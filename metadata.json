@@ -1,0 +1,6 @@
+{
+  "name": "Remix 3D Model Painting Studio - Play Mode",
+  "description": "Tactile Retro-Pop 3D Toybox Model Painting Studio with 27 Magic Animated Shaders, 3D Stickers, Chime Pen, Boing Physics & Polaroid Photo Booth",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

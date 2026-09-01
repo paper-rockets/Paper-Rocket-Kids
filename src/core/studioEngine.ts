@@ -1,0 +1,1140 @@
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
+import confetti from 'canvas-confetti';
+import { BrushType, PaintedStroke, PlacedSticker, ShaderPreset, ToyModelInfo } from '../types';
+import { SHADER_PRESETS, createMagicShaderMaterial } from './animatedShaders';
+import { TOYBOX_MODELS, buildToyModelGroup } from './sampleModels';
+import { ProceduralSkyEngine } from './proceduralSky';
+import { UndoRedoManager, MeshTextureSnapshot } from './undoRedoManager';
+import { soundEngine } from '../utils/audio';
+import { resolveAssetUrl } from '../utils/assetUrl';
+
+export interface StudioEngineOptions {
+  canvas: HTMLCanvasElement;
+  onStrokeStart?: () => void;
+  onStrokeEnd?: (stroke: PaintedStroke) => void;
+  onModelLoaded?: (model: ToyModelInfo) => void;
+  onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void;
+}
+
+interface MeshPaintData {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  texture: THREE.CanvasTexture;
+  baseColor: string;
+  lastUV: THREE.Vector2 | null;
+  history: ImageData[];
+}
+
+export class StudioEngine {
+  public canvas: HTMLCanvasElement;
+  public scene: THREE.Scene;
+  public camera: THREE.PerspectiveCamera;
+  public renderer: THREE.WebGLRenderer;
+  public sky: ProceduralSkyEngine;
+  public undoManager: UndoRedoManager = new UndoRedoManager();
+
+  // Loaders
+  private dracoLoader: DRACOLoader;
+  private gltfLoader: GLTFLoader;
+
+  // Geometry holders
+  public currentToyGroup: THREE.Group | null = null;
+  public stickersGroup: THREE.Group;
+  public currentModelInfo: ToyModelInfo = TOYBOX_MODELS[0];
+
+  // Map of mesh UUID to its paint canvas & context
+  private meshPaintData: Map<string, MeshPaintData> = new Map();
+
+  // Active Painting State
+  public brushType: BrushType = 'flat_paint';
+  public brushColor: string = '#FF2A6D';
+  public brushRadius: number = 0.09;
+  public activeShader: ShaderPreset = SHADER_PRESETS[0];
+  public symmetryCount: number = 1; // 1, 2, 4, 6, 8
+  public activeStickerEmoji: string = '⭐';
+
+  // Shader Uniform Remixer state
+  public remixColorA: string = '#FF5376';
+  public remixColorB: string = '#FFE600';
+  public remixGlow: number = 0.5;
+  public remixSpeed: number = 1.0;
+
+  // Animation & Boing Physics State
+  public isAnimationPlaying: boolean = true;
+  public isTurntableActive: boolean = false;
+  public turntableSpeed: number = 0.35;
+  public isBoingActive: boolean = false;
+  public boingTime: number = 0;
+
+  // Camera Orbit State
+  private isOrbiting: boolean = false;
+  private orbitSpeed: number = 0.005;
+  public cameraAzimuth: number = 0.6;
+  public cameraElevation: number = 0.35;
+  public cameraDistance: number = 4.8;
+  private targetLookAt: THREE.Vector3 = new THREE.Vector3(0, 0.85, 0);
+
+  // Active Stroke Drawing State
+  private isDrawing: boolean = false;
+  private activeStrokePoints: { x: number; y: number; z: number; pressure: number; time: number }[] = [];
+  private raycaster: THREE.Raycaster = new THREE.Raycaster();
+  private mousePos: THREE.Vector2 = new THREE.Vector2();
+
+  // Callbacks
+  private onStrokeStart?: () => void;
+  private onStrokeEnd?: (stroke: PaintedStroke) => void;
+  private onModelLoaded?: (model: ToyModelInfo) => void;
+  private onHistoryChange?: (canUndo: boolean, canRedo: boolean) => void;
+
+  // Key event reference for cleanup
+  private handleKeyDown?: (e: KeyboardEvent) => void;
+
+  private clock: THREE.Clock = new THREE.Clock();
+  private animFrameId: number | null = null;
+
+  constructor(options: StudioEngineOptions) {
+    this.canvas = options.canvas;
+    this.onStrokeStart = options.onStrokeStart;
+    this.onStrokeEnd = options.onStrokeEnd;
+    this.onModelLoaded = options.onModelLoaded;
+    this.onHistoryChange = options.onHistoryChange;
+
+    this.undoManager.onChange = (canUndo, canRedo) => {
+      this.onHistoryChange?.(canUndo, canRedo);
+    };
+
+    // 1. Scene
+    this.scene = new THREE.Scene();
+
+    // 2. Camera
+    this.camera = new THREE.PerspectiveCamera(
+      42,
+      this.canvas.clientWidth / (this.canvas.clientHeight || 1),
+      0.1,
+      1000
+    );
+    this.updateCameraTransform();
+
+    // 3. Renderer with antialiasing, high DPI, soft shadows
+    this.renderer = new THREE.WebGLRenderer({
+      canvas: this.canvas,
+      antialias: true,
+      preserveDrawingBuffer: true,
+      powerPreference: 'high-performance',
+    });
+    this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.15;
+
+    // 4. Loaders Setup (Draco & GLTF)
+    this.dracoLoader = new DRACOLoader();
+    this.dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.7/');
+    this.dracoLoader.setDecoderConfig({ type: 'js' });
+    this.dracoLoader.preload();
+
+    this.gltfLoader = new GLTFLoader();
+    this.gltfLoader.setDRACOLoader(this.dracoLoader);
+
+    // 5. Groups
+    this.stickersGroup = new THREE.Group();
+    this.scene.add(this.stickersGroup);
+
+    // 6. Sky Engine
+    this.sky = new ProceduralSkyEngine(this.scene);
+
+    // 7. Ground Studio Disc with shadow reception & neo-pop circular styling
+    const groundGeo = new THREE.CylinderGeometry(5.2, 5.2, 0.05, 48);
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: 0xf4f6fc,
+      roughness: 0.85,
+      metalness: 0.05,
+    });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.position.y = -0.025;
+    ground.receiveShadow = true;
+    this.scene.add(ground);
+
+    // 8. Initial Toy Model
+    this.loadToyModel(this.currentModelInfo);
+
+    // 8. Bind event handlers
+    this.bindEvents();
+
+    // 9. Start render loop
+    this.renderLoop = this.renderLoop.bind(this);
+    this.renderLoop();
+  }
+
+  /**
+   * Initializes dynamic paint textures on every mesh in the model group
+   */
+  private initMeshPaintingTextures(group: THREE.Group) {
+    this.meshPaintData.clear();
+
+    group.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        const canvas = document.createElement('canvas');
+        canvas.width = 1024;
+        canvas.height = 1024;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) return;
+
+        // Get initial base color of the mesh
+        let baseColor = '#FFFFFF';
+        if (mesh.material) {
+          if (Array.isArray(mesh.material)) {
+            const m = mesh.material[0] as THREE.MeshStandardMaterial;
+            if (m.color) baseColor = '#' + m.color.getHexString();
+          } else {
+            const m = mesh.material as THREE.MeshStandardMaterial;
+            if (m.color) baseColor = '#' + m.color.getHexString();
+          }
+        }
+
+        // Fill canvas with base color
+        ctx.fillStyle = baseColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Create Canvas Texture
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        texture.minFilter = THREE.LinearMipmapLinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.generateMipmaps = true;
+
+        // Clone material and assign map
+        if (mesh.material) {
+          const originalMat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+          const standardMat = new THREE.MeshStandardMaterial({
+            map: texture,
+            roughness: (originalMat as THREE.MeshStandardMaterial).roughness || 0.4,
+            metalness: (originalMat as THREE.MeshStandardMaterial).metalness || 0.05,
+            side: THREE.DoubleSide,
+          });
+          mesh.material = standardMat;
+          mesh.castShadow = true;
+          mesh.receiveShadow = true;
+        }
+
+        // Save initial state for undo
+        const initialImg = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        this.meshPaintData.set(mesh.uuid, {
+          canvas,
+          ctx,
+          texture,
+          baseColor,
+          lastUV: null,
+          history: [initialImg],
+        });
+      }
+    });
+  }
+
+  /**
+   * Load any 3D toybox model (GLB or procedural fallback)
+   */
+  public async loadToyModel(modelInfo: ToyModelInfo) {
+    if (this.currentToyGroup) {
+      this.scene.remove(this.currentToyGroup);
+      this.currentToyGroup.traverse((child) => {
+        if ((child as THREE.Mesh).geometry) {
+          (child as THREE.Mesh).geometry.dispose();
+        }
+      });
+    }
+
+    this.clearStickers();
+    this.undoManager.reset();
+    this.currentModelInfo = modelInfo;
+
+    // Check if model has a static .glb file
+    if (modelInfo.file) {
+      try {
+        const fileUrl = resolveAssetUrl(modelInfo.file);
+        const gltf = await this.gltfLoader.loadAsync(fileUrl);
+        const rootGroup = new THREE.Group();
+        rootGroup.name = modelInfo.name;
+        rootGroup.add(gltf.scene);
+
+        // Normalize bounding box & center
+        const box = new THREE.Box3().setFromObject(rootGroup);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        const targetScale = (modelInfo.scale || 1.2) * (2.2 / maxDim);
+
+        rootGroup.scale.set(targetScale, targetScale, targetScale);
+        rootGroup.position.x = -center.x * targetScale;
+        rootGroup.position.y = -box.min.y * targetScale + 0.02;
+        rootGroup.position.z = -center.z * targetScale;
+
+        // Apply rotation if defined
+        if (modelInfo.rotation) {
+          rootGroup.rotation.set(
+            THREE.MathUtils.degToRad(modelInfo.rotation.x || 0),
+            THREE.MathUtils.degToRad(modelInfo.rotation.y || 0),
+            THREE.MathUtils.degToRad(modelInfo.rotation.z || 0)
+          );
+        }
+
+        this.currentToyGroup = rootGroup;
+        this.initMeshPaintingTextures(this.currentToyGroup);
+        this.scene.add(this.currentToyGroup);
+        this.onModelLoaded?.(modelInfo);
+        return;
+      } catch (err) {
+        console.warn('GLB load notice for ' + modelInfo.name + ', falling back to procedural:', err);
+      }
+    }
+
+    // Procedural 3D model fallback
+    this.currentToyGroup = buildToyModelGroup(modelInfo);
+    this.initMeshPaintingTextures(this.currentToyGroup);
+    this.scene.add(this.currentToyGroup);
+    this.onModelLoaded?.(modelInfo);
+  }
+
+  /**
+   * 3D Model Upload Support (.glb, .gltf, .obj, .stl)
+   */
+  public async loadCustomModelFile(file: File): Promise<ToyModelInfo> {
+    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const arrayBuffer = await file.arrayBuffer();
+
+    let loadedObject: THREE.Object3D | null = null;
+
+    if (ext === 'glb' || ext === 'gltf') {
+      const gltfLoader = new GLTFLoader();
+      const gltf = await gltfLoader.parseAsync(arrayBuffer, '');
+      loadedObject = gltf.scene;
+    } else if (ext === 'obj') {
+      const text = new TextDecoder().decode(arrayBuffer);
+      const objLoader = new OBJLoader();
+      loadedObject = objLoader.parse(text);
+    } else if (ext === 'stl') {
+      const stlLoader = new STLLoader();
+      const geometry = stlLoader.parse(arrayBuffer);
+      const material = new THREE.MeshStandardMaterial({ color: 0x90a4ae, roughness: 0.4 });
+      loadedObject = new THREE.Mesh(geometry, material);
+    } else {
+      throw new Error('Unsupported 3D file format. Please upload .glb, .gltf, .obj, or .stl.');
+    }
+
+    if (!loadedObject) {
+      throw new Error('Failed to parse 3D model.');
+    }
+
+    // Clean previous toy
+    if (this.currentToyGroup) {
+      this.scene.remove(this.currentToyGroup);
+      this.currentToyGroup.traverse((child) => {
+        if ((child as THREE.Mesh).geometry) {
+          (child as THREE.Mesh).geometry.dispose();
+        }
+      });
+    }
+    this.clearStickers();
+    this.undoManager.reset();
+
+    // Group wrapper
+    const rootGroup = new THREE.Group();
+    rootGroup.name = file.name;
+    rootGroup.add(loadedObject);
+
+    // Compute bounding box and normalize scale & center origin
+    const box = new THREE.Box3().setFromObject(rootGroup);
+    const size = new THREE.Vector3();
+    box.getSize(size);
+    const center = new THREE.Vector3();
+    box.getCenter(center);
+
+    const maxDim = Math.max(size.x, size.y, size.z) || 1;
+    const targetScale = 2.4 / maxDim;
+
+    rootGroup.scale.set(targetScale, targetScale, targetScale);
+    // Center at Y = 0.85
+    rootGroup.position.x = -center.x * targetScale;
+    rootGroup.position.y = -box.min.y * targetScale + 0.05;
+    rootGroup.position.z = -center.z * targetScale;
+
+    // Count vertices & subparts
+    let polyCount = 0;
+    const subParts: string[] = [];
+    rootGroup.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        const mesh = child as THREE.Mesh;
+        if (mesh.geometry) {
+          polyCount += mesh.geometry.attributes.position ? mesh.geometry.attributes.position.count : 0;
+        }
+        subParts.push(mesh.name || `Part ${subParts.length + 1}`);
+      }
+    });
+
+    const customModelInfo: ToyModelInfo = {
+      id: `custom_${Date.now()}`,
+      name: file.name.replace(/\.[^/.]+$/, ''),
+      category: 'shapes',
+      categoryName: 'Uploaded 3D Models',
+      icon: '📦',
+      description: `Uploaded 3D model: ${file.name} (${Math.round(file.size / 1024)} KB)`,
+      subParts: subParts.length > 0 ? subParts : ['Main Body'],
+      scale: 1.0,
+      polyCount: polyCount || 1500,
+      tags: ['upload', 'custom', ext],
+    };
+
+    this.currentModelInfo = customModelInfo;
+    this.currentToyGroup = rootGroup;
+    this.initMeshPaintingTextures(this.currentToyGroup);
+    this.scene.add(this.currentToyGroup);
+
+    this.onModelLoaded?.(customModelInfo);
+    return customModelInfo;
+  }
+
+  public clearStickers() {
+    while (this.stickersGroup.children.length > 0) {
+      const obj = this.stickersGroup.children[0];
+      this.stickersGroup.remove(obj);
+      if ((obj as THREE.Mesh).geometry) (obj as THREE.Mesh).geometry.dispose();
+    }
+  }
+
+  /**
+   * Reset paint on all subparts of current toy (tracked for Undo/Redo)
+   */
+  public clearAllPaint() {
+    const beforeTextures: MeshTextureSnapshot[] = [];
+    const afterTextures: MeshTextureSnapshot[] = [];
+    const beforeStickers = [...this.stickersGroup.children] as THREE.Mesh[];
+
+    this.meshPaintData.forEach((data, uuid) => {
+      beforeTextures.push({
+        meshUuid: uuid,
+        imageData: data.ctx.getImageData(0, 0, data.canvas.width, data.canvas.height),
+      });
+
+      data.ctx.fillStyle = data.baseColor;
+      data.ctx.fillRect(0, 0, data.canvas.width, data.canvas.height);
+      data.texture.needsUpdate = true;
+
+      afterTextures.push({
+        meshUuid: uuid,
+        imageData: data.ctx.getImageData(0, 0, data.canvas.width, data.canvas.height),
+      });
+    });
+
+    this.clearStickers();
+    this.undoManager.recordClear(beforeTextures, afterTextures, beforeStickers);
+    soundEngine.playEraserWhoosh();
+  }
+
+  /**
+   * Undo/Redo accessors and controls
+   */
+  public get canUndo(): boolean {
+    return this.undoManager.canUndo;
+  }
+
+  public get canRedo(): boolean {
+    return this.undoManager.canRedo;
+  }
+
+  public undo(): boolean {
+    const success = this.undoManager.undo({
+      restoreTexture: (meshUuid, imageData) => {
+        const paintData = this.meshPaintData.get(meshUuid);
+        if (paintData) {
+          paintData.ctx.putImageData(imageData, 0, 0);
+          paintData.texture.needsUpdate = true;
+          if (this.currentToyGroup) {
+            this.currentToyGroup.traverse((child) => {
+              if ((child as THREE.Mesh).isMesh && child.uuid === meshUuid) {
+                const m = child as THREE.Mesh;
+                if (
+                  !(m.material instanceof THREE.MeshStandardMaterial) ||
+                  (m.material as THREE.MeshStandardMaterial).map !== paintData.texture
+                ) {
+                  m.material = new THREE.MeshStandardMaterial({
+                    map: paintData.texture,
+                    roughness: 0.4,
+                    metalness: 0.05,
+                    side: THREE.DoubleSide,
+                  });
+                }
+              }
+            });
+          }
+        }
+      },
+      addSticker: (mesh) => {
+        if (!this.stickersGroup.children.includes(mesh)) {
+          this.stickersGroup.add(mesh);
+        }
+      },
+      removeSticker: (mesh) => {
+        if (this.stickersGroup.children.includes(mesh)) {
+          this.stickersGroup.remove(mesh);
+        }
+      },
+      clearStickers: () => {
+        this.clearStickers();
+      },
+    });
+
+    if (success) {
+      soundEngine.playEraserWhoosh();
+    }
+    return success;
+  }
+
+  public redo(): boolean {
+    const success = this.undoManager.redo({
+      restoreTexture: (meshUuid, imageData) => {
+        const paintData = this.meshPaintData.get(meshUuid);
+        if (paintData) {
+          paintData.ctx.putImageData(imageData, 0, 0);
+          paintData.texture.needsUpdate = true;
+          if (this.currentToyGroup) {
+            this.currentToyGroup.traverse((child) => {
+              if ((child as THREE.Mesh).isMesh && child.uuid === meshUuid) {
+                const m = child as THREE.Mesh;
+                if (
+                  !(m.material instanceof THREE.MeshStandardMaterial) ||
+                  (m.material as THREE.MeshStandardMaterial).map !== paintData.texture
+                ) {
+                  m.material = new THREE.MeshStandardMaterial({
+                    map: paintData.texture,
+                    roughness: 0.4,
+                    metalness: 0.05,
+                    side: THREE.DoubleSide,
+                  });
+                }
+              }
+            });
+          }
+        }
+      },
+      addSticker: (mesh) => {
+        if (!this.stickersGroup.children.includes(mesh)) {
+          this.stickersGroup.add(mesh);
+        }
+      },
+      removeSticker: (mesh) => {
+        if (this.stickersGroup.children.includes(mesh)) {
+          this.stickersGroup.remove(mesh);
+        }
+      },
+      clearStickers: () => {
+        this.clearStickers();
+      },
+    });
+
+    if (success) {
+      soundEngine.playBubblePop(1.2);
+    }
+    return success;
+  }
+
+  /**
+   * Apply animated magic shader to the whole model or active mesh
+   */
+  public applyShaderToModel(shader: ShaderPreset) {
+    this.activeShader = shader;
+    if (!this.currentToyGroup) return;
+
+    const shaderMat = createMagicShaderMaterial({
+      ...shader,
+      colorA: this.brushColor || shader.colorA,
+      colorB: this.remixColorB || shader.colorB,
+      glow: this.remixGlow,
+      speed: this.remixSpeed,
+    });
+
+    this.currentToyGroup.traverse((child) => {
+      if ((child as THREE.Mesh).isMesh) {
+        (child as THREE.Mesh).material = shaderMat;
+      }
+    });
+
+    soundEngine.playBucketFill();
+  }
+
+  /**
+   * 1-Tap Paint Bucket Sub-Mesh Flood Fill
+   */
+  public floodFillPartAtPointer(clientX: number, clientY: number) {
+    if (!this.currentToyGroup) return;
+
+    const rect = this.canvas.getBoundingClientRect();
+    this.mousePos.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    this.mousePos.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.mousePos, this.camera);
+    const intersects = this.raycaster.intersectObjects(this.currentToyGroup.children, true);
+
+    if (intersects.length > 0) {
+      const hit = intersects[0];
+      const targetMesh = hit.object as THREE.Mesh;
+      if (targetMesh) {
+        soundEngine.playBucketFill();
+        const paintData = this.meshPaintData.get(targetMesh.uuid);
+
+        if (paintData) {
+          const beforeImg = paintData.ctx.getImageData(0, 0, paintData.canvas.width, paintData.canvas.height);
+
+          // If in magic shader mode, apply magic shader
+          if (this.brushType === 'magic_wand') {
+            const shaderMat = createMagicShaderMaterial({
+              ...this.activeShader,
+              colorA: this.brushColor,
+              colorB: this.remixColorB,
+              glow: this.remixGlow,
+              speed: this.remixSpeed,
+            });
+            targetMesh.material = shaderMat;
+          } else {
+            // Fill canvas with flat paint color
+            paintData.ctx.fillStyle = this.brushColor;
+            paintData.ctx.fillRect(0, 0, paintData.canvas.width, paintData.canvas.height);
+            paintData.texture.needsUpdate = true;
+
+            // Ensure mesh is using textured standard material
+            if (!(targetMesh.material instanceof THREE.MeshStandardMaterial) || (targetMesh.material as THREE.MeshStandardMaterial).map !== paintData.texture) {
+              targetMesh.material = new THREE.MeshStandardMaterial({
+                map: paintData.texture,
+                roughness: 0.4,
+                metalness: 0.05,
+                side: THREE.DoubleSide,
+              });
+            }
+          }
+
+          const afterImg = paintData.ctx.getImageData(0, 0, paintData.canvas.width, paintData.canvas.height);
+          this.undoManager.recordFill(targetMesh.uuid, beforeImg, afterImg);
+        }
+      }
+    }
+  }
+
+  /**
+   * Paint Flat Color / Texture directly on Model Surface at UV coordinate
+   */
+  private paintFlatOnModelAtUV(mesh: THREE.Mesh, uv: THREE.Vector2, isFirstPoint: boolean) {
+    const paintData = this.meshPaintData.get(mesh.uuid);
+    if (!paintData) return;
+
+    this.undoManager.touchMeshInStroke(mesh.uuid, paintData.ctx, paintData.canvas.width, paintData.canvas.height);
+
+    const { canvas, ctx, texture, lastUV } = paintData;
+    const px = uv.x * canvas.width;
+    const py = (1 - uv.y) * canvas.height;
+    const radiusPx = Math.max(6, this.brushRadius * 280);
+
+    // If mesh is currently using a shader material, revert to its paint texture map
+    if (!(mesh.material instanceof THREE.MeshStandardMaterial) || (mesh.material as THREE.MeshStandardMaterial).map !== texture) {
+      mesh.material = new THREE.MeshStandardMaterial({
+        map: texture,
+        roughness: 0.4,
+        metalness: 0.05,
+        side: THREE.DoubleSide,
+      });
+    }
+
+    if (this.brushType === 'eraser') {
+      // Erase to base color
+      ctx.save();
+      ctx.fillStyle = paintData.baseColor;
+      ctx.beginPath();
+      ctx.arc(px, py, radiusPx * 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      texture.needsUpdate = true;
+      paintData.lastUV = uv.clone();
+      return;
+    }
+
+    if (this.brushType === 'stardust') {
+      // Stardust spray
+      ctx.save();
+      const sparkles = 10;
+      for (let i = 0; i < sparkles; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * radiusPx * 2.2;
+        const sx = px + Math.cos(angle) * dist;
+        const sy = py + Math.sin(angle) * dist;
+        const size = Math.random() * 4 + 2;
+
+        ctx.fillStyle = i % 2 === 0 ? this.brushColor : this.remixColorB;
+        ctx.beginPath();
+        ctx.arc(sx, sy, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+      texture.needsUpdate = true;
+      paintData.lastUV = uv.clone();
+      return;
+    }
+
+    if (this.brushType === 'magic_wand') {
+      // Magic glowing brush stroke
+      ctx.save();
+      ctx.shadowColor = this.remixColorB;
+      ctx.shadowBlur = radiusPx * 0.8;
+      ctx.fillStyle = this.brushColor;
+      ctx.beginPath();
+      ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+      texture.needsUpdate = true;
+      paintData.lastUV = uv.clone();
+      return;
+    }
+
+    // Default: 'flat_paint' (Ultra-smooth flat paint stroke)
+    ctx.save();
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.strokeStyle = this.brushColor;
+    ctx.fillStyle = this.brushColor;
+    ctx.lineWidth = radiusPx * 2;
+
+    if (!isFirstPoint && lastUV) {
+      const lastPx = lastUV.x * canvas.width;
+      const lastPy = (1 - lastUV.y) * canvas.height;
+      const dist = Math.hypot(px - lastPx, py - lastPy);
+
+      // Only connect if on same UV island / reasonable distance
+      if (dist < canvas.width * 0.25) {
+        ctx.beginPath();
+        ctx.moveTo(lastPx, lastPy);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+      }
+    }
+
+    // Draw circular brush stamp
+    ctx.beginPath();
+    ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Symmetrical painting if symmetry count > 1
+    if (this.symmetryCount > 1) {
+      const symmetries = this.symmetryCount;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const relX = px - cx;
+      const relY = py - cy;
+
+      for (let s = 1; s < symmetries; s++) {
+        const angle = (s / symmetries) * Math.PI * 2;
+        const rotX = cx + relX * Math.cos(angle) - relY * Math.sin(angle);
+        const rotY = cy + relX * Math.sin(angle) + relY * Math.cos(angle);
+
+        ctx.beginPath();
+        ctx.arc(rotX, rotY, radiusPx, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
+    texture.needsUpdate = true;
+    paintData.lastUV = uv.clone();
+  }
+
+  /**
+   * Slap Sticker onto 3D Model Surface
+   */
+  public placeStickerAtPointer(clientX: number, clientY: number, emoji: string) {
+    const rect = this.canvas.getBoundingClientRect();
+    this.mousePos.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    this.mousePos.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.mousePos, this.camera);
+    const targets = this.currentToyGroup ? this.currentToyGroup.children : [];
+    const intersects = this.raycaster.intersectObjects(targets, true);
+
+    if (intersects.length > 0) {
+      const hit = intersects[0];
+      const pos = hit.point;
+      const normal = hit.face ? hit.face.normal.clone() : new THREE.Vector3(0, 1, 0);
+
+      soundEngine.playStickerSlap();
+
+      // Create emoji sticker canvas texture
+      const canvas = document.createElement('canvas');
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.font = '84px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(emoji, 64, 68);
+      }
+      const texture = new THREE.CanvasTexture(canvas);
+
+      const stickerGeo = new THREE.PlaneGeometry(0.48, 0.48);
+      const stickerMat = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
+
+      const stickerMesh = new THREE.Mesh(stickerGeo, stickerMat);
+      stickerMesh.position.copy(pos.clone().add(normal.clone().multiplyScalar(0.03)));
+      stickerMesh.lookAt(pos.clone().add(normal));
+      stickerMesh.rotateZ((Math.random() - 0.5) * 0.3);
+
+      this.stickersGroup.add(stickerMesh);
+      this.undoManager.recordStickerAdd(stickerMesh);
+    }
+  }
+
+  /**
+   * Super Zap Vacuum Eraser: deletes closest intersecting sticker or clears paint under cursor
+   */
+  public superZapAtPointer(clientX: number, clientY: number) {
+    const rect = this.canvas.getBoundingClientRect();
+    this.mousePos.x = ((clientX - rect.left) / rect.width) * 2 - 1;
+    this.mousePos.y = -((clientY - rect.top) / rect.height) * 2 + 1;
+
+    this.raycaster.setFromCamera(this.mousePos, this.camera);
+    const intersects = this.raycaster.intersectObjects(this.stickersGroup.children, true);
+
+    if (intersects.length > 0) {
+      const hit = intersects[0].object as THREE.Mesh;
+      soundEngine.playEraserWhoosh();
+      this.stickersGroup.remove(hit);
+      this.undoManager.recordStickerRemove(hit);
+    }
+  }
+
+  /**
+   * Trigger the "Jelly Boing!" elastic wobble
+   */
+  public triggerJellyBoing() {
+    this.isBoingActive = true;
+    this.boingTime = 0;
+    soundEngine.playBoing();
+    this.triggerCelebrationConfetti();
+  }
+
+  /**
+   * Confetti celebration on achievements / stroke completion
+   */
+  public triggerCelebrationConfetti() {
+    try {
+      confetti({
+        particleCount: 45,
+        spread: 70,
+        origin: { y: 0.8 },
+        colors: ['#FF2A6D', '#FFE600', '#00F0FF', '#75F0C2', '#B042FF'],
+      });
+    } catch (_) {}
+  }
+
+  public updateShaderUniforms(colorA: string, colorB: string, glow: number, speed: number) {
+    this.remixColorA = colorA;
+    this.remixColorB = colorB;
+    this.remixGlow = glow;
+    this.remixSpeed = speed;
+
+    const colA = new THREE.Color(colorA);
+    const colB = new THREE.Color(colorB);
+
+    if (this.currentToyGroup) {
+      this.currentToyGroup.traverse((child) => {
+        if ((child as THREE.Mesh).material) {
+          const mat = (child as THREE.Mesh).material as THREE.ShaderMaterial;
+          if (mat.uniforms) {
+            if (mat.uniforms.uColorA) mat.uniforms.uColorA.value = colA;
+            if (mat.uniforms.uColorB) mat.uniforms.uColorB.value = colB;
+            if (mat.uniforms.uEmissiveIntensity) mat.uniforms.uEmissiveIntensity.value = glow;
+            if (mat.uniforms.uTimeSpeed) mat.uniforms.uTimeSpeed.value = speed;
+          }
+        }
+      });
+    }
+  }
+
+  /**
+   * Navigation camera controls & delta helpers
+   */
+  public orbitAzimuth(deltaAngle: number) {
+    this.cameraAzimuth += deltaAngle;
+    this.updateCameraTransform();
+  }
+
+  public orbitElevation(deltaElevation: number) {
+    this.cameraElevation = Math.max(-0.2, Math.min(1.4, this.cameraElevation + deltaElevation));
+    this.updateCameraTransform();
+  }
+
+  public zoomDelta(deltaDist: number) {
+    this.cameraDistance = Math.max(2.2, Math.min(9.5, this.cameraDistance + deltaDist));
+    this.updateCameraTransform();
+  }
+
+  public setCameraAzimuth(angleRad: number) {
+    this.cameraAzimuth = angleRad;
+    this.updateCameraTransform();
+  }
+
+  public setCameraElevation(angleRad: number) {
+    this.cameraElevation = Math.max(-0.2, Math.min(1.4, angleRad));
+    this.updateCameraTransform();
+  }
+
+  public setCameraDistance(dist: number) {
+    this.cameraDistance = Math.max(2.2, Math.min(9.5, dist));
+    this.updateCameraTransform();
+  }
+
+  public resetCamera() {
+    this.cameraAzimuth = 0.6;
+    this.cameraElevation = 0.35;
+    this.cameraDistance = 4.8;
+    this.targetLookAt.set(0, 0.85, 0);
+    this.updateCameraTransform();
+    soundEngine.playDialClick();
+  }
+
+  public updateCameraTransform() {
+    const x = this.targetLookAt.x + this.cameraDistance * Math.cos(this.cameraElevation) * Math.sin(this.cameraAzimuth);
+    const y = this.targetLookAt.y + this.cameraDistance * Math.sin(this.cameraElevation);
+    const z = this.targetLookAt.z + this.cameraDistance * Math.cos(this.cameraElevation) * Math.cos(this.cameraAzimuth);
+
+    this.camera.position.set(x, y, z);
+    this.camera.lookAt(this.targetLookAt);
+  }
+
+  private bindEvents() {
+    let lastX = 0;
+    let lastY = 0;
+
+    const handlePointerDown = (e: PointerEvent) => {
+      lastX = e.clientX;
+      lastY = e.clientY;
+
+      // Middle click, right click, or Alt+drag = orbit
+      if (e.button === 1 || e.button === 2 || e.altKey) {
+        this.isOrbiting = true;
+        return;
+      }
+
+      if (this.brushType === 'bucket') {
+        this.floodFillPartAtPointer(e.clientX, e.clientY);
+        return;
+      }
+
+      if (this.brushType === 'sticker') {
+        this.placeStickerAtPointer(e.clientX, e.clientY, this.activeStickerEmoji);
+        return;
+      }
+
+      // Check if clicking on model surface for flat paint
+      const rect = this.canvas.getBoundingClientRect();
+      this.mousePos.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      this.mousePos.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+      this.raycaster.setFromCamera(this.mousePos, this.camera);
+      const targets = this.currentToyGroup ? this.currentToyGroup.children : [];
+      const intersects = this.raycaster.intersectObjects(targets, true);
+
+      if (intersects.length > 0) {
+        const hit = intersects[0];
+        const mesh = hit.object as THREE.Mesh;
+        if (hit.uv && mesh) {
+          this.isDrawing = true;
+          this.activeStrokePoints = [];
+          this.undoManager.beginStroke();
+          this.paintFlatOnModelAtUV(mesh, hit.uv, true);
+          soundEngine.playChimeStroke(0.5, 1.0);
+          this.onStrokeStart?.();
+          return;
+        }
+      }
+
+      // If clicked on empty space / background, orbit the model smoothly
+      this.isOrbiting = true;
+    };
+
+    const handlePointerMove = (e: PointerEvent) => {
+      if (this.isOrbiting) {
+        const dx = e.clientX - lastX;
+        const dy = e.clientY - lastY;
+        lastX = e.clientX;
+        lastY = e.clientY;
+
+        this.cameraAzimuth -= dx * this.orbitSpeed;
+        this.cameraElevation += dy * this.orbitSpeed;
+        this.cameraElevation = Math.max(-0.2, Math.min(1.4, this.cameraElevation));
+        this.updateCameraTransform();
+        return;
+      }
+
+      if (this.isDrawing && this.currentToyGroup) {
+        const rect = this.canvas.getBoundingClientRect();
+        this.mousePos.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        this.mousePos.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+        this.raycaster.setFromCamera(this.mousePos, this.camera);
+        const intersects = this.raycaster.intersectObjects(this.currentToyGroup.children, true);
+
+        if (intersects.length > 0) {
+          const hit = intersects[0];
+          const mesh = hit.object as THREE.Mesh;
+          if (hit.uv && mesh) {
+            this.paintFlatOnModelAtUV(mesh, hit.uv, false);
+          }
+        }
+      }
+    };
+
+    const handlePointerUp = () => {
+      if (this.isOrbiting) {
+        this.isOrbiting = false;
+      }
+      if (this.isDrawing) {
+        this.isDrawing = false;
+        // Reset lastUV on all meshes
+        this.meshPaintData.forEach((data) => {
+          data.lastUV = null;
+        });
+
+        this.undoManager.endStroke((uuid) => {
+          const data = this.meshPaintData.get(uuid);
+          return data ? data.ctx.getImageData(0, 0, data.canvas.width, data.canvas.height) : null;
+        });
+
+        const strokeRecord: PaintedStroke = {
+          id: `stroke_${Date.now()}`,
+          points: [...this.activeStrokePoints],
+          brushType: this.brushType,
+          color: this.brushColor,
+          radius: this.brushRadius,
+          shaderId: this.activeShader.id,
+          symmetryCount: this.symmetryCount,
+        };
+        this.onStrokeEnd?.(strokeRecord);
+      }
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      this.cameraDistance += e.deltaY * 0.004;
+      this.cameraDistance = Math.max(2.2, Math.min(9.5, this.cameraDistance));
+      this.updateCameraTransform();
+    };
+
+    this.handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger undo/redo if user is typing into an input field or textarea
+      const activeTag = (document.activeElement?.tagName || '').toLowerCase();
+      if (activeTag === 'input' || activeTag === 'textarea') return;
+
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          this.redo();
+        } else {
+          this.undo();
+        }
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        this.redo();
+      }
+    };
+
+    this.canvas.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('pointermove', handlePointerMove);
+    window.addEventListener('pointerup', handlePointerUp);
+    this.canvas.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('keydown', this.handleKeyDown);
+  }
+
+  public handleResize() {
+    if (!this.canvas) return;
+    const width = this.canvas.clientWidth;
+    const height = this.canvas.clientHeight || 1;
+
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height, false);
+  }
+
+  public captureSnapshotDataURL(): string {
+    this.renderer.render(this.scene, this.camera);
+    return this.canvas.toDataURL('image/png');
+  }
+
+  private renderLoop() {
+    this.animFrameId = requestAnimationFrame(this.renderLoop);
+
+    const delta = this.clock.getDelta();
+    const elapsedTime = this.clock.getElapsedTime();
+
+    // Turntable auto-rotate
+    if (this.isTurntableActive) {
+      this.cameraAzimuth += delta * this.turntableSpeed;
+      this.updateCameraTransform();
+    }
+
+    // Sky update
+    this.sky.update(delta);
+
+    // Boing physics wobble update
+    if (this.isBoingActive) {
+      this.boingTime += delta;
+      if (this.boingTime > 2.5) {
+        this.isBoingActive = false;
+        this.boingTime = 0;
+      }
+    }
+
+    // Update animated shader materials with time & jelly wobble uniforms
+    if (this.currentToyGroup) {
+      this.currentToyGroup.traverse((child) => {
+        if ((child as THREE.Mesh).material) {
+          const mat = (child as THREE.Mesh).material as THREE.ShaderMaterial;
+          if (mat.uniforms) {
+            if (mat.uniforms.uTime && this.isAnimationPlaying) {
+              mat.uniforms.uTime.value = elapsedTime;
+            }
+            if (mat.uniforms.uWobbleAmount) {
+              mat.uniforms.uWobbleAmount.value = this.isBoingActive ? 1.0 : 0.0;
+            }
+            if (mat.uniforms.uWobbleTime) {
+              mat.uniforms.uWobbleTime.value = this.boingTime;
+            }
+          }
+        }
+      });
+    }
+
+    this.renderer.render(this.scene, this.camera);
+  }
+
+  public dispose() {
+    if (this.animFrameId) {
+      cancelAnimationFrame(this.animFrameId);
+    }
+    if (this.handleKeyDown) {
+      window.removeEventListener('keydown', this.handleKeyDown);
+    }
+    this.renderer.dispose();
+  }
+}
