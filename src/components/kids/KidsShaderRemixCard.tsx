@@ -69,16 +69,16 @@ export const KidsShaderRemixCard: React.FC<KidsShaderRemixCardProps> = ({
         </button>
       </div>
 
-      {/* 3 Track Sliders */}
-      <div className="space-y-3 bg-white/80 p-3 rounded-2xl border-[2.5px] border-black">
-        {/* Track 1: Color Tint / Hue (Pink Ball Knob) */}
-        <div className="space-y-1">
+      {/* 3 Track Sliders with Chunky Large Touch Targets */}
+      <div className="space-y-4 bg-white/90 p-3.5 rounded-2xl border-[2.5px] border-black">
+        {/* Track 1: Color Tint / Hue */}
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-bold text-black">
-            <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#FF2A6D] border border-black" />
-              <span>Color Tint</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-full bg-[#FF2A6D] border-[1.5px] border-black shadow-[1px_1px_0_#000]" />
+              <span className="text-[11px] uppercase tracking-wider">Color Tint</span>
             </span>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <input
                 type="color"
                 value={colorA.startsWith('#') ? colorA : '#FF5376'}
@@ -86,7 +86,7 @@ export const KidsShaderRemixCard: React.FC<KidsShaderRemixCardProps> = ({
                   onChangeColorA(e.target.value);
                   soundEngine.playDialClick(600);
                 }}
-                className="w-5 h-5 rounded-full border border-black cursor-pointer bg-transparent p-0"
+                className="w-6 h-6 rounded-full border-[2px] border-black cursor-pointer bg-transparent p-0 shadow-[1px_1px_0_#000] hover:scale-110 active:scale-95 transition-transform"
                 title="Primary Color"
               />
               <input
@@ -96,13 +96,13 @@ export const KidsShaderRemixCard: React.FC<KidsShaderRemixCardProps> = ({
                   onChangeColorB(e.target.value);
                   soundEngine.playDialClick(800);
                 }}
-                className="w-5 h-5 rounded-full border border-black cursor-pointer bg-transparent p-0"
+                className="w-6 h-6 rounded-full border-[2px] border-black cursor-pointer bg-transparent p-0 shadow-[1px_1px_0_#000] hover:scale-110 active:scale-95 transition-transform"
                 title="Secondary Color"
               />
             </div>
           </div>
 
-          <div className="relative flex items-center h-6">
+          <div className="relative flex items-center h-8">
             <input
               id="slider-shader-hue"
               type="range"
@@ -118,24 +118,24 @@ export const KidsShaderRemixCard: React.FC<KidsShaderRemixCardProps> = ({
                 soundEngine.playDialClick(400 + hue * 2);
                 triggerHaptic('light');
               }}
-              className="w-full h-3 bg-gradient-to-r from-red-500 via-yellow-400 via-green-400 via-blue-500 to-purple-500 rounded-full border-[2px] border-black appearance-none cursor-pointer accent-[#FF2A6D]"
+              className="w-full h-4 bg-gradient-to-r from-red-500 via-yellow-400 via-green-400 via-blue-500 to-purple-500 rounded-full border-[2.5px] border-black appearance-none cursor-pointer [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-[2.5px] [&::-webkit-slider-thumb]:border-black [&::-webkit-slider-thumb]:shadow-[2px_2px_0_#000] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer"
             />
           </div>
         </div>
 
-        {/* Track 2: Glow & Bloom Intensity (Yellow Ball Knob) */}
-        <div className="space-y-1">
+        {/* Track 2: Glow & Bloom Intensity */}
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-bold text-black">
-            <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#FFE600] border border-black" />
-              <span>Glow & Bloom</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-full bg-[#FFE600] border-[1.5px] border-black shadow-[1px_1px_0_#000]" />
+              <span className="text-[11px] uppercase tracking-wider">Glow & Bloom</span>
             </span>
-            <span className="text-[11px] font-black text-amber-700 bg-amber-100 px-1 rounded">
+            <span className="text-[11px] font-black text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded-lg border border-amber-300">
               {Math.round(glow * 100)}%
             </span>
           </div>
 
-          <div className="relative flex items-center h-6">
+          <div className="relative flex items-center h-8">
             <input
               id="slider-shader-glow"
               type="range"
@@ -149,24 +149,24 @@ export const KidsShaderRemixCard: React.FC<KidsShaderRemixCardProps> = ({
                 soundEngine.playDialClick(500 + val * 400);
                 triggerHaptic('light');
               }}
-              className="w-full h-3 bg-[#FFE600] rounded-full border-[2px] border-black appearance-none cursor-pointer accent-[#FFE600]"
+              className="w-full h-4 bg-[#FFE600] rounded-full border-[2.5px] border-black appearance-none cursor-pointer [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-[2.5px] [&::-webkit-slider-thumb]:border-black [&::-webkit-slider-thumb]:shadow-[2px_2px_0_#000] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer"
             />
           </div>
         </div>
 
-        {/* Track 3: Magic Flow Speed (Purple Ball Knob) */}
-        <div className="space-y-1">
+        {/* Track 3: Magic Flow Speed */}
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between text-xs font-bold text-black">
-            <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#B042FF] border border-black" />
-              <span>Flow Speed</span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded-full bg-[#B042FF] border-[1.5px] border-black shadow-[1px_1px_0_#000]" />
+              <span className="text-[11px] uppercase tracking-wider">Flow Speed</span>
             </span>
-            <span className="text-[11px] font-black text-purple-800 bg-purple-100 px-1 rounded">
+            <span className="text-[11px] font-black text-purple-900 bg-purple-100 px-1.5 py-0.5 rounded-lg border border-purple-300">
               {speed.toFixed(1)}x
             </span>
           </div>
 
-          <div className="relative flex items-center h-6">
+          <div className="relative flex items-center h-8">
             <input
               id="slider-shader-speed"
               type="range"
@@ -180,7 +180,7 @@ export const KidsShaderRemixCard: React.FC<KidsShaderRemixCardProps> = ({
                 soundEngine.playDialClick(600 + val * 300);
                 triggerHaptic('light');
               }}
-              className="w-full h-3 bg-[#B042FF] rounded-full border-[2px] border-black appearance-none cursor-pointer accent-[#B042FF]"
+              className="w-full h-4 bg-[#B042FF] rounded-full border-[2.5px] border-black appearance-none cursor-pointer [&::-webkit-slider-thumb]:w-7 [&::-webkit-slider-thumb]:h-7 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:border-[2.5px] [&::-webkit-slider-thumb]:border-black [&::-webkit-slider-thumb]:shadow-[2px_2px_0_#000] [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:cursor-pointer"
             />
           </div>
         </div>

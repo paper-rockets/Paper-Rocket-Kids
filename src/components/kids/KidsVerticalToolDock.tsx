@@ -54,6 +54,7 @@ export const KidsVerticalToolDock: React.FC<KidsVerticalToolDockProps> = ({
   onUndo,
   onRedo,
 }) => {
+  const [activeTab, setActiveTab] = useState<'tools' | 'colors'>('tools');
   const [favorites, setFavorites] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('remix3d_favorite_colors');
@@ -75,12 +76,12 @@ export const KidsVerticalToolDock: React.FC<KidsVerticalToolDockProps> = ({
   };
 
   const tools: { id: BrushType; name: string; icon: React.ReactNode; color: string }[] = [
-    { id: 'flat_paint', name: 'Flat Paint', icon: <Paintbrush className="w-5 h-5" />, color: '#FF70B8' },
-    { id: 'bucket', name: '1-Tap Fill', icon: <PaintBucket className="w-5 h-5" />, color: '#00F0FF' },
-    { id: 'stardust', name: 'Star Dust', icon: <Sparkles className="w-5 h-5" />, color: '#FFE600' },
-    { id: 'magic_wand', name: 'Magic Glow', icon: <Wand2 className="w-5 h-5" />, color: '#8FA2FA' },
-    { id: 'sticker', name: '3D Sticker', icon: <Tag className="w-5 h-5" />, color: '#75F0C2' },
-    { id: 'eraser', name: 'Super Zap', icon: <Eraser className="w-5 h-5" />, color: '#FF9E00' },
+    { id: 'flat_paint', name: 'Flat Paint', icon: <Paintbrush className="w-4 h-4 sm:w-5 sm:h-5" />, color: '#FF70B8' },
+    { id: 'bucket', name: '1-Tap Fill', icon: <PaintBucket className="w-4 h-4 sm:w-5 sm:h-5" />, color: '#00F0FF' },
+    { id: 'stardust', name: 'Star Dust', icon: <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />, color: '#FFE600' },
+    { id: 'magic_wand', name: 'Magic Glow', icon: <Wand2 className="w-4 h-4 sm:w-5 sm:h-5" />, color: '#8FA2FA' },
+    { id: 'sticker', name: '3D Sticker', icon: <Tag className="w-4 h-4 sm:w-5 sm:h-5" />, color: '#75F0C2' },
+    { id: 'eraser', name: 'Super Zap', icon: <Eraser className="w-4 h-4 sm:w-5 sm:h-5" />, color: '#FF9E00' },
   ];
 
   return (
@@ -88,233 +89,281 @@ export const KidsVerticalToolDock: React.FC<KidsVerticalToolDockProps> = ({
       id="kids-vertical-tool-dock"
       initial={{ x: -60, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      className="relative flex flex-col gap-3 p-3 bg-[#FFE600] rounded-3xl border-[3.5px] border-black shadow-[6px_6px_0px_#1B1B4B] select-none max-w-[210px]"
+      className="relative flex flex-col gap-2.5 p-2.5 bg-[#FFE600] rounded-3xl border-[3.5px] border-black shadow-[5px_5px_0px_#1B1B4B] select-none w-[190px] sm:w-[210px]"
     >
       {/* Gloss Highlight */}
       <div className="absolute top-2 left-4 right-8 h-2 bg-white/40 rounded-full pointer-events-none" />
 
-      {/* Tool Selector Grid */}
-      <div className="grid grid-cols-2 gap-1.5 pt-1">
-        {tools.map((tool) => {
-          const isSelected = activeBrush === tool.id;
-          return (
-            <motion.button
-              key={tool.id}
-              id={`tool-btn-${tool.id}`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => {
-                soundEngine.playBubblePop(1.1);
-                triggerHaptic('selection');
-                onSelectBrush(tool.id);
-                if (tool.id === 'sticker') {
-                  onOpenStickerTray();
-                }
-              }}
-              title={tool.name}
-              className={`flex flex-col items-center justify-center p-2 rounded-2xl border-[2.5px] border-black transition-all cursor-pointer ${
-                isSelected
-                  ? 'bg-black text-white shadow-[2px_2px_0_#FFE600] scale-105'
-                  : 'bg-white text-black hover:bg-gray-100 shadow-[2px_2px_0_#000]'
-              }`}
-            >
-              <span className={isSelected ? 'text-[#FFE600]' : 'text-black'}>{tool.icon}</span>
-              <span className="text-[10px] font-['Fredoka',sans-serif] font-bold mt-0.5 leading-tight truncate w-full text-center">
-                {tool.name}
-              </span>
-            </motion.button>
-          );
-        })}
+      {/* Progressive Disclosure Tab Switcher (Tools vs Colors) */}
+      <div className="grid grid-cols-2 gap-1 p-1 bg-black/10 rounded-2xl border-[2px] border-black mt-1">
+        <button
+          onClick={() => {
+            soundEngine.playDialClick(700);
+            triggerHaptic('light');
+            setActiveTab('tools');
+          }}
+          className={`flex items-center justify-center gap-1 py-1.5 rounded-xl font-['Fredoka',sans-serif] font-bold text-xs transition-all cursor-pointer ${
+            activeTab === 'tools'
+              ? 'bg-black text-white shadow-[1.5px_1.5px_0_#FFE600] scale-[1.02]'
+              : 'bg-white/80 text-black hover:bg-white'
+          }`}
+        >
+          <span>🎨</span>
+          <span>Tools</span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundEngine.playDialClick(900);
+            triggerHaptic('light');
+            setActiveTab('colors');
+          }}
+          className={`flex items-center justify-center gap-1 py-1.5 rounded-xl font-['Fredoka',sans-serif] font-bold text-xs transition-all cursor-pointer ${
+            activeTab === 'colors'
+              ? 'bg-black text-white shadow-[1.5px_1.5px_0_#FFE600] scale-[1.02]'
+              : 'bg-white/80 text-black hover:bg-white'
+          }`}
+        >
+          <span>✨</span>
+          <span>Colors</span>
+        </button>
       </div>
 
-      {/* Section Divider */}
-      <div className="h-0.5 bg-black/20 rounded-full" />
-
-      {/* Brush Sizes */}
-      <div className="space-y-1">
-        <div className="flex items-center justify-between px-1">
-          <span className="font-['Fredoka',sans-serif] font-bold text-xs text-black">
-            Pen Size
-          </span>
-          <SparkleStar size={14} color="#FF70B8" />
-        </div>
-
-        <div className="grid grid-cols-5 gap-1 bg-white/90 p-1 rounded-2xl border-[2.5px] border-black w-full overflow-hidden">
-          {BRUSH_SIZES.map((size) => {
-            const isSelected = activeSizeId === size.id;
-            return (
-              <button
-                key={size.id}
-                id={`size-fader-pill-${size.id}`}
-                onClick={() => {
-                  soundEngine.playDialClick(600 + size.radius * 2000);
-                  triggerHaptic('light');
-                  onSelectSize(size.id, size.radius);
-                }}
-                title={`${size.name} (${size.label})`}
-                className={`relative flex flex-col items-center justify-center py-1.5 px-0.5 rounded-xl border-[2px] border-black transition-all cursor-pointer min-w-0 ${
-                  isSelected
-                    ? 'bg-[#FF2A6D] text-white shadow-[1.5px_1.5px_0_#000] -translate-y-0.5'
-                    : 'bg-[#FFE600] text-black hover:bg-yellow-300'
-                }`}
-              >
-                {/* Center Groove Slit */}
-                <div
-                  className={`w-1 rounded-full mb-1 ${
-                    isSelected ? 'bg-white' : 'bg-black/40'
+      {/* TAB 1: Tools & Pen Sizes */}
+      {activeTab === 'tools' && (
+        <motion.div
+          key="tab-tools"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col gap-2.5"
+        >
+          {/* Tool Selector Grid */}
+          <div className="grid grid-cols-2 gap-1.5">
+            {tools.map((tool) => {
+              const isSelected = activeBrush === tool.id;
+              return (
+                <motion.button
+                  key={tool.id}
+                  id={`tool-btn-${tool.id}`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => {
+                    soundEngine.playBubblePop(1.1);
+                    triggerHaptic('selection');
+                    onSelectBrush(tool.id);
+                    if (tool.id === 'sticker') {
+                      onOpenStickerTray();
+                    }
+                  }}
+                  title={tool.name}
+                  className={`flex flex-col items-center justify-center p-2 rounded-2xl border-[2.5px] border-black transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-black text-white shadow-[2px_2px_0_#FFE600] scale-105'
+                      : 'bg-white text-black hover:bg-gray-100 shadow-[2px_2px_0_#000]'
                   }`}
-                  style={{ height: `${6 + BRUSH_SIZES.indexOf(size) * 3}px` }}
-                />
-                <span className="text-[8.5px] font-black tracking-tighter truncate w-full text-center">
-                  {size.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Section Divider */}
-      <div className="h-0.5 bg-black/20 rounded-full" />
-
-      {/* Magic Shaders Quick Sample Strip */}
-      <div className="space-y-1">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1 font-['Fredoka',sans-serif] font-bold text-xs text-black">
-            <Sparkles className="w-3.5 h-3.5 text-black" />
-            <span>Magic Shaders</span>
+                >
+                  <span className={isSelected ? 'text-[#FFE600]' : 'text-black'}>{tool.icon}</span>
+                  <span className="text-[10px] font-['Fredoka',sans-serif] font-bold mt-0.5 leading-tight truncate w-full text-center">
+                    {tool.name}
+                  </span>
+                </motion.button>
+              );
+            })}
           </div>
-          <SparkleStar size={12} color="#00F0FF" />
-        </div>
 
-        <div className="grid grid-cols-4 gap-1 bg-white/90 p-1.5 rounded-2xl border-[2.5px] border-black max-h-[110px] overflow-y-auto custom-kids-scrollbar">
-          {SHADER_PRESETS.slice(0, 16).map((shader) => {
-            const isSelected = activeShaderId === shader.id;
-            return (
-              <motion.button
-                key={shader.id}
-                whileHover={{ scale: 1.15 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => {
-                  soundEngine.playBubblePop(1.3);
-                  triggerHaptic('selection');
-                  onSelectShader?.(shader);
-                }}
-                title={shader.name}
-                className={`flex flex-col items-center justify-center p-1 rounded-xl border-[2px] border-black transition-transform cursor-pointer ${
-                  isSelected
-                    ? 'bg-[#00F0FF] shadow-[2px_2px_0_#000] scale-110'
-                    : 'bg-white shadow-[1px_1px_0_#000] hover:bg-cyan-50'
-                }`}
+          {/* Section Divider */}
+          <div className="h-0.5 bg-black/20 rounded-full" />
+
+          {/* Brush Sizes */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between px-1">
+              <span className="font-['Fredoka',sans-serif] font-bold text-xs text-black">
+                Pen Size
+              </span>
+              <SparkleStar size={14} color="#FF70B8" />
+            </div>
+
+            <div className="grid grid-cols-5 gap-1 bg-white/90 p-1 rounded-2xl border-[2.5px] border-black w-full overflow-hidden">
+              {BRUSH_SIZES.map((size) => {
+                const isSelected = activeSizeId === size.id;
+                return (
+                  <button
+                    key={size.id}
+                    id={`size-fader-pill-${size.id}`}
+                    onClick={() => {
+                      soundEngine.playDialClick(600 + size.radius * 2000);
+                      triggerHaptic('light');
+                      onSelectSize(size.id, size.radius);
+                    }}
+                    title={`${size.name} (${size.label})`}
+                    className={`relative flex flex-col items-center justify-center py-1.5 px-0.5 rounded-xl border-[2px] border-black transition-all cursor-pointer min-w-0 ${
+                      isSelected
+                        ? 'bg-[#FF2A6D] text-white shadow-[1.5px_1.5px_0_#000] -translate-y-0.5'
+                        : 'bg-[#FFE600] text-black hover:bg-yellow-300'
+                    }`}
+                  >
+                    <div
+                      className={`w-1 rounded-full mb-1 ${
+                        isSelected ? 'bg-white' : 'bg-black/40'
+                      }`}
+                      style={{ height: `${6 + BRUSH_SIZES.indexOf(size) * 3}px` }}
+                    />
+                    <span className="text-[8.5px] font-black tracking-tighter truncate w-full text-center">
+                      {size.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* TAB 2: Colors, Shaders & Favorites */}
+      {activeTab === 'colors' && (
+        <motion.div
+          key="tab-colors"
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col gap-2.5"
+        >
+          {/* 16 Candy Swatches & Pipette Custom Color */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between px-1">
+              <span className="font-['Fredoka',sans-serif] font-bold text-xs text-black">
+                Candy Colors
+              </span>
+              <label
+                htmlFor="custom-color-input"
+                className="flex items-center gap-1 bg-white/90 px-1.5 py-0.5 rounded-full border border-black shadow-[1px_1px_0_#000] cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+                title="Pick Custom Color"
               >
-                <span className="text-base leading-none">{shader.emoji}</span>
-              </motion.button>
-            );
-          })}
-        </div>
-      </div>
+                <Pipette className="w-2.5 h-2.5 text-black" />
+                <div
+                  className="w-3 h-3 rounded-full border border-black shadow-inner"
+                  style={{ backgroundColor: activeColor }}
+                />
+                <input
+                  id="custom-color-input"
+                  type="color"
+                  value={activeColor.startsWith('#') ? activeColor : '#FF2A6D'}
+                  onChange={(e) => {
+                    onSelectColor(e.target.value);
+                    soundEngine.playDialClick(700);
+                  }}
+                  className="sr-only"
+                />
+              </label>
+            </div>
 
-      {/* Section Divider */}
-      <div className="h-0.5 bg-black/20 rounded-full" />
-
-      {/* 16 Candy Swatch Strip & Custom Color Picker */}
-      <div className="space-y-1">
-        <div className="flex items-center justify-between px-1">
-          <span className="font-['Fredoka',sans-serif] font-bold text-xs text-black">
-            Candy Colors
-          </span>
-          <label
-            htmlFor="custom-color-input"
-            className="flex items-center gap-1 bg-white/90 px-1.5 py-0.5 rounded-full border border-black shadow-[1px_1px_0_#000] cursor-pointer hover:scale-105 active:scale-95 transition-transform"
-            title="Pick Custom Color"
-          >
-            <Pipette className="w-2.5 h-2.5 text-black" />
-            <div
-              className="w-3 h-3 rounded-full border border-black shadow-inner"
-              style={{ backgroundColor: activeColor }}
-            />
-            <input
-              id="custom-color-input"
-              type="color"
-              value={activeColor.startsWith('#') ? activeColor : '#FF2A6D'}
-              onChange={(e) => {
-                onSelectColor(e.target.value);
-                soundEngine.playDialClick(700);
-              }}
-              className="sr-only"
-            />
-          </label>
-        </div>
-
-        <div className="grid grid-cols-4 gap-1.5 bg-white/80 p-1.5 rounded-2xl border-[2.5px] border-black">
-          {CANDY_SWATCHES.map((color, idx) => {
-            const isSelected = activeColor.toLowerCase() === color.toLowerCase();
-            return (
-              <motion.button
-                key={color}
-                id={`swatch-btn-${idx}`}
-                whileHover={{ scale: 1.15 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={() => {
-                  soundEngine.playBubblePop(0.8 + (idx / CANDY_SWATCHES.length) * 0.8);
-                  triggerHaptic('selection');
-                  onSelectColor(color);
-                }}
-                style={{ backgroundColor: color }}
-                className={`w-full aspect-square rounded-xl border-[2px] border-black transition-transform cursor-pointer ${
-                  isSelected ? 'scale-115 ring-2 ring-black shadow-[2px_2px_0_#000]' : 'shadow-[1px_1px_0_#000]'
-                }`}
-              />
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Favorites Section */}
-      <div className="space-y-1">
-        <div className="flex items-center justify-between px-1">
-          <div className="flex items-center gap-1 font-['Fredoka',sans-serif] font-bold text-xs text-black">
-            <Heart className="w-3 h-3 text-[#FF2A6D] fill-[#FF2A6D]" />
-            <span>Favorites</span>
+            <div className="grid grid-cols-4 gap-1 bg-white/80 p-1.5 rounded-2xl border-[2.5px] border-black">
+              {CANDY_SWATCHES.map((color, idx) => {
+                const isSelected = activeColor.toLowerCase() === color.toLowerCase();
+                return (
+                  <motion.button
+                    key={color}
+                    id={`swatch-btn-${idx}`}
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                      soundEngine.playBubblePop(0.8 + (idx / CANDY_SWATCHES.length) * 0.8);
+                      triggerHaptic('selection');
+                      onSelectColor(color);
+                    }}
+                    style={{ backgroundColor: color }}
+                    className={`w-full aspect-square rounded-xl border-[2px] border-black transition-transform cursor-pointer ${
+                      isSelected ? 'scale-115 ring-2 ring-black shadow-[2px_2px_0_#000]' : 'shadow-[1px_1px_0_#000]'
+                    }`}
+                  />
+                );
+              })}
+            </div>
           </div>
 
-          <motion.button
-            id="btn-add-favorite-color"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleAddFavorite}
-            title="Save Current Color to Favorites"
-            className="flex items-center gap-0.5 px-1.5 py-0.5 bg-white text-black text-[9px] font-black rounded-full border border-black shadow-[1px_1px_0_#000] hover:bg-pink-100 cursor-pointer"
-          >
-            <Plus className="w-2.5 h-2.5 stroke-[3]" />
-            <span>Save</span>
-          </motion.button>
-        </div>
+          {/* Favorites Row */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-1 font-['Fredoka',sans-serif] font-bold text-xs text-black">
+                <Heart className="w-3 h-3 text-[#FF2A6D] fill-[#FF2A6D]" />
+                <span>Favorites</span>
+              </div>
 
-        <div className="flex items-center gap-1 bg-white/80 p-1.5 rounded-2xl border-[2.5px] border-black overflow-x-auto scrollbar-none">
-          {favorites.map((favColor, idx) => {
-            const isSelected = activeColor.toLowerCase() === favColor.toLowerCase();
-            return (
               <motion.button
-                key={`${favColor}-${idx}`}
-                id={`favorite-swatch-${idx}`}
-                whileHover={{ scale: 1.2 }}
+                id="btn-add-favorite-color"
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => {
-                  soundEngine.playBubblePop(1.1);
-                  triggerHaptic('selection');
-                  onSelectColor(favColor);
-                }}
-                style={{ backgroundColor: favColor }}
-                title={`Favorite Color ${favColor}`}
-                className={`flex-1 min-w-[22px] h-6 rounded-lg border-[2px] border-black transition-transform cursor-pointer ${
-                  isSelected ? 'scale-115 ring-2 ring-black shadow-[1.5px_1.5px_0_#000]' : 'shadow-[1px_1px_0_#000]'
-                }`}
-              />
-            );
-          })}
-        </div>
-      </div>
+                onClick={handleAddFavorite}
+                title="Save Current Color to Favorites"
+                className="flex items-center gap-0.5 px-1.5 py-0.5 bg-white text-black text-[9px] font-black rounded-full border border-black shadow-[1px_1px_0_#000] hover:bg-pink-100 cursor-pointer"
+              >
+                <Plus className="w-2.5 h-2.5 stroke-[3]" />
+                <span>Save</span>
+              </motion.button>
+            </div>
+
+            <div className="flex items-center gap-1 bg-white/80 p-1 rounded-2xl border-[2.5px] border-black overflow-x-auto scrollbar-none">
+              {favorites.map((favColor, idx) => {
+                const isSelected = activeColor.toLowerCase() === favColor.toLowerCase();
+                return (
+                  <motion.button
+                    key={`${favColor}-${idx}`}
+                    id={`favorite-swatch-${idx}`}
+                    whileHover={{ scale: 1.2 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                      soundEngine.playBubblePop(1.1);
+                      triggerHaptic('selection');
+                      onSelectColor(favColor);
+                    }}
+                    style={{ backgroundColor: favColor }}
+                    title={`Favorite Color ${favColor}`}
+                    className={`flex-1 min-w-[20px] h-5 rounded-lg border-[2px] border-black transition-transform cursor-pointer ${
+                      isSelected ? 'scale-115 ring-2 ring-black shadow-[1.5px_1.5px_0_#000]' : 'shadow-[1px_1px_0_#000]'
+                    }`}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Magic Shaders Quick Sample Strip */}
+          <div className="space-y-1">
+            <div className="flex items-center justify-between px-1">
+              <div className="flex items-center gap-1 font-['Fredoka',sans-serif] font-bold text-xs text-black">
+                <Sparkles className="w-3 h-3 text-black" />
+                <span>Shaders</span>
+              </div>
+              <SparkleStar size={10} color="#00F0FF" />
+            </div>
+
+            <div className="grid grid-cols-4 gap-1 bg-white/90 p-1 rounded-2xl border-[2.5px] border-black max-h-[85px] overflow-y-auto custom-kids-scrollbar">
+              {SHADER_PRESETS.slice(0, 16).map((shader) => {
+                const isSelected = activeShaderId === shader.id;
+                return (
+                  <motion.button
+                    key={shader.id}
+                    whileHover={{ scale: 1.15 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => {
+                      soundEngine.playBubblePop(1.3);
+                      triggerHaptic('selection');
+                      onSelectShader?.(shader);
+                    }}
+                    title={shader.name}
+                    className={`flex flex-col items-center justify-center p-1 rounded-xl border-[2px] border-black transition-transform cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#00F0FF] shadow-[2px_2px_0_#000] scale-110'
+                        : 'bg-white shadow-[1px_1px_0_#000] hover:bg-cyan-50'
+                    }`}
+                  >
+                    <span className="text-sm leading-none">{shader.emoji}</span>
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+        </motion.div>
+      )}
     </motion.div>
   );
 };

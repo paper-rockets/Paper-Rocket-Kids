@@ -113,34 +113,34 @@ export const ProWorkspace: React.FC<ProWorkspaceProps> = ({ engine, onToggleMode
       </header>
 
       {/* Pro CAD Side Panel */}
-      <div className="flex-1 flex justify-between p-4 pointer-events-none">
+      <div className="flex-1 flex justify-between p-3 pointer-events-none overflow-hidden">
         {/* Left Inspector */}
-        <aside className="pointer-events-auto w-64 bg-[#121420]/90 border border-gray-800 rounded-xl p-3 backdrop-blur-md space-y-4">
+        <aside className="pointer-events-auto hidden md:block w-60 bg-[#121420]/90 border border-gray-800 rounded-xl p-3 backdrop-blur-md space-y-3 max-h-[calc(100vh-100px)] overflow-y-auto custom-kids-scrollbar">
           <div className="flex items-center justify-between border-b border-gray-800 pb-2">
-            <span className="font-bold text-gray-300 uppercase tracking-wider">Scene Graph</span>
+            <span className="font-bold text-gray-300 uppercase tracking-wider text-[11px]">Scene Graph</span>
             <Layers className="w-4 h-4 text-gray-500" />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 text-[11px]">
             <div className="p-1.5 bg-gray-900/80 rounded border border-gray-800 flex items-center justify-between text-gray-300">
-              <span>Toy Mesh: {engine?.currentModelInfo?.name || 'Pusheen'}</span>
-              <span className="text-cyan-400 text-[10px]">MeshStandard</span>
+              <span className="truncate max-w-[130px]">{engine?.currentModelInfo?.name || 'Pusheen'}</span>
+              <span className="text-cyan-400 text-[9px]">MeshStandard</span>
             </div>
             <div className="p-1.5 bg-gray-900/80 rounded border border-gray-800 flex items-center justify-between text-gray-300">
               <span>Strokes Buffer</span>
-              <span className="text-purple-400 text-[10px]">TubeGeometry</span>
+              <span className="text-purple-400 text-[9px]">TubeGeometry</span>
             </div>
             <div className="p-1.5 bg-gray-900/80 rounded border border-gray-800 flex items-center justify-between text-gray-300">
-              <span>Decal / Stickers</span>
-              <span className="text-yellow-400 text-[10px]">PlaneDecal</span>
+              <span>Stickers</span>
+              <span className="text-yellow-400 text-[9px]">PlaneDecal</span>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 pt-2 space-y-2">
-            <span className="font-bold text-gray-300 uppercase tracking-wider block">
-              Draco WASM Compression
+          <div className="border-t border-gray-800 pt-2 space-y-1.5">
+            <span className="font-bold text-gray-300 uppercase tracking-wider block text-[10px]">
+              Draco Compression
             </span>
-            <div className="flex items-center justify-between text-gray-400">
+            <div className="flex items-center justify-between text-gray-400 text-[10px]">
               <span>Ratio: {dracoCompressionRatio}%</span>
               <span className="text-green-400">Level 7</span>
             </div>
@@ -150,21 +150,21 @@ export const ProWorkspace: React.FC<ProWorkspaceProps> = ({ engine, onToggleMode
               max="95"
               value={dracoCompressionRatio}
               onChange={(e) => setDracoCompressionRatio(parseInt(e.target.value))}
-              className="w-full accent-pink-500"
+              className="w-full accent-pink-500 h-1.5 bg-gray-800 rounded-lg cursor-pointer"
             />
           </div>
         </aside>
 
         {/* Right Shaders / BVH Panel */}
-        <aside className="pointer-events-auto w-64 bg-[#121420]/90 border border-gray-800 rounded-xl p-3 backdrop-blur-md space-y-4">
+        <aside className="pointer-events-auto hidden md:block w-60 bg-[#121420]/90 border border-gray-800 rounded-xl p-3 backdrop-blur-md space-y-3 max-h-[calc(100vh-100px)] overflow-y-auto custom-kids-scrollbar">
           <div className="flex items-center justify-between border-b border-gray-800 pb-2">
-            <span className="font-bold text-gray-300 uppercase tracking-wider">KD-Tree & BVH</span>
+            <span className="font-bold text-gray-300 uppercase tracking-wider text-[11px]">KD-Tree & BVH</span>
             <Cpu className="w-4 h-4 text-cyan-400" />
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1.5 text-[10px]">
             <div className="flex items-center justify-between">
-              <span className="text-gray-400">Raycast Density</span>
+              <span className="text-gray-400">Density</span>
               <span className="text-white font-bold">{bvhDensity} pts/cm²</span>
             </div>
             <input
@@ -173,18 +173,18 @@ export const ProWorkspace: React.FC<ProWorkspaceProps> = ({ engine, onToggleMode
               max="128"
               value={bvhDensity}
               onChange={(e) => setBvhDensity(parseInt(e.target.value))}
-              className="w-full accent-cyan-400"
+              className="w-full accent-cyan-400 h-1.5 bg-gray-800 rounded-lg cursor-pointer"
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="pt-2 border-t border-gray-800">
             <button
               onClick={() => {
                 if (engine) engine.clearAllPaint();
               }}
-              className="w-full py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 border border-red-800 rounded flex items-center justify-center gap-1"
+              className="w-full py-1.5 bg-red-900/40 hover:bg-red-900/60 text-red-300 border border-red-800 rounded flex items-center justify-center gap-1 text-[10px] cursor-pointer"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3 h-3" />
               <span>Purge Stroke Buffers</span>
             </button>
           </div>

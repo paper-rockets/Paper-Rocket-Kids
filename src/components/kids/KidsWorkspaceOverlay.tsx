@@ -201,50 +201,56 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
       id="kids-workspace-overlay"
       className="absolute inset-0 flex flex-col pointer-events-none z-20 overflow-hidden font-['Outfit',sans-serif]"
     >
-      {/* 1. TOP BAR: TOY CONSOLE HEADER */}
+      {/* 1. TOP HEADER BAR */}
       <div className="pointer-events-auto w-full">
         <KidsHeaderBar
-          onOpenToybox={() => {
-            setConsoleInitialTab('toybox');
-            setIsToyConsoleOpen(true);
-          }}
-          onOpenShaders={() => {
-            setConsoleInitialTab('shaders');
-            setIsToyConsoleOpen(true);
-          }}
-          onOpenStickers={() => {
-            setConsoleInitialTab('stickers');
-            setIsToyConsoleOpen(true);
-          }}
-          onOpenSky={() => {
-            setConsoleInitialTab('sky');
-            setIsToyConsoleOpen(true);
-          }}
-          onJellyBoing={handleJellyBoing}
-          symmetryCount={symmetryCount}
-          onToggleSymmetry={handleToggleSymmetry}
-          canUndo={canUndo}
-          canRedo={canRedo}
-          onUndo={handleUndo}
-          onRedo={handleRedo}
-          onClearCanvas={() => {
-            if (engine) engine.clearAllPaint();
-          }}
-          activeTheme={activeTheme}
-          onSelectTheme={onSelectTheme}
-          isMuted={isMuted}
-          onToggleMute={() => {
-            const nextMute = !isMuted;
-            setIsMuted(nextMute);
-            soundEngine.setMuted(nextMute);
-          }}
-        />
+        onOpenToybox={() => {
+          setConsoleInitialTab('toybox');
+          setIsToyConsoleOpen(true);
+        }}
+        onOpenShaders={() => {
+          setConsoleInitialTab('shaders');
+          setIsToyConsoleOpen(true);
+        }}
+        onOpenStickers={() => {
+          setConsoleInitialTab('stickers');
+          setIsToyConsoleOpen(true);
+        }}
+        onOpenSky={() => {
+          setConsoleInitialTab('sky');
+          setIsToyConsoleOpen(true);
+        }}
+        onJellyBoing={handleJellyBoing}
+        symmetryCount={symmetryCount}
+        onToggleSymmetry={() => {
+          const next = symmetryCount === 1 ? 2 : symmetryCount === 2 ? 4 : 1;
+          setSymmetryCount(next);
+          if (engine) engine.symmetryCount = next;
+        }}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={handleUndo}
+        onRedo={handleRedo}
+        onClearCanvas={() => {
+          if (engine) engine.clearAllPaint();
+        }}
+        activeTheme={activeTheme}
+        onSelectTheme={onSelectTheme}
+        isMuted={isMuted}
+        onToggleMute={handleToggleMute}
+        isSpinning={isTurntable}
+        onToggleSpin={() => {
+          const nextTurn = !isTurntable;
+          setIsTurntable(nextTurn);
+          if (engine) engine.isTurntableActive = nextTurn;
+        }}
+      />
       </div>
 
-      {/* 2. MAIN HUD LAYOUT: Left Dock, Right Dock, Bottom Dock */}
-      <div className="relative flex-1 flex justify-between items-start p-2.5 sm:p-4 overflow-hidden pointer-events-none">
-        {/* LEFT DOCK: Tool Rack, Sizes, Colors & Favorites */}
-        <div className="pointer-events-auto max-h-[calc(100vh-76px)] overflow-y-auto scrollbar-none pb-2">
+      {/* 2. MAIN WORKSPACE VIEWPORT */}
+      <div className="relative flex-1 flex justify-between p-3 sm:p-4 pointer-events-none overflow-hidden">
+        {/* LEFT DOCK: Progressive Disclosure Tabbed Tool Dock */}
+        <div className="pointer-events-auto">
           <KidsVerticalToolDock
             activeBrush={activeBrush}
             onSelectBrush={handleSelectBrush}
@@ -268,62 +274,22 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
           />
         </div>
 
-        {/* RIGHT DOCK: Glossy 3-Track Shader Remix Card */}
-        <div className="pointer-events-auto hidden md:block">
-          <KidsShaderRemixCard
-            activeShader={activeShader}
-            colorA={remixColorA}
-            colorB={remixColorB}
-            glow={remixGlow}
-            speed={remixSpeed}
-            onChangeColorA={(col) => setRemixColorA(col)}
-            onChangeColorB={(col) => setRemixColorB(col)}
-            onChangeGlow={(g) => setRemixGlow(g)}
-            onChangeSpeed={(s) => setRemixSpeed(s)}
-            onOpenShadersModal={() => {
-              setConsoleInitialTab('shaders');
-              setIsToyConsoleOpen(true);
+        {/* BOTTOM RIGHT: Collapsible 3D Navigator */}
+        <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 pointer-events-auto">
+          <KidsMagicFaceDial
+            onRotateAzimuth={(delta) => {
+              if (engine) engine.orbitAzimuth(delta);
+            }}
+            onRotateElevation={(delta) => {
+              if (engine) engine.orbitElevation(delta);
+            }}
+            onZoomChange={(delta) => {
+              if (engine) engine.zoomDelta(delta);
+            }}
+            onResetCamera={() => {
+              if (engine) engine.resetCamera();
             }}
           />
-        </div>
-
-        {/* BOTTOM HUD: Scrubber (Bottom Center) & 3D Navigator (Bottom Right) */}
-        <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:right-4 flex items-end justify-between pointer-events-none">
-          {/* Bottom Center: Media Scrubber & Turntable */}
-          <div className="pointer-events-auto mx-auto">
-            <KidsScrubberBar
-              isPlaying={isPlaying}
-              onTogglePlay={() => {
-                const nextPlay = !isPlaying;
-                setIsPlaying(nextPlay);
-                if (engine) engine.isAnimationPlaying = nextPlay;
-              }}
-              isTurntable={isTurntable}
-              onToggleTurntable={() => {
-                const nextTurn = !isTurntable;
-                setIsTurntable(nextTurn);
-                if (engine) engine.isTurntableActive = nextTurn;
-              }}
-            />
-          </div>
-
-          {/* Bottom Right: 3D Navigator Hub */}
-          <div className="pointer-events-auto">
-            <KidsMagicFaceDial
-              onRotateAzimuth={(delta) => {
-                if (engine) engine.orbitAzimuth(delta);
-              }}
-              onRotateElevation={(delta) => {
-                if (engine) engine.orbitElevation(delta);
-              }}
-              onZoomChange={(delta) => {
-                if (engine) engine.zoomDelta(delta);
-              }}
-              onResetCamera={() => {
-                if (engine) engine.resetCamera();
-              }}
-            />
-          </div>
         </div>
       </div>
 
