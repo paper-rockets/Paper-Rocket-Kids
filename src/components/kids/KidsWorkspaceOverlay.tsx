@@ -237,7 +237,11 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
         activeTheme={activeTheme}
         onSelectTheme={onSelectTheme}
         isMuted={isMuted}
-        onToggleMute={handleToggleMute}
+        onToggleMute={() => {
+          const nextMute = !isMuted;
+          setIsMuted(nextMute);
+          soundEngine.setMuted(nextMute);
+        }}
         isSpinning={isTurntable}
         onToggleSpin={() => {
           const nextTurn = !isTurntable;
