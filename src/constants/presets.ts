@@ -67,11 +67,11 @@ export const CANDY_SWATCHES: string[] = [
 ];
 
 export const BRUSH_SIZES: BrushSizeOption[] = [
-  { id: 'sm', name: 'Fine', radius: 0.012, label: '1mm' },
-  { id: 'med', name: 'Small', radius: 0.028, label: '3mm' },
-  { id: 'lg', name: 'Medium', radius: 0.055, label: '6mm' },
-  { id: 'huge', name: 'Large', radius: 0.10, label: '10mm' },
-  { id: 'jumbo', name: 'Wide', radius: 0.18, label: '18mm' },
+  { id: 'xs', name: 'Micro', radius: 0.008, label: '0.5mm' },
+  { id: 'sm', name: 'Fine', radius: 0.016, label: '1.5mm' },
+  { id: 'med', name: 'Medium', radius: 0.032, label: '3mm' },
+  { id: 'lg', name: 'Thick', radius: 0.065, label: '6mm' },
+  { id: 'huge', name: 'Wide', radius: 0.11, label: '10mm' },
 ];
 
 export const STICKER_CATALOG: StickerItem[] = [

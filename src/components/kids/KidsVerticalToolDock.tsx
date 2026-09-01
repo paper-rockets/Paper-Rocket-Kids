@@ -187,8 +187,8 @@ export const KidsVerticalToolDock: React.FC<KidsVerticalToolDockProps> = ({
           <SparkleStar size={12} color="#00F0FF" />
         </div>
 
-        <div className="grid grid-cols-4 gap-1 bg-white/90 p-1.5 rounded-2xl border-[2.5px] border-black">
-          {SHADER_PRESETS.slice(0, 8).map((shader) => {
+        <div className="grid grid-cols-4 gap-1 bg-white/90 p-1.5 rounded-2xl border-[2.5px] border-black max-h-[110px] overflow-y-auto custom-kids-scrollbar">
+          {SHADER_PRESETS.slice(0, 16).map((shader) => {
             const isSelected = activeShaderId === shader.id;
             return (
               <motion.button

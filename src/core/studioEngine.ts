@@ -29,6 +29,97 @@ interface MeshPaintData {
   history: ImageData[];
 }
 
+/**
+ * Generates continuous, non-overlapping triplanar cubic UVs across all 3D mesh triangles
+ * completely eliminating texture tiling, UV mirroring, and checkerboard artifacts.
+ */
+function generateUniqueBoxUVs(geometry: THREE.BufferGeometry) {
+  geometry.computeBoundingBox();
+  const box = geometry.boundingBox || new THREE.Box3();
+  const size = new THREE.Vector3();
+  box.getSize(size);
+  const min = box.min;
+
+  const pos = geometry.attributes.position;
+  if (!pos) return;
+
+  if (!geometry.attributes.normal) {
+    geometry.computeVertexNormals();
+  }
+  const norm = geometry.attributes.normal;
+  const count = pos.count;
+  const uvs = new Float32Array(count * 2);
+
+  const dx = Math.max(0.001, size.x);
+  const dy = Math.max(0.001, size.y);
+  const dz = Math.max(0.001, size.z);
+
+  for (let i = 0; i < count; i++) {
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    const z = pos.getZ(i);
+
+    const nx = Math.abs(norm.getX(i));
+    const ny = Math.abs(norm.getY(i));
+    const nz = Math.abs(norm.getZ(i));
+
+    let u = 0;
+    let v = 0;
+    let col = 0;
+    let row = 0;
+
+    if (ny >= nx && ny >= nz) {
+      // Y-dominant (Top / Bottom)
+      if (norm.getY(i) > 0) {
+        u = (x - min.x) / dx;
+        v = (z - min.z) / dz;
+        col = 1;
+        row = 1;
+      } else {
+        u = (x - min.x) / dx;
+        v = (z - min.z) / dz;
+        col = 2;
+        row = 1;
+      }
+    } else if (nx >= ny && nx >= nz) {
+      // X-dominant (Right / Left)
+      if (norm.getX(i) > 0) {
+        u = (z - min.z) / dz;
+        v = (y - min.y) / dy;
+        col = 2;
+        row = 0;
+      } else {
+        u = (z - min.z) / dz;
+        v = (y - min.y) / dy;
+        col = 0;
+        row = 1;
+      }
+    } else {
+      // Z-dominant (Front / Back)
+      if (norm.getZ(i) > 0) {
+        u = (x - min.x) / dx;
+        v = (y - min.y) / dy;
+        col = 0;
+        row = 0;
+      } else {
+        u = (x - min.x) / dx;
+        v = (y - min.y) / dy;
+        col = 1;
+        row = 0;
+      }
+    }
+
+    u = Math.min(0.98, Math.max(0.02, u));
+    v = Math.min(0.98, Math.max(0.02, v));
+
+    uvs[i * 2] = (col + u) / 3.0;
+    uvs[i * 2 + 1] = (row + v) / 2.0;
+  }
+
+  geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
+  geometry.attributes.uv.needsUpdate = true;
+}
+
 export class StudioEngine {
   public canvas: HTMLCanvasElement;
   public scene: THREE.Scene;
@@ -52,7 +143,7 @@ export class StudioEngine {
   // Active Painting State
   public brushType: BrushType = 'flat_paint';
   public brushColor: string = '#FF2A6D';
-  public brushRadius: number = 0.09;
+  public brushRadius: number = 0.03;
   public activeShader: ShaderPreset = SHADER_PRESETS[0];
   public symmetryCount: number = 1; // 1, 2, 4, 6, 8
   public activeStickerEmoji: string = '⭐';
@@ -173,7 +264,7 @@ export class StudioEngine {
   }
 
   /**
-   * Initializes dynamic paint textures on every mesh in the model group (Uniform Flat Grey Base)
+   * Initializes dynamic paint textures on every mesh in the model group (Uniform Flat Grey Base + Seam-Free UVs)
    */
   private initMeshPaintingTextures(group: THREE.Group) {
     this.meshPaintData.clear();
@@ -184,11 +275,29 @@ export class StudioEngine {
     group.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
+        if (!mesh.geometry) return;
+
+        // Preserve alpha cutout / transparency (e.g. Sailor Moon hair bangs, eyes, decals)
+        let isAlphaCutout = false;
+        if (mesh.material) {
+          const originalMat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
+          if (originalMat.transparent || (originalMat as THREE.Material & { alphaTest?: number }).alphaTest > 0) {
+            isAlphaCutout = true;
+          }
+        }
+
+        // Convert to non-indexed geometry to prevent UV seam interpolation artifacts
+        if (mesh.geometry.index) {
+          mesh.geometry = mesh.geometry.toNonIndexed();
+        }
 
         // Strip vertex colors that cause dark patches
-        if (mesh.geometry && mesh.geometry.attributes.color) {
+        if (mesh.geometry.attributes.color) {
           mesh.geometry.deleteAttribute('color');
         }
+
+        // Generate non-overlapping continuous UV mapping
+        generateUniqueBoxUVs(mesh.geometry);
 
         const canvas = document.createElement('canvas');
         canvas.width = 1024;
@@ -214,6 +323,8 @@ export class StudioEngine {
           roughness: 0.45,
           metalness: 0.05,
           side: THREE.DoubleSide,
+          transparent: isAlphaCutout,
+          alphaTest: isAlphaCutout ? 0.4 : 0.0,
         });
         mesh.material = standardMat;
         mesh.castShadow = true;
@@ -550,23 +661,27 @@ export class StudioEngine {
   }
 
   /**
-   * Apply animated magic shader to the whole model or active mesh
+   * Apply animated magic shader to the whole model or active mesh (Preserves Paint Layer)
    */
   public applyShaderToModel(shader: ShaderPreset) {
     this.activeShader = shader;
     if (!this.currentToyGroup) return;
 
-    const shaderMat = createMagicShaderMaterial({
-      ...shader,
-      colorA: this.brushColor || shader.colorA,
-      colorB: this.remixColorB || shader.colorB,
-      glow: this.remixGlow,
-      speed: this.remixSpeed,
-    });
-
     this.currentToyGroup.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
-        (child as THREE.Mesh).material = shaderMat;
+        const mesh = child as THREE.Mesh;
+        const paintData = this.meshPaintData.get(mesh.uuid);
+        const shaderMat = createMagicShaderMaterial(
+          {
+            ...shader,
+            colorA: this.brushColor || shader.colorA,
+            colorB: this.remixColorB || shader.colorB,
+            glow: this.remixGlow,
+            speed: this.remixSpeed,
+          },
+          paintData?.texture || null
+        );
+        mesh.material = shaderMat;
       }
     });
 
@@ -574,7 +689,7 @@ export class StudioEngine {
   }
 
   /**
-   * 1-Tap Paint Bucket Sub-Mesh Flood Fill
+   * 1-Tap Paint Bucket Sub-Mesh Flood Fill with Current Active Color
    */
   public floodFillPartAtPointer(clientX: number, clientY: number) {
     if (!this.currentToyGroup) return;
@@ -596,31 +711,26 @@ export class StudioEngine {
         if (paintData) {
           const beforeImg = paintData.ctx.getImageData(0, 0, paintData.canvas.width, paintData.canvas.height);
 
-          // If in magic shader mode, apply magic shader
-          if (this.brushType === 'magic_wand') {
-            const shaderMat = createMagicShaderMaterial({
-              ...this.activeShader,
-              colorA: this.brushColor,
-              colorB: this.remixColorB,
-              glow: this.remixGlow,
-              speed: this.remixSpeed,
-            });
-            targetMesh.material = shaderMat;
-          } else {
-            // Fill canvas with flat paint color
-            paintData.ctx.fillStyle = this.brushColor;
-            paintData.ctx.fillRect(0, 0, paintData.canvas.width, paintData.canvas.height);
-            paintData.texture.needsUpdate = true;
+          // Fill canvas with active brush color
+          paintData.ctx.fillStyle = this.brushColor;
+          paintData.ctx.fillRect(0, 0, paintData.canvas.width, paintData.canvas.height);
+          paintData.texture.needsUpdate = true;
 
-            // Ensure mesh is using textured standard material
-            if (!(targetMesh.material instanceof THREE.MeshStandardMaterial) || (targetMesh.material as THREE.MeshStandardMaterial).map !== paintData.texture) {
-              targetMesh.material = new THREE.MeshStandardMaterial({
-                map: paintData.texture,
-                roughness: 0.4,
-                metalness: 0.05,
-                side: THREE.DoubleSide,
-              });
-            }
+          // If mesh is using shader material, activate its paint map
+          if (targetMesh.material instanceof THREE.ShaderMaterial) {
+            const mat = targetMesh.material as THREE.ShaderMaterial;
+            if (mat.uniforms.uPaintMap) mat.uniforms.uPaintMap.value = paintData.texture;
+            if (mat.uniforms.uUsePaintMap) mat.uniforms.uUsePaintMap.value = true;
+          } else if (
+            !(targetMesh.material instanceof THREE.MeshStandardMaterial) ||
+            (targetMesh.material as THREE.MeshStandardMaterial).map !== paintData.texture
+          ) {
+            targetMesh.material = new THREE.MeshStandardMaterial({
+              map: paintData.texture,
+              roughness: 0.45,
+              metalness: 0.05,
+              side: THREE.DoubleSide,
+            });
           }
 
           const afterImg = paintData.ctx.getImageData(0, 0, paintData.canvas.width, paintData.canvas.height);
@@ -631,7 +741,7 @@ export class StudioEngine {
   }
 
   /**
-   * Paint Flat Color / Texture directly on Model Surface at UV coordinate
+   * Paint Flat Color / Texture directly on Model Surface at UV coordinate (Composites on top of Shaders)
    */
   private paintFlatOnModelAtUV(mesh: THREE.Mesh, uv: THREE.Vector2, isFirstPoint: boolean) {
     const paintData = this.meshPaintData.get(mesh.uuid);
@@ -642,20 +752,26 @@ export class StudioEngine {
     const { canvas, ctx, texture, lastUV } = paintData;
     const px = uv.x * canvas.width;
     const py = (1 - uv.y) * canvas.height;
-    const radiusPx = Math.max(6, this.brushRadius * 280);
+    const radiusPx = Math.max(1.2, this.brushRadius * 110);
 
-    // If mesh is currently using a shader material, revert to its paint texture map
-    if (!(mesh.material instanceof THREE.MeshStandardMaterial) || (mesh.material as THREE.MeshStandardMaterial).map !== texture) {
+    // If mesh is currently using a ShaderMaterial, keep the shader and composite paint on top!
+    if (mesh.material instanceof THREE.ShaderMaterial) {
+      const mat = mesh.material as THREE.ShaderMaterial;
+      if (mat.uniforms.uPaintMap) mat.uniforms.uPaintMap.value = texture;
+      if (mat.uniforms.uUsePaintMap) mat.uniforms.uUsePaintMap.value = true;
+    } else if (
+      !(mesh.material instanceof THREE.MeshStandardMaterial) ||
+      (mesh.material as THREE.MeshStandardMaterial).map !== texture
+    ) {
       mesh.material = new THREE.MeshStandardMaterial({
         map: texture,
-        roughness: 0.4,
+        roughness: 0.45,
         metalness: 0.05,
         side: THREE.DoubleSide,
       });
     }
 
     if (this.brushType === 'eraser') {
-      // Erase to base color
       ctx.save();
       ctx.fillStyle = paintData.baseColor;
       ctx.beginPath();
@@ -668,15 +784,14 @@ export class StudioEngine {
     }
 
     if (this.brushType === 'stardust') {
-      // Stardust spray
       ctx.save();
-      const sparkles = 10;
+      const sparkles = 8;
       for (let i = 0; i < sparkles; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * radiusPx * 2.2;
+        const dist = Math.random() * radiusPx * 2.0;
         const sx = px + Math.cos(angle) * dist;
         const sy = py + Math.sin(angle) * dist;
-        const size = Math.random() * 4 + 2;
+        const size = Math.random() * 3 + 1.5;
 
         ctx.fillStyle = i % 2 === 0 ? this.brushColor : this.remixColorB;
         ctx.beginPath();
@@ -690,13 +805,20 @@ export class StudioEngine {
     }
 
     if (this.brushType === 'magic_wand') {
-      // Magic glowing brush stroke
+      // Magic Glow: Vibrant Neon Core + Luminous Bloom
       ctx.save();
-      ctx.shadowColor = this.remixColorB;
-      ctx.shadowBlur = radiusPx * 0.8;
+      ctx.shadowColor = this.brushColor;
+      ctx.shadowBlur = radiusPx * 2.5;
       ctx.fillStyle = this.brushColor;
       ctx.beginPath();
-      ctx.arc(px, py, radiusPx, 0, Math.PI * 2);
+      ctx.arc(px, py, radiusPx * 1.3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // White-hot luminous inner core
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(px, py, radiusPx * 0.55, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
       texture.needsUpdate = true;
@@ -756,7 +878,7 @@ export class StudioEngine {
   }
 
   /**
-   * Slap Sticker onto 3D Model Surface
+   * Slap Sticker onto 3D Model Surface (Proper outward orientation + No sinking)
    */
   public placeStickerAtPointer(clientX: number, clientY: number, emoji: string) {
     const rect = this.canvas.getBoundingClientRect();
@@ -770,7 +892,9 @@ export class StudioEngine {
     if (intersects.length > 0) {
       const hit = intersects[0];
       const pos = hit.point;
-      const normal = hit.face ? hit.face.normal.clone() : new THREE.Vector3(0, 1, 0);
+      const worldNormal = hit.face
+        ? hit.face.normal.clone().transformDirection(hit.object.matrixWorld).normalize()
+        : hit.point.clone().sub(this.targetLookAt).normalize();
 
       soundEngine.playStickerSlap();
 
@@ -787,17 +911,20 @@ export class StudioEngine {
       }
       const texture = new THREE.CanvasTexture(canvas);
 
-      const stickerGeo = new THREE.PlaneGeometry(0.48, 0.48);
+      const stickerGeo = new THREE.PlaneGeometry(0.38, 0.38);
       const stickerMat = new THREE.MeshBasicMaterial({
         map: texture,
         transparent: true,
         side: THREE.DoubleSide,
         depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: -4,
+        polygonOffsetUnits: -4,
       });
 
       const stickerMesh = new THREE.Mesh(stickerGeo, stickerMat);
-      stickerMesh.position.copy(pos.clone().add(normal.clone().multiplyScalar(0.03)));
-      stickerMesh.lookAt(pos.clone().add(normal));
+      stickerMesh.position.copy(pos.clone().add(worldNormal.clone().multiplyScalar(0.04)));
+      stickerMesh.lookAt(pos.clone().add(worldNormal));
       stickerMesh.rotateZ((Math.random() - 0.5) * 0.3);
 
       this.stickersGroup.add(stickerMesh);
@@ -838,24 +965,22 @@ export class StudioEngine {
    * Confetti celebration on achievements / stroke completion
    */
   public triggerCelebrationConfetti() {
-    try {
-      confetti({
-        particleCount: 45,
-        spread: 70,
-        origin: { y: 0.8 },
-        colors: ['#FF2A6D', '#FFE600', '#00F0FF', '#75F0C2', '#B042FF'],
-      });
-    } catch (_) {}
+    confetti({
+      particleCount: 45,
+      spread: 60,
+      origin: { y: 0.8 },
+      colors: ['#FF2A6D', '#FFE600', '#00F0FF', '#75F0C2', '#B042FF'],
+    });
   }
 
-  public updateShaderUniforms(colorA: string, colorB: string, glow: number, speed: number) {
-    this.remixColorA = colorA;
-    this.remixColorB = colorB;
+  /**
+   * Update live uniform colors and bloom on the current active shader
+   */
+  public updateShaderRemixUniforms(colA: THREE.Color, colB: THREE.Color, glow: number, speed: number) {
+    this.remixColorA = '#' + colA.getHexString();
+    this.remixColorB = '#' + colB.getHexString();
     this.remixGlow = glow;
     this.remixSpeed = speed;
-
-    const colA = new THREE.Color(colorA);
-    const colB = new THREE.Color(colorB);
 
     if (this.currentToyGroup) {
       this.currentToyGroup.traverse((child) => {
@@ -926,10 +1051,14 @@ export class StudioEngine {
   private bindEvents() {
     let lastX = 0;
     let lastY = 0;
+    let lastDrawX = 0;
+    let lastDrawY = 0;
 
     const handlePointerDown = (e: PointerEvent) => {
       lastX = e.clientX;
       lastY = e.clientY;
+      lastDrawX = e.clientX;
+      lastDrawY = e.clientY;
 
       // Middle click, right click, or Alt+drag = orbit
       if (e.button === 1 || e.button === 2 || e.altKey) {
@@ -990,19 +1119,31 @@ export class StudioEngine {
 
       if (this.isDrawing && this.currentToyGroup) {
         const rect = this.canvas.getBoundingClientRect();
-        this.mousePos.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-        this.mousePos.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        const distPx = Math.hypot(e.clientX - lastDrawX, e.clientY - lastDrawY);
+        // Fast swipe interpolation to prevent dropping stroke points
+        const steps = Math.max(1, Math.min(8, Math.ceil(distPx / 6)));
 
-        this.raycaster.setFromCamera(this.mousePos, this.camera);
-        const intersects = this.raycaster.intersectObjects(this.currentToyGroup.children, true);
+        for (let s = 1; s <= steps; s++) {
+          const interpX = lastDrawX + (e.clientX - lastDrawX) * (s / steps);
+          const interpY = lastDrawY + (e.clientY - lastDrawY) * (s / steps);
 
-        if (intersects.length > 0) {
-          const hit = intersects[0];
-          const mesh = hit.object as THREE.Mesh;
-          if (hit.uv && mesh) {
-            this.paintFlatOnModelAtUV(mesh, hit.uv, false);
+          this.mousePos.x = ((interpX - rect.left) / rect.width) * 2 - 1;
+          this.mousePos.y = -((interpY - rect.top) / rect.height) * 2 + 1;
+
+          this.raycaster.setFromCamera(this.mousePos, this.camera);
+          const intersects = this.raycaster.intersectObjects(this.currentToyGroup.children, true);
+
+          if (intersects.length > 0) {
+            const hit = intersects[0];
+            const mesh = hit.object as THREE.Mesh;
+            if (hit.uv && mesh) {
+              this.paintFlatOnModelAtUV(mesh, hit.uv, false);
+            }
           }
         }
+
+        lastDrawX = e.clientX;
+        lastDrawY = e.clientY;
       }
     };
 

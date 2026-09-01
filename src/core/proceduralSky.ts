@@ -32,7 +32,6 @@ export class ProceduralSkyEngine {
 
     this.initSkyDome();
     this.initStars();
-    this.initFluffyClouds();
     this.applyPreset(this.currentPreset);
   }
 
@@ -51,12 +50,52 @@ export class ProceduralSkyEngine {
       uniform vec3 uSkyBottom;
       uniform vec3 uSunPosition;
       uniform vec3 uSunColor;
+      uniform vec3 uCloudColor;
+      uniform float uTime;
       varying vec3 vWorldPosition;
+
+      float hash21(vec2 p) {
+        return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+      }
+
+      float noise2D(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        f = f * f * (3.0 - 2.0 * f);
+        float a = hash21(i);
+        float b = hash21(i + vec2(1.0, 0.0));
+        float c = hash21(i + vec2(0.0, 1.0));
+        float d = hash21(i + vec2(1.0, 1.0));
+        return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+      }
+
+      float fbm(vec2 p) {
+        float val = 0.0;
+        float amp = 0.5;
+        for (int i = 0; i < 4; i++) {
+          val += amp * noise2D(p);
+          p *= 2.02;
+          amp *= 0.5;
+        }
+        return val;
+      }
 
       void main() {
         vec3 point = normalize(vWorldPosition);
         float h = max(0.0, point.y);
         vec3 sky = mix(uSkyBottom, uSkyTop, pow(h, 0.7));
+
+        // Real Procedural Volumetric Cloud Layer
+        if (point.y > 0.02) {
+          vec2 cloudUV = (point.xz / (point.y + 0.12)) * 0.4 + vec2(uTime * 0.012, uTime * 0.006);
+          float cloudDensity = fbm(cloudUV);
+          float cloudCoverage = smoothstep(0.48, 0.72, cloudDensity) * smoothstep(0.02, 0.25, point.y);
+
+          // Sunlight scattering on clouds
+          float sunDot = max(0.0, dot(point, normalize(uSunPosition)));
+          vec3 sunLightOnClouds = mix(uCloudColor * 0.9, uSunColor, pow(sunDot, 4.0) * 0.5);
+          sky = mix(sky, sunLightOnClouds, cloudCoverage * 0.92);
+        }
 
         // Sun disc + flare
         float sunDot = max(0.0, dot(point, normalize(uSunPosition)));
@@ -73,6 +112,8 @@ export class ProceduralSkyEngine {
       uSkyBottom: { value: new THREE.Color('#CBE4FF') },
       uSunPosition: { value: new THREE.Vector3(5, 10, 5) },
       uSunColor: { value: new THREE.Color('#FFF4D0') },
+      uCloudColor: { value: new THREE.Color('#FFFFFF') },
+      uTime: { value: 0 },
     };
 
     const skyGeo = new THREE.SphereGeometry(150, 32, 24);
@@ -117,33 +158,6 @@ export class ProceduralSkyEngine {
     this.scene.add(this.starParticles);
   }
 
-  private initFluffyClouds() {
-    this.cloudsGroup = new THREE.Group();
-    const cloudMat = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      roughness: 0.9,
-      metalness: 0.0,
-      transparent: true,
-      opacity: 0.85,
-    });
-
-    for (let i = 0; i < 8; i++) {
-      const puffCluster = new THREE.Group();
-      const numPuffs = 4 + Math.floor(Math.random() * 4);
-      for (let j = 0; j < numPuffs; j++) {
-        const puffGeo = new THREE.SphereGeometry(1.5 + Math.random() * 1.5, 12, 10);
-        const puff = new THREE.Mesh(puffGeo, cloudMat);
-        puff.position.set((j - numPuffs / 2) * 1.8, Math.sin(j) * 0.8, (Math.random() - 0.5) * 2.0);
-        puffCluster.add(puff);
-      }
-      const angle = (i / 8) * Math.PI * 2;
-      const dist = 35 + Math.random() * 15;
-      puffCluster.position.set(Math.cos(angle) * dist, 12 + Math.random() * 8, Math.sin(angle) * dist);
-      this.cloudsGroup.add(puffCluster);
-    }
-    this.scene.add(this.cloudsGroup);
-  }
-
   public setTimeOfDay(ratio: number) {
     // 0 = midnight, 0.25 = sunrise, 0.5 = midday, 0.75 = sunset, 1.0 = midnight
     const angle = ratio * Math.PI * 2 - Math.PI / 2;
@@ -179,6 +193,7 @@ export class ProceduralSkyEngine {
         mat.uniforms.uSkyTop.value.set(preset.skyTop);
         mat.uniforms.uSkyBottom.value.set(preset.skyBottom);
         mat.uniforms.uSunColor.value.set(preset.sunColor);
+        mat.uniforms.uCloudColor.value.set(preset.cloudColor);
       }
     }
 
@@ -189,8 +204,11 @@ export class ProceduralSkyEngine {
   }
 
   public update(delta: number) {
-    if (this.cloudsGroup) {
-      this.cloudsGroup.rotation.y += delta * 0.015;
+    if (this.skyMesh) {
+      const mat = this.skyMesh.material as THREE.ShaderMaterial;
+      if (mat.uniforms && mat.uniforms.uTime) {
+        mat.uniforms.uTime.value += delta;
+      }
     }
   }
 }

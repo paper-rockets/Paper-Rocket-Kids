@@ -382,6 +382,8 @@ const fragmentShader = `
   uniform vec3 uColorB;
   uniform float uEmissiveIntensity;
   uniform int uShaderMode;
+  uniform sampler2D uPaintMap;
+  uniform bool uUsePaintMap;
 
   varying vec2 vUv;
   varying vec3 vNormal;
@@ -540,6 +542,16 @@ const fragmentShader = `
       finalColor = mix(uColorA, uColorB, fresnel);
     }
 
+    // Composite painted strokes directly over the animated magic shader!
+    if (uUsePaintMap) {
+      vec4 paintSample = texture2D(uPaintMap, vUv);
+      // Flat light grey base is rgb(0.874, 0.890, 0.921)
+      float diff = distance(paintSample.rgb, vec3(0.874, 0.890, 0.921));
+      if (diff > 0.05) {
+        finalColor = mix(finalColor, paintSample.rgb, paintSample.a);
+      }
+    }
+
     // Apply emissive boost
     finalColor += finalColor * uEmissiveIntensity * 0.35;
 
@@ -547,7 +559,7 @@ const fragmentShader = `
   }
 `;
 
-export function createMagicShaderMaterial(preset: ShaderPreset): THREE.ShaderMaterial {
+export function createMagicShaderMaterial(preset: ShaderPreset, paintTexture?: THREE.Texture | null): THREE.ShaderMaterial {
   const modeIndex = SHADER_PRESETS.findIndex((p) => p.id === preset.id);
 
   const uniforms = {
@@ -559,6 +571,8 @@ export function createMagicShaderMaterial(preset: ShaderPreset): THREE.ShaderMat
     uWobbleAmount: { value: 0 },
     uWobbleTime: { value: 0 },
     uShaderMode: { value: modeIndex >= 0 ? modeIndex : 0 },
+    uPaintMap: { value: paintTexture || null },
+    uUsePaintMap: { value: !!paintTexture },
   };
 
   const mat = new THREE.ShaderMaterial({
