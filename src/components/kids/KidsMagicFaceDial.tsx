@@ -26,6 +26,27 @@ export const KidsMagicFaceDial: React.FC<KidsMagicFaceDialProps> = ({
   onZoomChange,
   onResetCamera,
 }) => {
+  const intervalRef = React.useRef<number | null>(null);
+
+  const startContinuous = (action: () => void) => {
+    action();
+    if (intervalRef.current) window.clearInterval(intervalRef.current);
+    intervalRef.current = window.setInterval(action, 75);
+  };
+
+  const stopContinuous = () => {
+    if (intervalRef.current) {
+      window.clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  React.useEffect(() => {
+    return () => {
+      if (intervalRef.current) window.clearInterval(intervalRef.current);
+    };
+  }, []);
+
   return (
     <motion.div
       id="kids-magic-face-dial"
@@ -40,18 +61,20 @@ export const KidsMagicFaceDial: React.FC<KidsMagicFaceDialProps> = ({
       </div>
 
       {/* Arcade D-Pad 3D Orbit Compass */}
-      <div className="relative w-24 h-24 sm:w-26 sm:h-26 flex items-center justify-center bg-white/90 rounded-full border-[3px] border-black shadow-[2px_2px_0_#000]">
+      <div className="relative w-26 h-26 sm:w-28 sm:h-28 flex items-center justify-center bg-white/90 rounded-full border-[3px] border-black shadow-[2px_2px_0_#000]">
         {/* Top: Pitch Up */}
         <motion.button
           id="btn-nav-pitch-up"
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.85 }}
-          onClick={() => {
+          onPointerDown={() => {
             soundEngine.playDialClick(750);
             triggerHaptic('light');
-            onRotateElevation(0.2);
+            startContinuous(() => onRotateElevation(0.25));
           }}
-          className="absolute top-1 p-1 bg-[#8FA2FA] hover:bg-indigo-300 text-black rounded-lg border-[2px] border-black shadow-[1px_1px_0_#000] cursor-pointer"
+          onPointerUp={stopContinuous}
+          onPointerLeave={stopContinuous}
+          className="absolute top-1 p-1.5 bg-[#8FA2FA] hover:bg-indigo-300 text-black rounded-xl border-[2px] border-black shadow-[1px_1px_0_#000] cursor-pointer touch-none"
           title="Pitch Up (Look from Top)"
         >
           <ChevronUp className="w-4 h-4 stroke-[3]" />
@@ -62,12 +85,14 @@ export const KidsMagicFaceDial: React.FC<KidsMagicFaceDialProps> = ({
           id="btn-nav-pitch-down"
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.85 }}
-          onClick={() => {
+          onPointerDown={() => {
             soundEngine.playDialClick(650);
             triggerHaptic('light');
-            onRotateElevation(-0.2);
+            startContinuous(() => onRotateElevation(-0.25));
           }}
-          className="absolute bottom-1 p-1 bg-[#8FA2FA] hover:bg-indigo-300 text-black rounded-lg border-[2px] border-black shadow-[1px_1px_0_#000] cursor-pointer"
+          onPointerUp={stopContinuous}
+          onPointerLeave={stopContinuous}
+          className="absolute bottom-1 p-1.5 bg-[#8FA2FA] hover:bg-indigo-300 text-black rounded-xl border-[2px] border-black shadow-[1px_1px_0_#000] cursor-pointer touch-none"
           title="Pitch Down (Look from Bottom)"
         >
           <ChevronDown className="w-4 h-4 stroke-[3]" />
@@ -78,12 +103,14 @@ export const KidsMagicFaceDial: React.FC<KidsMagicFaceDialProps> = ({
           id="btn-nav-orbit-left"
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.85 }}
-          onClick={() => {
+          onPointerDown={() => {
             soundEngine.playDialClick(800);
             triggerHaptic('light');
-            onRotateAzimuth(-0.35);
+            startContinuous(() => onRotateAzimuth(-0.35));
           }}
-          className="absolute left-1 p-1 bg-[#75F0C2] hover:bg-emerald-300 text-black rounded-lg border-[2px] border-black shadow-[1px_1px_0_#000] cursor-pointer"
+          onPointerUp={stopContinuous}
+          onPointerLeave={stopContinuous}
+          className="absolute left-1 p-1.5 bg-[#75F0C2] hover:bg-emerald-300 text-black rounded-xl border-[2px] border-black shadow-[1px_1px_0_#000] cursor-pointer touch-none"
           title="Orbit Left ⟲"
         >
           <RotateCcw className="w-4 h-4 stroke-[3]" />
@@ -94,12 +121,14 @@ export const KidsMagicFaceDial: React.FC<KidsMagicFaceDialProps> = ({
           id="btn-nav-orbit-right"
           whileHover={{ scale: 1.15 }}
           whileTap={{ scale: 0.85 }}
-          onClick={() => {
+          onPointerDown={() => {
             soundEngine.playDialClick(900);
             triggerHaptic('light');
-            onRotateAzimuth(0.35);
+            startContinuous(() => onRotateAzimuth(0.35));
           }}
-          className="absolute right-1 p-1 bg-[#75F0C2] hover:bg-emerald-300 text-black rounded-lg border-[2px] border-black shadow-[1px_1px_0_#000] cursor-pointer"
+          onPointerUp={stopContinuous}
+          onPointerLeave={stopContinuous}
+          className="absolute right-1 p-1.5 bg-[#75F0C2] hover:bg-emerald-300 text-black rounded-xl border-[2px] border-black shadow-[1px_1px_0_#000] cursor-pointer touch-none"
           title="Orbit Right ⟳"
         >
           <RotateCw className="w-4 h-4 stroke-[3]" />
@@ -125,12 +154,14 @@ export const KidsMagicFaceDial: React.FC<KidsMagicFaceDialProps> = ({
       <div className="flex items-center justify-between w-full gap-1 mt-1.5 bg-white/95 px-2 py-1 rounded-full border-[2px] border-black shadow-[1.5px_1.5px_0_#000]">
         <button
           id="btn-nav-zoom-in"
-          onClick={() => {
+          onPointerDown={() => {
             soundEngine.playDialClick(650);
             triggerHaptic('light');
-            onZoomChange(-0.5);
+            startContinuous(() => onZoomChange(-0.6));
           }}
-          className="p-1 rounded-md text-black hover:bg-yellow-200 active:scale-90 transition-all cursor-pointer"
+          onPointerUp={stopContinuous}
+          onPointerLeave={stopContinuous}
+          className="p-1 rounded-md text-black hover:bg-yellow-200 active:scale-90 transition-all cursor-pointer touch-none"
           title="Zoom In"
         >
           <ZoomIn className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -140,12 +171,14 @@ export const KidsMagicFaceDial: React.FC<KidsMagicFaceDialProps> = ({
 
         <button
           id="btn-nav-zoom-out"
-          onClick={() => {
+          onPointerDown={() => {
             soundEngine.playDialClick(500);
             triggerHaptic('light');
-            onZoomChange(0.5);
+            startContinuous(() => onZoomChange(0.6));
           }}
-          className="p-1 rounded-md text-black hover:bg-yellow-200 active:scale-90 transition-all cursor-pointer"
+          onPointerUp={stopContinuous}
+          onPointerLeave={stopContinuous}
+          className="p-1 rounded-md text-black hover:bg-yellow-200 active:scale-90 transition-all cursor-pointer touch-none"
           title="Zoom Out"
         >
           <ZoomOut className="w-3.5 h-3.5 stroke-[2.5]" />

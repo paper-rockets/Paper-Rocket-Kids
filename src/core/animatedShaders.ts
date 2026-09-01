@@ -418,7 +418,7 @@ const fragmentShader = `
     vec3 finalColor = uColorA;
     float alpha = 1.0;
 
-    // Modes mapped to our 27 shaders
+    // Modes mapped to our 27 shaders (Volumetric Continuous 3D World Space - No Subpart Seams)
     if (uShaderMode == 0) {
       // anime_cel: 3-step cel-shading with ink rim
       float stepL = step(0.65, NdotL) * 0.5 + step(0.2, NdotL) * 0.35 + 0.25;
@@ -429,7 +429,7 @@ const fragmentShader = `
     else if (uShaderMode == 1) {
       // posterize_ink: graphic pop art
       float p = floor(NdotL * 4.0) / 4.0;
-      float dots = sin(vUv.x * 60.0) * sin(vUv.y * 60.0);
+      float dots = sin(vWorldPosition.x * 20.0) * sin(vWorldPosition.y * 20.0);
       vec3 pop = mix(uColorA, uColorB, p + dots * 0.15);
       finalColor = pop;
     }
@@ -439,20 +439,22 @@ const fragmentShader = `
       finalColor = mix(uColorA * 0.3, uColorB * 1.5, rim * uEmissiveIntensity);
     }
     else if (uShaderMode == 3) {
-      // rainbow: spectral rainbow wave
-      float hue = fract(vPosition.y * 1.5 + vPosition.x * 0.5 + t * 0.4);
+      // rainbow: seamless volumetric spectral rainbow wave
+      float hue = fract(vWorldPosition.y * 0.6 + vWorldPosition.x * 0.3 + t * 0.3);
       vec3 rgb = clamp(abs(mod(hue * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
       finalColor = mix(rgb, uColorA, 0.2) + fresnel * uColorB * 0.5;
     }
     else if (uShaderMode == 4) {
       // glitter: sparkling star flakes
-      float glitter = step(0.92, hash(floor(vUv * 80.0) + floor(t * 8.0) * 0.1));
-      vec3 base = mix(uColorA, uColorB, vUv.y);
+      vec2 sp = vWorldPosition.xy + vWorldPosition.yz;
+      float glitter = step(0.92, hash(floor(sp * 30.0) + floor(t * 8.0) * 0.1));
+      vec3 base = mix(uColorA, uColorB, fract(vWorldPosition.y * 0.5));
       finalColor = base + glitter * vec3(1.5, 1.4, 0.9) * uEmissiveIntensity;
     }
     else if (uShaderMode == 5) {
       // sparkler: fiery spark trails
-      float s = noise(vUv * 20.0 - vec2(0.0, t * 4.0));
+      vec2 sp = vWorldPosition.xy + vWorldPosition.xz;
+      float s = noise(sp * 8.0 - vec2(0.0, t * 3.0));
       float spark = pow(s, 4.0) * 3.0;
       finalColor = mix(uColorA, uColorB, spark) + spark * vec3(1.0, 0.9, 0.5);
     }
@@ -466,65 +468,69 @@ const fragmentShader = `
     else if (uShaderMode == 7 || uShaderMode == 8 || uShaderMode == 9) {
       // slime / jelly / jelly_warp: subsurface gelatin
       float sub = pow(1.0 - fresnel, 1.5) * 0.6;
-      vec3 gel = mix(uColorA, uColorB, sub + sin(t * 2.0 + vPosition.y * 4.0) * 0.2);
+      vec3 gel = mix(uColorA, uColorB, sub + sin(t * 2.0 + vWorldPosition.y * 3.0) * 0.2);
       float spec = pow(max(0.0, dot(normal, normalize(lightDir + viewDir))), 48.0);
       finalColor = gel + spec * vec3(0.9, 1.0, 1.0) + fresnel * uColorB * 0.5;
       alpha = 0.92;
     }
     else if (uShaderMode == 10) {
       // fire: flaming ribbon
-      float f = noise(vUv * 6.0 - vec2(0.0, t * 3.0)) + noise(vUv * 12.0 - vec2(0.0, t * 5.0)) * 0.5;
+      vec2 sp = vWorldPosition.xy + vWorldPosition.xz;
+      float f = noise(sp * 3.0 - vec2(0.0, t * 2.5)) + noise(sp * 6.0 - vec2(0.0, t * 4.0)) * 0.5;
       vec3 flame = mix(uColorA, uColorB, clamp(f * 1.5, 0.0, 1.0));
       finalColor = flame * (1.0 + uEmissiveIntensity);
     }
     else if (uShaderMode == 11) {
       // lava: glowing magma cracks
-      float crack = step(0.48, noise(vUv * 14.0 + sin(t * 0.5)));
+      vec2 sp = vWorldPosition.xz + vWorldPosition.xy;
+      float crack = step(0.48, noise(sp * 6.0 + sin(t * 0.5)));
       vec3 crust = vec3(0.08, 0.05, 0.05);
-      vec3 magma = mix(uColorA, uColorB, sin(t + vUv.x * 8.0) * 0.5 + 0.5) * 2.0;
+      vec3 magma = mix(uColorA, uColorB, sin(t + vWorldPosition.y * 4.0) * 0.5 + 0.5) * 2.0;
       finalColor = mix(magma, crust, crack);
     }
     else if (uShaderMode == 12 || uShaderMode == 13) {
       // lightning / electric_arc: crackling electricity
-      float arc = step(0.88, fract(sin(dot(floor(vUv * 30.0), vec2(12.9898, 78.233))) * 43758.5453 + t * 15.0));
+      vec2 sp = vWorldPosition.xy + vWorldPosition.yz;
+      float arc = step(0.88, fract(sin(dot(floor(sp * 15.0), vec2(12.9898, 78.233))) * 43758.5453 + t * 15.0));
       vec3 elec = mix(uColorA, uColorB, fresnel);
       finalColor = elec + arc * vec3(2.0) * uEmissiveIntensity;
     }
     else if (uShaderMode >= 14 && uShaderMode <= 18) {
       // water / ocean / caustics / waterfall / foam / ripple
       float wave = sin(vWorldPosition.x * 4.0 + t * 2.0) * cos(vWorldPosition.z * 4.0 + t * 2.0);
-      float c = noise(vUv * 16.0 + vec2(t * 0.5, t * 0.3));
+      float c = noise(vWorldPosition.xz * 5.0 + vec2(t * 0.5, t * 0.3));
       vec3 water = mix(uColorA, uColorB, c * 0.6 + wave * 0.2 + fresnel * 0.4);
       finalColor = water + fresnel * vec3(0.4, 0.7, 1.0);
     }
     else if (uShaderMode >= 19 && uShaderMode <= 21) {
       // foliage / forest / cloud
-      float wind = sin(t * 2.0 + vPosition.y * 3.0) * 0.1;
+      float wind = sin(t * 2.0 + vWorldPosition.y * 3.0) * 0.1;
       vec3 fol = mix(uColorA, uColorB, NdotL * 0.7 + wind + 0.2);
       finalColor = fol;
     }
     else if (uShaderMode == 22) {
       // galaxy: starry cosmos nebulae
-      float stars = step(0.96, hash(floor(vUv * 100.0)));
-      float neb = noise(vUv * 4.0 + vec2(t * 0.1, -t * 0.08));
+      vec2 sp = vWorldPosition.xy + vWorldPosition.yz;
+      float stars = step(0.96, hash(floor(sp * 35.0)));
+      float neb = noise(vWorldPosition.xz * 1.5 + vec2(t * 0.1, -t * 0.08));
       vec3 nebColor = mix(uColorA, uColorB, neb);
       finalColor = nebColor + stars * vec3(1.8) * uEmissiveIntensity;
     }
     else if (uShaderMode == 23) {
       // aurora: luminous northern lights
-      float curtain = sin(vUv.x * 8.0 + t * 1.5) * sin(vUv.y * 4.0 + t);
+      float curtain = sin(vWorldPosition.x * 3.0 + t * 1.5) * sin(vWorldPosition.y * 2.0 + t);
       vec3 aur = mix(uColorA, uColorB, curtain * 0.5 + 0.5);
       finalColor = aur * (1.0 + fresnel * uEmissiveIntensity);
     }
     else if (uShaderMode == 24 || uShaderMode == 25) {
       // neon plasma / volumetric plasma
-      float pulse = sin(t * 3.0) * 0.2 + 0.8;
+      float pulse = sin(t * 3.0 + vWorldPosition.y * 2.0) * 0.2 + 0.8;
       vec3 pl = mix(uColorA, uColorB, fresnel);
       finalColor = pl * pulse * (1.2 + uEmissiveIntensity);
     }
     else if (uShaderMode == 26) {
       // hologram: scanlines & iridescent foil
-      float scan = sin(vWorldPosition.y * 80.0 + t * 10.0) * 0.15 + 0.85;
+      float scan = sin(vWorldPosition.y * 60.0 + t * 10.0) * 0.15 + 0.85;
       float holoHue = fract(fresnel * 2.0 + t * 0.2);
       vec3 holoColor = clamp(abs(mod(holoHue * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
       finalColor = mix(uColorA, holoColor, 0.7) * scan + fresnel * uColorB;

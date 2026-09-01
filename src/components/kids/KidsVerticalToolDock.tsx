@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { SparkleStar } from './SparkleStar';
-import { BrushType } from '../../types';
+import { BrushType, ShaderPreset } from '../../types';
 import { BRUSH_SIZES, CANDY_SWATCHES } from '../../constants/presets';
+import { SHADER_PRESETS } from '../../core/animatedShaders';
 import { soundEngine } from '../../utils/audio';
 import { triggerHaptic } from '../../utils/haptics';
 import {
@@ -29,6 +30,8 @@ interface KidsVerticalToolDockProps {
   onSelectColor: (color: string) => void;
   onClearCanvas: () => void;
   onOpenStickerTray: () => void;
+  activeShaderId?: string;
+  onSelectShader?: (shader: ShaderPreset) => void;
   canUndo?: boolean;
   canRedo?: boolean;
   onUndo?: () => void;
@@ -44,6 +47,8 @@ export const KidsVerticalToolDock: React.FC<KidsVerticalToolDockProps> = ({
   onSelectColor,
   onClearCanvas,
   onOpenStickerTray,
+  activeShaderId,
+  onSelectShader,
   canUndo = false,
   canRedo = false,
   onUndo,
@@ -164,6 +169,46 @@ export const KidsVerticalToolDock: React.FC<KidsVerticalToolDockProps> = ({
                   {size.label}
                 </span>
               </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Section Divider */}
+      <div className="h-0.5 bg-black/20 rounded-full" />
+
+      {/* Magic Shaders Quick Sample Strip */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-1 font-['Fredoka',sans-serif] font-bold text-xs text-black">
+            <Sparkles className="w-3.5 h-3.5 text-black" />
+            <span>Magic Shaders</span>
+          </div>
+          <SparkleStar size={12} color="#00F0FF" />
+        </div>
+
+        <div className="grid grid-cols-4 gap-1 bg-white/90 p-1.5 rounded-2xl border-[2.5px] border-black">
+          {SHADER_PRESETS.slice(0, 8).map((shader) => {
+            const isSelected = activeShaderId === shader.id;
+            return (
+              <motion.button
+                key={shader.id}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => {
+                  soundEngine.playBubblePop(1.3);
+                  triggerHaptic('selection');
+                  onSelectShader?.(shader);
+                }}
+                title={shader.name}
+                className={`flex flex-col items-center justify-center p-1 rounded-xl border-[2px] border-black transition-transform cursor-pointer ${
+                  isSelected
+                    ? 'bg-[#00F0FF] shadow-[2px_2px_0_#000] scale-110'
+                    : 'bg-white shadow-[1px_1px_0_#000] hover:bg-cyan-50'
+                }`}
+              >
+                <span className="text-base leading-none">{shader.emoji}</span>
+              </motion.button>
             );
           })}
         </div>

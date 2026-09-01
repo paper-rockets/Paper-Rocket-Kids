@@ -85,7 +85,6 @@ export const KidsHeaderBar: React.FC<KidsHeaderBarProps> = ({
         >
           <span className="text-base sm:text-lg">🧸</span>
           <span className="font-['Fredoka',sans-serif] tracking-wide whitespace-nowrap">3D Toybox</span>
-          <span className="text-[10px] bg-black text-white px-1.5 py-0.2 rounded-full font-black">{TOYBOX_MODELS.length}</span>
         </motion.button>
 
         {/* 2. Magic Shaders */}
@@ -102,7 +101,6 @@ export const KidsHeaderBar: React.FC<KidsHeaderBarProps> = ({
         >
           <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black" />
           <span className="font-['Fredoka',sans-serif] whitespace-nowrap hidden xs:inline">Magic Shaders</span>
-          <span className="text-[10px] bg-black text-white px-1.5 py-0.2 rounded-full font-black">{SHADER_PRESETS.length}</span>
         </motion.button>
 
         {/* 3. 3D Stickers */}
@@ -119,11 +117,10 @@ export const KidsHeaderBar: React.FC<KidsHeaderBarProps> = ({
         >
           <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black" />
           <span className="font-['Fredoka',sans-serif] whitespace-nowrap hidden sm:inline">3D Stickers</span>
-          <span className="text-[10px] bg-black text-white px-1.5 py-0.2 rounded-full font-black">{STICKER_CATALOG.length}</span>
         </motion.button>
       </div>
 
-      {/* Center: Undo/Redo, Symmetry, Boing, Sky */}
+      {/* Center: Undo/Redo, Clear, Boing, Sky */}
       <div className="flex items-center gap-1.5">
         {/* Undo Button */}
         <motion.button
@@ -188,24 +185,6 @@ export const KidsHeaderBar: React.FC<KidsHeaderBarProps> = ({
         >
           <Trash2 className="w-4 h-4" />
           <span className="hidden lg:inline">Clear</span>
-        </motion.button>
-
-        {/* Kaleidoscope Snowflake Symmetry */}
-        <motion.button
-          id="btn-kaleidoscope"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            soundEngine.playBubblePop(1.4);
-            triggerHaptic('selection');
-            onToggleSymmetry();
-          }}
-          title="Kaleidoscope Symmetry Mirror"
-          className="flex items-center gap-1 px-2.5 py-1.5 bg-[#FFF275] text-black font-bold text-xs rounded-xl border-[2.5px] border-black shadow-[2.5px_2.5px_0_#000] cursor-pointer"
-        >
-          <span className="text-sm">❄️</span>
-          <span className="hidden md:inline">Mirror:</span>
-          <span className="font-black text-pink-600 bg-white/80 px-1.5 py-0.2 rounded border border-black">{symmetryCount}x</span>
         </motion.button>
 
         {/* Jelly Wobble / Boing Button */}

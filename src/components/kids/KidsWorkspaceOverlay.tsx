@@ -259,6 +259,8 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
               setConsoleInitialTab('stickers');
               setIsToyConsoleOpen(true);
             }}
+            activeShaderId={activeShader.id}
+            onSelectShader={handleSelectShader}
             canUndo={canUndo}
             canRedo={canRedo}
             onUndo={handleUndo}

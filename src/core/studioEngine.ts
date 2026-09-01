@@ -173,34 +173,31 @@ export class StudioEngine {
   }
 
   /**
-   * Initializes dynamic paint textures on every mesh in the model group
+   * Initializes dynamic paint textures on every mesh in the model group (Uniform Flat Grey Base)
    */
   private initMeshPaintingTextures(group: THREE.Group) {
     this.meshPaintData.clear();
 
+    // Clean neutral flat light-grey coloring base for all models
+    const uniformBaseColor = '#DFE3EB';
+
     group.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
         const mesh = child as THREE.Mesh;
+
+        // Strip vertex colors that cause dark patches
+        if (mesh.geometry && mesh.geometry.attributes.color) {
+          mesh.geometry.deleteAttribute('color');
+        }
+
         const canvas = document.createElement('canvas');
         canvas.width = 1024;
         canvas.height = 1024;
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
-        // Get initial base color of the mesh
-        let baseColor = '#FFFFFF';
-        if (mesh.material) {
-          if (Array.isArray(mesh.material)) {
-            const m = mesh.material[0] as THREE.MeshStandardMaterial;
-            if (m.color) baseColor = '#' + m.color.getHexString();
-          } else {
-            const m = mesh.material as THREE.MeshStandardMaterial;
-            if (m.color) baseColor = '#' + m.color.getHexString();
-          }
-        }
-
-        // Fill canvas with base color
-        ctx.fillStyle = baseColor;
+        // Fill canvas with uniform flat light-grey
+        ctx.fillStyle = uniformBaseColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         // Create Canvas Texture
@@ -210,19 +207,17 @@ export class StudioEngine {
         texture.magFilter = THREE.LinearFilter;
         texture.generateMipmaps = true;
 
-        // Clone material and assign map
-        if (mesh.material) {
-          const originalMat = Array.isArray(mesh.material) ? mesh.material[0] : mesh.material;
-          const standardMat = new THREE.MeshStandardMaterial({
-            map: texture,
-            roughness: (originalMat as THREE.MeshStandardMaterial).roughness || 0.4,
-            metalness: (originalMat as THREE.MeshStandardMaterial).metalness || 0.05,
-            side: THREE.DoubleSide,
-          });
-          mesh.material = standardMat;
-          mesh.castShadow = true;
-          mesh.receiveShadow = true;
-        }
+        // Assign clean standard material
+        const standardMat = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          map: texture,
+          roughness: 0.45,
+          metalness: 0.05,
+          side: THREE.DoubleSide,
+        });
+        mesh.material = standardMat;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
 
         // Save initial state for undo
         const initialImg = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -231,7 +226,7 @@ export class StudioEngine {
           canvas,
           ctx,
           texture,
-          baseColor,
+          baseColor: uniformBaseColor,
           lastUV: null,
           history: [initialImg],
         });
@@ -289,6 +284,10 @@ export class StudioEngine {
           );
         }
 
+        // Center camera look target on the model's vertical center
+        this.targetLookAt.set(0, Math.max(0.4, (size.y * targetScale) * 0.5), 0);
+        this.updateCameraTransform();
+
         this.currentToyGroup = rootGroup;
         this.initMeshPaintingTextures(this.currentToyGroup);
         this.scene.add(this.currentToyGroup);
@@ -301,6 +300,8 @@ export class StudioEngine {
 
     // Procedural 3D model fallback
     this.currentToyGroup = buildToyModelGroup(modelInfo);
+    this.targetLookAt.set(0, 0.85, 0);
+    this.updateCameraTransform();
     this.initMeshPaintingTextures(this.currentToyGroup);
     this.scene.add(this.currentToyGroup);
     this.onModelLoaded?.(modelInfo);

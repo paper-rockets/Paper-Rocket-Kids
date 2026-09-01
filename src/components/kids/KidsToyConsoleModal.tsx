@@ -53,7 +53,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
   if (!isOpen) return null;
 
   const modelCategories: { id: ModelCategoryId | 'all'; name: string; emoji: string }[] = [
-    { id: 'all', name: `All ${TOYBOX_MODELS.length} Toys`, emoji: '🌟' },
+    { id: 'all', name: 'All Toys', emoji: '🌟' },
     { id: 'animals', name: 'Cute Animals', emoji: '🐱' },
     { id: 'cartoons', name: 'Pokémon & Anime', emoji: '⚡' },
     { id: 'houses', name: 'Fairytale Houses', emoji: '🍄' },
@@ -62,7 +62,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
   ];
 
   const shaderCategories: { id: ShaderCategoryId | 'all'; name: string; emoji: string }[] = [
-    { id: 'all', name: 'All 27 Shaders', emoji: '✨' },
+    { id: 'all', name: 'All Shaders', emoji: '✨' },
     { id: 'toon', name: 'Toon & Anime', emoji: '🖋️' },
     { id: 'magic', name: 'Fun & Magic', emoji: '🌈' },
     { id: 'elemental', name: 'Wonderlust', emoji: '🔥' },
@@ -82,8 +82,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
     const matchesCat = selectedShaderCategory === 'all' || s.category === selectedShaderCategory;
     const matchesSearch =
       searchQuery.trim() === '' ||
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.description.toLowerCase().includes(searchQuery.toLowerCase());
+      s.name.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
 
@@ -174,7 +173,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
               }`}
             >
               <span>🧸</span>
-              <span className="font-['Fredoka',sans-serif]">3D Toybox ({TOYBOX_MODELS.length})</span>
+              <span className="font-['Fredoka',sans-serif]">3D Toybox</span>
             </button>
 
             <button
@@ -189,7 +188,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
               }`}
             >
               <span>✨</span>
-              <span className="font-['Fredoka',sans-serif]">Magic Shaders (27)</span>
+              <span className="font-['Fredoka',sans-serif]">Magic Shaders</span>
             </button>
 
             <button
@@ -204,7 +203,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
               }`}
             >
               <span>🏷️</span>
-              <span className="font-['Fredoka',sans-serif]">3D Stickers (16)</span>
+              <span className="font-['Fredoka',sans-serif]">3D Stickers</span>
             </button>
 
             <button
@@ -219,7 +218,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
               }`}
             >
               <span>🌅</span>
-              <span className="font-['Fredoka',sans-serif]">Sky Worlds (5)</span>
+              <span className="font-['Fredoka',sans-serif]">Sky Worlds</span>
             </button>
           </div>
 
@@ -310,16 +309,13 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
                           {model.icon}
                         </div>
 
-                        <div className="text-center w-full">
-                          <h4 className="font-['Fredoka',sans-serif] font-bold text-sm text-black truncate">
-                            {model.name}
-                          </h4>
-                          <div className="flex items-center justify-center gap-1 mt-1 text-[11px] font-semibold text-gray-600">
-                            <span className="bg-purple-100 text-purple-800 px-1.5 py-0.5 rounded border border-purple-300">
-                              {model.subParts.length} Parts
-                            </span>
-                          </div>
-                        </div>
+                        <h4 className="font-['Fredoka',sans-serif] font-bold text-xs sm:text-sm text-center text-black leading-tight">
+                          {model.name}
+                        </h4>
+
+                        <span className="text-[10px] font-black text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full border border-purple-300 mt-2">
+                          {model.subParts?.length || 1} Parts
+                        </span>
                       </motion.div>
                     );
                   })}
@@ -351,7 +347,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
                   ))}
                 </div>
 
-                {/* Shaders Grid */}
+                {/* Shaders Grid (Visual & Kid-friendly) */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
                   {filteredShaders.map((shader) => {
                     const isSelected = activeShaderId === shader.id;
@@ -359,36 +355,34 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
                       <motion.div
                         key={shader.id}
                         id={`shader-card-${shader.id}`}
-                        whileHover={{ scale: 1.04, y: -2 }}
-                        whileTap={{ scale: 0.96 }}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => {
                           soundEngine.playBubblePop(1.4);
                           triggerHaptic('medium');
                           onSelectShader(shader);
                           onClose();
                         }}
-                        className={`relative flex flex-col p-3 rounded-2xl border-[3px] border-black cursor-pointer transition-all ${
+                        className={`relative flex flex-col items-center justify-center p-3.5 rounded-2xl border-[3px] border-black cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-[#00F0FF] shadow-[4px_4px_0_#000] ring-3 ring-pink-500'
                             : 'bg-white shadow-[3px_3px_0_#000] hover:bg-cyan-50'
                         }`}
                       >
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-3xl">{shader.emoji}</span>
-                          <div
-                            className="w-5 h-5 rounded-full border-[2px] border-black shadow-[1px_1px_0_#000]"
-                            style={{
-                              background: `linear-gradient(135deg, ${shader.colorA}, ${shader.colorB})`,
-                            }}
-                          />
+                        <div className="text-4xl sm:text-5xl my-1.5 filter drop-shadow-sm">
+                          {shader.emoji}
                         </div>
 
-                        <h4 className="font-['Fredoka',sans-serif] font-bold text-sm text-black truncate">
+                        <h4 className="font-['Fredoka',sans-serif] font-bold text-xs sm:text-sm text-center text-black leading-tight mt-1">
                           {shader.name}
                         </h4>
-                        <p className="text-[11px] text-gray-600 line-clamp-2 mt-0.5 leading-snug">
-                          {shader.description}
-                        </p>
+
+                        <div
+                          className="w-full h-3 rounded-full border-[1.5px] border-black mt-2 shadow-[1px_1px_0_#000]"
+                          style={{
+                            background: `linear-gradient(90deg, ${shader.colorA}, ${shader.colorB})`,
+                          }}
+                        />
                       </motion.div>
                     );
                   })}
