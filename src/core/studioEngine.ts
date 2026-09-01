@@ -976,6 +976,12 @@ export class StudioEngine {
   /**
    * Update live uniform colors and bloom on the current active shader
    */
+  public updateShaderUniforms(colorA: string | THREE.Color, colorB: string | THREE.Color, glow: number, speed: number) {
+    const colA = typeof colorA === 'string' ? new THREE.Color(colorA) : colorA;
+    const colB = typeof colorB === 'string' ? new THREE.Color(colorB) : colorB;
+    this.updateShaderRemixUniforms(colA, colB, glow, speed);
+  }
+
   public updateShaderRemixUniforms(colA: THREE.Color, colB: THREE.Color, glow: number, speed: number) {
     this.remixColorA = '#' + colA.getHexString();
     this.remixColorB = '#' + colB.getHexString();
