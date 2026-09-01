@@ -6,28 +6,37 @@ import { ProWorkspace } from './components/pro/ProWorkspace';
 
 export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const studioRef = useRef<StudioEngine | null>(null);
   const [engine, setEngine] = useState<StudioEngine | null>(null);
   const [mode, setMode] = useState<AppMode>('kids');
   const [activeTheme, setActiveTheme] = useState<UITheme>('periwinkle');
 
   useEffect(() => {
     if (!canvasRef.current) return;
+    if (studioRef.current) {
+      setEngine(studioRef.current);
+      return;
+    }
 
-    const studio = new StudioEngine({
-      canvas: canvasRef.current,
-    });
-    setEngine(studio);
+    try {
+      const studio = new StudioEngine({
+        canvas: canvasRef.current,
+      });
+      studioRef.current = studio;
+      setEngine(studio);
 
-    const handleResize = () => {
-      studio.handleResize();
-    };
+      const handleResize = () => {
+        studio.handleResize();
+      };
 
-    window.addEventListener('resize', handleResize);
+      window.addEventListener('resize', handleResize);
 
-    return () => {
-      window.removeEventListener('resize', handleResize);
-      studio.dispose();
-    };
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    } catch (err) {
+      console.error('Failed to initialize StudioEngine:', err);
+    }
   }, []);
 
   const handleToggleMode = () => {
