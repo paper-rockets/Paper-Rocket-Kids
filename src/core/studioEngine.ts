@@ -660,14 +660,6 @@ export class StudioEngine {
     return success;
   }
 
-  public get canUndo(): boolean {
-    return this.undoManager.canUndo();
-  }
-
-  public get canRedo(): boolean {
-    return this.undoManager.canRedo();
-  }
-
   /**
    * Apply animated magic shader to the whole model or active mesh (Preserves Paint Layer)
    */
