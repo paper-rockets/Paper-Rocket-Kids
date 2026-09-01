@@ -4,6 +4,9 @@ import { SparkleStar } from './SparkleStar';
 import { UITheme } from '../../types';
 import { soundEngine } from '../../utils/audio';
 import { triggerHaptic } from '../../utils/haptics';
+import { TOYBOX_MODELS } from '../../core/sampleModels';
+import { SHADER_PRESETS } from '../../core/animatedShaders';
+import { STICKER_CATALOG } from '../../constants/presets';
 import {
   Volume2,
   VolumeX,
@@ -82,7 +85,7 @@ export const KidsHeaderBar: React.FC<KidsHeaderBarProps> = ({
         >
           <span className="text-base sm:text-lg">🧸</span>
           <span className="font-['Fredoka',sans-serif] tracking-wide whitespace-nowrap">3D Toybox</span>
-          <span className="text-[10px] bg-black text-white px-1.5 py-0.2 rounded-full font-black">37</span>
+          <span className="text-[10px] bg-black text-white px-1.5 py-0.2 rounded-full font-black">{TOYBOX_MODELS.length}</span>
         </motion.button>
 
         {/* 2. Magic Shaders */}
@@ -99,7 +102,7 @@ export const KidsHeaderBar: React.FC<KidsHeaderBarProps> = ({
         >
           <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black" />
           <span className="font-['Fredoka',sans-serif] whitespace-nowrap hidden xs:inline">Magic Shaders</span>
-          <span className="text-[10px] bg-black text-white px-1.5 py-0.2 rounded-full font-black">27</span>
+          <span className="text-[10px] bg-black text-white px-1.5 py-0.2 rounded-full font-black">{SHADER_PRESETS.length}</span>
         </motion.button>
 
         {/* 3. 3D Stickers */}
@@ -116,7 +119,7 @@ export const KidsHeaderBar: React.FC<KidsHeaderBarProps> = ({
         >
           <Tag className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-black" />
           <span className="font-['Fredoka',sans-serif] whitespace-nowrap hidden sm:inline">3D Stickers</span>
-          <span className="text-[10px] bg-black text-white px-1.5 py-0.2 rounded-full font-black">16</span>
+          <span className="text-[10px] bg-black text-white px-1.5 py-0.2 rounded-full font-black">{STICKER_CATALOG.length}</span>
         </motion.button>
       </div>
 

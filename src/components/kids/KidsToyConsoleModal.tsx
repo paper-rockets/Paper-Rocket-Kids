@@ -53,7 +53,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
   if (!isOpen) return null;
 
   const modelCategories: { id: ModelCategoryId | 'all'; name: string; emoji: string }[] = [
-    { id: 'all', name: 'All 37 Toys', emoji: '🌟' },
+    { id: 'all', name: `All ${TOYBOX_MODELS.length} Toys`, emoji: '🌟' },
     { id: 'animals', name: 'Cute Animals', emoji: '🐱' },
     { id: 'cartoons', name: 'Pokémon & Anime', emoji: '⚡' },
     { id: 'houses', name: 'Fairytale Houses', emoji: '🍄' },
