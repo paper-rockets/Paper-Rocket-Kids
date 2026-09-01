@@ -278,20 +278,21 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
           />
         </div>
 
-        {/* BOTTOM RIGHT: Collapsible 3D Navigator */}
-        <div className="absolute bottom-3 right-3 sm:bottom-4 sm:right-4 pointer-events-auto">
-          <KidsMagicFaceDial
-            onRotateAzimuth={(delta) => {
-              if (engine) engine.orbitAzimuth(delta);
-            }}
-            onRotateElevation={(delta) => {
-              if (engine) engine.orbitElevation(delta);
-            }}
-            onZoomChange={(delta) => {
-              if (engine) engine.zoomDelta(delta);
-            }}
-            onResetCamera={() => {
-              if (engine) engine.resetCamera();
+        {/* RIGHT DOCK: Glossy 3-Track Shader Remix Card */}
+        <div className="pointer-events-auto hidden md:block">
+          <KidsShaderRemixCard
+            activeShader={activeShader}
+            colorA={remixColorA}
+            colorB={remixColorB}
+            glow={remixGlow}
+            speed={remixSpeed}
+            onChangeColorA={(col) => setRemixColorA(col)}
+            onChangeColorB={(col) => setRemixColorB(col)}
+            onChangeGlow={(g) => setRemixGlow(g)}
+            onChangeSpeed={(s) => setRemixSpeed(s)}
+            onOpenShadersModal={() => {
+              setConsoleInitialTab('shaders');
+              setIsToyConsoleOpen(true);
             }}
           />
         </div>

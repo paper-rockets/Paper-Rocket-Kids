@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
@@ -161,9 +162,8 @@ export class StudioEngine {
   public isBoingActive: boolean = false;
   public boingTime: number = 0;
 
-  // Camera Orbit State
-  private isOrbiting: boolean = false;
-  private orbitSpeed: number = 0.005;
+  // Camera & OrbitControls State
+  public controls: OrbitControls;
   public cameraAzimuth: number = 0.6;
   public cameraElevation: number = 0.35;
   public cameraDistance: number = 4.8;
@@ -208,7 +208,21 @@ export class StudioEngine {
       0.1,
       1000
     );
-    this.updateCameraTransform();
+    this.camera.position.set(2.4, 2.0, 4.2);
+    this.camera.lookAt(this.targetLookAt);
+
+    // 2b. Native Canvas OrbitControls (Touch & Mouse Gestures)
+    this.controls = new OrbitControls(this.camera, this.canvas);
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.08;
+    this.controls.target.copy(this.targetLookAt);
+    this.controls.minDistance = 2.0;
+    this.controls.maxDistance = 12.0;
+    this.controls.maxPolarAngle = Math.PI / 2 + 0.35;
+    this.controls.touches = {
+      ONE: THREE.TOUCH.ROTATE,
+      TWO: THREE.TOUCH.DOLLY_PAN,
+    };
 
     // 3. Renderer with antialiasing, high DPI, soft shadows
     this.renderer = new THREE.WebGLRenderer({
@@ -1061,16 +1075,8 @@ export class StudioEngine {
     let lastDrawY = 0;
 
     const handlePointerDown = (e: PointerEvent) => {
-      lastX = e.clientX;
-      lastY = e.clientY;
       lastDrawX = e.clientX;
       lastDrawY = e.clientY;
-
-      // Middle click, right click, or Alt+drag = orbit
-      if (e.button === 1 || e.button === 2 || e.altKey) {
-        this.isOrbiting = true;
-        return;
-      }
 
       if (this.brushType === 'bucket') {
         this.floodFillPartAtPointer(e.clientX, e.clientY);
@@ -1096,6 +1102,7 @@ export class StudioEngine {
         const mesh = hit.object as THREE.Mesh;
         if (hit.uv && mesh) {
           this.isDrawing = true;
+          this.controls.enabled = false;
           this.activeStrokePoints = [];
           this.undoManager.beginStroke();
           this.paintFlatOnModelAtUV(mesh, hit.uv, true);
@@ -1105,24 +1112,11 @@ export class StudioEngine {
         }
       }
 
-      // If clicked on empty space / background, orbit the model smoothly
-      this.isOrbiting = true;
+      // Empty space tapped -> OrbitControls is active for orbit & pinch
+      this.controls.enabled = true;
     };
 
     const handlePointerMove = (e: PointerEvent) => {
-      if (this.isOrbiting) {
-        const dx = e.clientX - lastX;
-        const dy = e.clientY - lastY;
-        lastX = e.clientX;
-        lastY = e.clientY;
-
-        this.cameraAzimuth -= dx * this.orbitSpeed;
-        this.cameraElevation += dy * this.orbitSpeed;
-        this.cameraElevation = Math.max(-0.2, Math.min(1.4, this.cameraElevation));
-        this.updateCameraTransform();
-        return;
-      }
-
       if (this.isDrawing && this.currentToyGroup) {
         const rect = this.canvas.getBoundingClientRect();
         const distPx = Math.hypot(e.clientX - lastDrawX, e.clientY - lastDrawY);
@@ -1154,9 +1148,7 @@ export class StudioEngine {
     };
 
     const handlePointerUp = () => {
-      if (this.isOrbiting) {
-        this.isOrbiting = false;
-      }
+      this.controls.enabled = true;
       if (this.isDrawing) {
         this.isDrawing = false;
         // Reset lastUV on all meshes
@@ -1178,6 +1170,7 @@ export class StudioEngine {
           shaderId: this.activeShader.id,
           symmetryCount: this.symmetryCount,
         };
+
         this.onStrokeEnd?.(strokeRecord);
       }
     };
@@ -1235,10 +1228,15 @@ export class StudioEngine {
     const delta = this.clock.getDelta();
     const elapsedTime = this.clock.getElapsedTime();
 
-    // Turntable auto-rotate
-    if (this.isTurntableActive) {
-      this.cameraAzimuth += delta * this.turntableSpeed;
-      this.updateCameraTransform();
+    // OrbitControls & Turntable auto-rotate
+    if (this.controls) {
+      if (this.isTurntableActive) {
+        this.controls.autoRotate = true;
+        this.controls.autoRotateSpeed = this.turntableSpeed * 6.0;
+      } else {
+        this.controls.autoRotate = false;
+      }
+      this.controls.update();
     }
 
     // Sky update

@@ -323,7 +323,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
               </div>
             )}
 
-            {/* TAB 2: MAGIC SHADERS */}
+            {/* TAB 2: MAGIC SHADERS (Dynamic 1:1 Shader Preview Spheres) */}
             {activeTab === 'shaders' && (
               <div className="space-y-4">
                 {/* Category Pills */}
@@ -347,7 +347,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
                   ))}
                 </div>
 
-                {/* Shaders Grid (Visual & Kid-friendly) */}
+                {/* Shaders Grid (Dynamic 1:1 Visual Sphere Cards) */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
                   {filteredShaders.map((shader) => {
                     const isSelected = activeShaderId === shader.id;
@@ -363,14 +363,25 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
                           onSelectShader(shader);
                           onClose();
                         }}
-                        className={`relative flex flex-col items-center justify-center p-3.5 rounded-2xl border-[3px] border-black cursor-pointer transition-all ${
+                        className={`relative flex flex-col items-center justify-between p-3.5 rounded-2xl border-[3px] border-black cursor-pointer transition-all ${
                           isSelected
                             ? 'bg-[#00F0FF] shadow-[4px_4px_0_#000] ring-3 ring-pink-500'
                             : 'bg-white shadow-[3px_3px_0_#000] hover:bg-cyan-50'
                         }`}
                       >
-                        <div className="text-4xl sm:text-5xl my-1.5 filter drop-shadow-sm">
-                          {shader.emoji}
+                        {/* Dynamic 1:1 Shader Material Preview Sphere */}
+                        <div className="relative w-16 h-16 sm:w-20 sm:h-20 my-1 rounded-full border-[2.5px] border-black shadow-[2px_2px_0_#000] overflow-hidden flex items-center justify-center">
+                          {/* 3D Sphere Specular Depth + Animated Gradient Simulation */}
+                          <div
+                            className="absolute inset-0"
+                            style={{
+                              background: `radial-gradient(circle at 35% 30%, ${shader.colorA}, ${shader.colorB} 70%, #111 100%)`,
+                              boxShadow: `inset -4px -4px 10px rgba(0,0,0,0.5), 0 0 12px ${shader.colorA}80`,
+                            }}
+                          />
+                          {/* Inner Specular Glint */}
+                          <div className="absolute top-2 left-2 w-4 h-2.5 bg-white/70 rounded-full rotate-[-30deg] pointer-events-none" />
+                          <span className="relative z-10 text-2xl filter drop-shadow-md">{shader.emoji}</span>
                         </div>
 
                         <h4 className="font-['Fredoka',sans-serif] font-bold text-xs sm:text-sm text-center text-black leading-tight mt-1">
@@ -378,7 +389,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
                         </h4>
 
                         <div
-                          className="w-full h-3 rounded-full border-[1.5px] border-black mt-2 shadow-[1px_1px_0_#000]"
+                          className="w-full h-2.5 rounded-full border-[1.5px] border-black mt-2 shadow-[1px_1px_0_#000]"
                           style={{
                             background: `linear-gradient(90deg, ${shader.colorA}, ${shader.colorB})`,
                           }}
@@ -390,12 +401,47 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
               </div>
             )}
 
-            {/* TAB 3: 3D STICKERS */}
+            {/* TAB 3: 3D STICKERS (Animated Pure CSS Keyframe Affordance) */}
             {activeTab === 'stickers' && (
               <div className="space-y-4">
-                <p className="text-xs font-bold text-gray-700 bg-white p-2.5 rounded-xl border-[2px] border-black inline-block">
-                  💡 Tap a sticker, then tap anywhere on your 3D toy model to stamp it directly onto the surface!
-                </p>
+                {/* Pure CSS Animated Instructional Affordance (Zero Reading Needed) */}
+                <div className="flex items-center justify-center gap-4 bg-white/90 p-3 rounded-2xl border-[2.5px] border-black shadow-[2px_2px_0_#000] select-none">
+                  {/* Step 1: Tap Sticker */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-xl bg-[#FFE600] border-[2px] border-black flex items-center justify-center text-2xl shadow-[1.5px_1.5px_0_#000]">
+                      ⭐
+                    </div>
+                    <span className="font-['Fredoka',sans-serif] font-bold text-xs text-black">1. Pick</span>
+                  </div>
+
+                  {/* Animated Motion Arrow & SVG Tapping Finger */}
+                  <div className="relative flex items-center justify-center w-16 h-8">
+                    <span className="text-xl font-black text-pink-500">➜</span>
+                    <motion.div
+                      animate={{
+                        x: [-18, 18, -18],
+                        y: [0, -4, 0],
+                        scale: [1, 0.85, 1],
+                      }}
+                      transition={{
+                        repeat: Infinity,
+                        duration: 1.8,
+                        ease: 'easeInOut',
+                      }}
+                      className="absolute -top-1"
+                    >
+                      <span className="text-2xl filter drop-shadow-sm">👆</span>
+                    </motion.div>
+                  </div>
+
+                  {/* Step 2: Stamp onto 3D Model */}
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 rounded-xl bg-[#75F0C2] border-[2px] border-black flex items-center justify-center text-2xl shadow-[1.5px_1.5px_0_#000]">
+                      🧸
+                    </div>
+                    <span className="font-['Fredoka',sans-serif] font-bold text-xs text-black">2. Slap!</span>
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3">
                   {STICKER_CATALOG.map((sticker) => {
@@ -412,7 +458,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
                           onSelectSticker(sticker);
                           onClose();
                         }}
-                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border-[3px] border-black transition-all cursor-pointer ${
+                        className={`flex flex-col items-center justify-center p-3 rounded-2xl border-[3px] border-black transition-all cursor-pointer min-h-[48px] ${
                           isSelected
                             ? 'bg-[#75F0C2] shadow-[4px_4px_0_#000] ring-3 ring-black'
                             : 'bg-white shadow-[3px_3px_0_#000] hover:bg-emerald-50'
@@ -429,51 +475,44 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
               </div>
             )}
 
-            {/* TAB 4: SKY WORLDS */}
+            {/* TAB 4: SKY WORLDS (Unified 4-Column Visual Cards) */}
             {activeTab === 'sky' && (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
                   {SKY_PRESETS.map((sky) => {
                     const isSelected = currentSkyId === sky.id;
                     return (
                       <motion.div
                         key={sky.id}
                         id={`sky-card-${sky.id}`}
-                        whileHover={{ scale: 1.03 }}
-                        whileTap={{ scale: 0.97 }}
+                        whileHover={{ scale: 1.04, y: -2 }}
+                        whileTap={{ scale: 0.96 }}
                         onClick={() => {
                           soundEngine.playBubblePop(1.1);
                           triggerHaptic('success');
                           onSelectSky(sky);
                           onClose();
                         }}
-                        className={`relative flex items-center gap-3.5 p-4 rounded-2xl border-[3px] border-black cursor-pointer transition-all ${
+                        className={`relative flex flex-col items-center justify-between p-3.5 rounded-2xl border-[3px] border-black cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-[#8FA2FA] text-white shadow-[4px_4px_0_#000] ring-3 ring-yellow-400'
-                            : 'bg-white text-black shadow-[3px_3px_0_#000] hover:bg-indigo-50'
+                            ? 'bg-[#FFE600] text-black shadow-[4px_4px_0_#000] ring-3 ring-purple-600'
+                            : 'bg-white text-black shadow-[3px_3px_0_#000] hover:bg-yellow-50'
                         }`}
                       >
+                        {/* Large Pre-Rendered Sky Gradient Dome Preview */}
                         <div
-                          className="w-14 h-14 rounded-2xl border-[2.5px] border-black flex items-center justify-center text-3xl shadow-[2px_2px_0_#000]"
+                          className="w-full aspect-[4/3] rounded-xl border-[2.5px] border-black flex items-center justify-center text-4xl shadow-[2px_2px_0_#000] overflow-hidden relative"
                           style={{
                             background: `linear-gradient(180deg, ${sky.skyTop}, ${sky.skyBottom})`,
                           }}
                         >
-                          {sky.icon}
+                          <div className="absolute inset-0 bg-white/10" />
+                          <span className="relative z-10 filter drop-shadow-md">{sky.icon}</span>
                         </div>
 
-                        <div className="flex-1">
-                          <h4 className="font-['Fredoka',sans-serif] font-bold text-base">
-                            {sky.name}
-                          </h4>
-                          <p
-                            className={`text-xs mt-0.5 line-clamp-2 ${
-                              isSelected ? 'text-white/90' : 'text-gray-600'
-                            }`}
-                          >
-                            {sky.description}
-                          </p>
-                        </div>
+                        <h4 className="font-['Fredoka',sans-serif] font-bold text-xs sm:text-sm text-center text-black leading-tight mt-2">
+                          {sky.name}
+                        </h4>
                       </motion.div>
                     );
                   })}
