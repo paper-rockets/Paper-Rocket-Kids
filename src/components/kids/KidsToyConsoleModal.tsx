@@ -99,7 +99,16 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs">
+      <div
+        id="toy-console-modal-overlay"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            soundEngine.playBubblePop(0.8);
+            onClose();
+          }
+        }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-xs pointer-events-auto"
+      >
         {/* Hidden 3D Model File Input */}
         <input
           ref={fileInputRef}
@@ -115,7 +124,7 @@ export const KidsToyConsoleModal: React.FC<KidsToyConsoleModalProps> = ({
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.85, opacity: 0, y: 30 }}
           transition={{ type: 'spring', damping: 22, stiffness: 300 }}
-          className="relative flex flex-col w-full max-w-4xl max-h-[90vh] bg-[#FFE600] rounded-3xl border-[4px] border-black shadow-[8px_8px_0px_#1B1B4B] overflow-hidden"
+          className="relative flex flex-col w-full max-w-4xl max-h-[90vh] bg-[#FFE600] rounded-3xl border-[4px] border-black shadow-[8px_8px_0px_#1B1B4B] overflow-hidden pointer-events-auto"
         >
           {/* Top Console Periwinkle Header Bar */}
           <div className="flex items-center justify-between px-5 py-3.5 bg-[#8FA2FA] border-b-[3.5px] border-black select-none">

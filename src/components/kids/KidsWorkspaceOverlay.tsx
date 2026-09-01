@@ -326,20 +326,22 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
       </div>
 
       {/* 3. MODALS */}
-      <KidsToyConsoleModal
-        isOpen={isToyConsoleOpen}
-        initialTab={consoleInitialTab}
-        onClose={() => setIsToyConsoleOpen(false)}
-        currentModelId={currentModel.id}
-        onSelectModel={handleSelectModel}
-        onUploadModel={handleUploadModel}
-        activeShaderId={activeShader.id}
-        onSelectShader={handleSelectShader}
-        activeStickerEmoji={activeStickerEmoji}
-        onSelectSticker={handleSelectSticker}
-        currentSkyId={currentSkyId}
-        onSelectSky={handleSelectSky}
-      />
+      <div className="pointer-events-auto">
+        <KidsToyConsoleModal
+          isOpen={isToyConsoleOpen}
+          initialTab={consoleInitialTab}
+          onClose={() => setIsToyConsoleOpen(false)}
+          currentModelId={currentModel.id}
+          onSelectModel={handleSelectModel}
+          onUploadModel={handleUploadModel}
+          activeShaderId={activeShader.id}
+          onSelectShader={handleSelectShader}
+          activeStickerEmoji={activeStickerEmoji}
+          onSelectSticker={handleSelectSticker}
+          currentSkyId={currentSkyId}
+          onSelectSky={handleSelectSky}
+        />
+      </div>
     </div>
   );
 };
