@@ -559,6 +559,10 @@ const fragmentShader = `
   }
 `;
 
+// 1x1 fallback texture to guarantee WebGL sampler is always bound
+const fallbackPaintTexture = new THREE.DataTexture(new Uint8Array([223, 227, 235, 255]), 1, 1);
+fallbackPaintTexture.needsUpdate = true;
+
 export function createMagicShaderMaterial(preset: ShaderPreset, paintTexture?: THREE.Texture | null): THREE.ShaderMaterial {
   const modeIndex = SHADER_PRESETS.findIndex((p) => p.id === preset.id);
 
@@ -571,7 +575,7 @@ export function createMagicShaderMaterial(preset: ShaderPreset, paintTexture?: T
     uWobbleAmount: { value: 0 },
     uWobbleTime: { value: 0 },
     uShaderMode: { value: modeIndex >= 0 ? modeIndex : 0 },
-    uPaintMap: { value: paintTexture || null },
+    uPaintMap: { value: paintTexture || fallbackPaintTexture },
     uUsePaintMap: { value: !!paintTexture },
   };
 

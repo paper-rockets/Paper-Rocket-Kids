@@ -70,13 +70,13 @@ export class ProceduralSkyEngine {
       }
 
       float fbm(vec2 p) {
-        float val = 0.0;
-        float amp = 0.5;
-        for (int i = 0; i < 4; i++) {
-          val += amp * noise2D(p);
-          p *= 2.02;
-          amp *= 0.5;
-        }
+        float val = 0.5 * noise2D(p);
+        p *= 2.02;
+        val += 0.25 * noise2D(p);
+        p *= 2.02;
+        val += 0.125 * noise2D(p);
+        p *= 2.02;
+        val += 0.0625 * noise2D(p);
         return val;
       }
 
