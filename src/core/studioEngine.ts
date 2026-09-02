@@ -1049,21 +1049,37 @@ export class StudioEngine {
   }
 
   /**
-   * Navigation camera controls & delta helpers
+   * Navigation camera controls & delta helpers (Works directly with OrbitControls)
    */
   public orbitAzimuth(deltaAngle: number) {
-    this.cameraAzimuth += deltaAngle;
-    this.updateCameraTransform();
+    if (this.controls) {
+      this.controls.rotateLeft(deltaAngle);
+    } else {
+      this.cameraAzimuth += deltaAngle;
+      this.updateCameraTransform();
+    }
   }
 
   public orbitElevation(deltaElevation: number) {
-    this.cameraElevation = Math.max(-0.2, Math.min(1.4, this.cameraElevation + deltaElevation));
-    this.updateCameraTransform();
+    if (this.controls) {
+      this.controls.rotateUp(deltaElevation);
+    } else {
+      this.cameraElevation = Math.max(-0.2, Math.min(1.4, this.cameraElevation + deltaElevation));
+      this.updateCameraTransform();
+    }
   }
 
   public zoomDelta(deltaDist: number) {
-    this.cameraDistance = Math.max(2.2, Math.min(9.5, this.cameraDistance + deltaDist));
-    this.updateCameraTransform();
+    if (this.controls) {
+      if (deltaDist < 0) {
+        this.controls.dollyIn(1.15);
+      } else {
+        this.controls.dollyOut(1.15);
+      }
+    } else {
+      this.cameraDistance = Math.max(2.2, Math.min(9.5, this.cameraDistance + deltaDist));
+      this.updateCameraTransform();
+    }
   }
 
   public setCameraAzimuth(angleRad: number) {
@@ -1086,7 +1102,15 @@ export class StudioEngine {
     this.cameraElevation = 0.35;
     this.cameraDistance = 4.8;
     this.targetLookAt.set(0, 0.85, 0);
-    this.updateCameraTransform();
+
+    if (this.controls) {
+      this.controls.target.copy(this.targetLookAt);
+      this.camera.position.set(2.4, 2.0, 4.2);
+      this.camera.lookAt(this.targetLookAt);
+      this.controls.update();
+    } else {
+      this.updateCameraTransform();
+    }
     soundEngine.playDialClick();
   }
 

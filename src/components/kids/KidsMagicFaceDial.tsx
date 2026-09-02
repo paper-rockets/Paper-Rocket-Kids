@@ -26,13 +26,13 @@ export const KidsMagicFaceDial: React.FC<KidsMagicFaceDialProps> = ({
   onZoomChange,
   onResetCamera,
 }) => {
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(true);
   const intervalRef = React.useRef<number | null>(null);
 
   const startContinuous = (action: () => void) => {
     action();
     if (intervalRef.current) window.clearInterval(intervalRef.current);
-    intervalRef.current = window.setInterval(action, 75);
+    intervalRef.current = window.setInterval(action, 65);
   };
 
   const stopContinuous = () => {
