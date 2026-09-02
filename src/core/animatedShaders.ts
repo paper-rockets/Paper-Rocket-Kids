@@ -2,6 +2,19 @@ import * as THREE from 'three';
 import { ShaderPreset } from '../types';
 
 export const SHADER_PRESETS: ShaderPreset[] = [
+  // Clean Standard Flat Paint (Reset Shader)
+  {
+    id: 'none',
+    name: 'Normal Paint',
+    category: 'toon',
+    categoryName: 'Toon & Anime',
+    emoji: '🎨',
+    description: 'Clean standard toy with your vibrant custom painted colors',
+    colorA: '#FFFFFF',
+    colorB: '#DFE3EB',
+    glow: 0,
+    speed: 0,
+  },
   // 1. Toon & Anime
   {
     id: 'anime_cel',

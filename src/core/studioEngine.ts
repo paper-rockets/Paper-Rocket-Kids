@@ -594,13 +594,17 @@ export class StudioEngine {
             this.currentToyGroup.traverse((child) => {
               if ((child as THREE.Mesh).isMesh && child.uuid === meshUuid) {
                 const m = child as THREE.Mesh;
-                if (
+                if (m.material instanceof THREE.ShaderMaterial) {
+                  const sm = m.material as THREE.ShaderMaterial;
+                  if (sm.uniforms.uPaintMap) sm.uniforms.uPaintMap.value = paintData.texture;
+                  if (sm.uniforms.uUsePaintMap) sm.uniforms.uUsePaintMap.value = true;
+                } else if (
                   !(m.material instanceof THREE.MeshStandardMaterial) ||
                   (m.material as THREE.MeshStandardMaterial).map !== paintData.texture
                 ) {
                   m.material = new THREE.MeshStandardMaterial({
                     map: paintData.texture,
-                    roughness: 0.4,
+                    roughness: 0.45,
                     metalness: 0.05,
                     side: THREE.DoubleSide,
                   });
@@ -642,13 +646,17 @@ export class StudioEngine {
             this.currentToyGroup.traverse((child) => {
               if ((child as THREE.Mesh).isMesh && child.uuid === meshUuid) {
                 const m = child as THREE.Mesh;
-                if (
+                if (m.material instanceof THREE.ShaderMaterial) {
+                  const sm = m.material as THREE.ShaderMaterial;
+                  if (sm.uniforms.uPaintMap) sm.uniforms.uPaintMap.value = paintData.texture;
+                  if (sm.uniforms.uUsePaintMap) sm.uniforms.uUsePaintMap.value = true;
+                } else if (
                   !(m.material instanceof THREE.MeshStandardMaterial) ||
                   (m.material as THREE.MeshStandardMaterial).map !== paintData.texture
                 ) {
                   m.material = new THREE.MeshStandardMaterial({
                     map: paintData.texture,
-                    roughness: 0.4,
+                    roughness: 0.45,
                     metalness: 0.05,
                     side: THREE.DoubleSide,
                   });
@@ -690,6 +698,25 @@ export class StudioEngine {
     this.remixSpeed = shader.speed;
 
     if (!this.currentToyGroup) return;
+
+    if (shader.id === 'none') {
+      this.currentToyGroup.traverse((child) => {
+        if ((child as THREE.Mesh).isMesh) {
+          const mesh = child as THREE.Mesh;
+          const paintData = this.meshPaintData.get(mesh.uuid);
+          if (paintData) {
+            mesh.material = new THREE.MeshStandardMaterial({
+              map: paintData.texture,
+              roughness: 0.45,
+              metalness: 0.05,
+              side: THREE.DoubleSide,
+            });
+          }
+        }
+      });
+      soundEngine.playBucketFill();
+      return;
+    }
 
     this.currentToyGroup.traverse((child) => {
       if ((child as THREE.Mesh).isMesh) {
