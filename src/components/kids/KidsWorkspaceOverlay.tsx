@@ -309,11 +309,12 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
             />
           </div>
 
-          {/* Lower Right: 3D Navigator Tool (D-Pad, Pitch, Orbit, Zoom & Reset) */}
+          {/* Lower Right: 3D Navigator Tool (D-Pad, Pitch, Orbit, Pan, Zoom & Reset) */}
           <div className="pointer-events-auto">
             <KidsMagicFaceDial
               onRotateAzimuth={(delta) => engine?.orbitAzimuth(delta)}
               onRotateElevation={(delta) => engine?.orbitElevation(delta)}
+              onPanVertical={(delta) => engine?.panVertical(delta)}
               onZoomChange={(delta) => engine?.zoomDelta(delta)}
               onResetCamera={() => engine?.resetCamera()}
             />

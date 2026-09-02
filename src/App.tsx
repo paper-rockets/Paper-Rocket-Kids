@@ -50,6 +50,7 @@ export default function App() {
         ref={canvasRef}
         id="remix-3d-canvas"
         className="absolute inset-0 w-full h-full block cursor-crosshair touch-none"
+        onContextMenu={(e) => e.preventDefault()}
       />
 
       {/* Mode Overlay Switcher */}

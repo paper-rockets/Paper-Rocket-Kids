@@ -1069,6 +1069,17 @@ export class StudioEngine {
     }
   }
 
+  public panVertical(deltaY: number) {
+    if (this.controls) {
+      this.controls.target.y += deltaY;
+      this.camera.position.y += deltaY;
+      this.controls.update();
+    } else {
+      this.targetLookAt.y += deltaY;
+      this.updateCameraTransform();
+    }
+  }
+
   public zoomDelta(deltaDist: number) {
     if (this.controls) {
       if (deltaDist < 0) {
