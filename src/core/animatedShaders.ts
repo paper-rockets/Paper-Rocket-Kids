@@ -558,9 +558,10 @@ const fragmentShader = `
     // Composite painted strokes directly over the animated magic shader!
     if (uUsePaintMap) {
       vec4 paintSample = texture2D(uPaintMap, vUv);
-      // Flat light grey base is rgb(0.874, 0.890, 0.921)
-      float diff = distance(paintSample.rgb, vec3(0.874, 0.890, 0.921));
-      if (diff > 0.05) {
+      // Base grey #DFE3EB in linear RGB (texture is tagged sRGB so Three.js linearizes it)
+      vec3 baseGrey = vec3(0.738, 0.768, 0.831);
+      float diff = distance(paintSample.rgb, baseGrey);
+      if (diff > 0.04) {
         finalColor = mix(finalColor, paintSample.rgb, paintSample.a);
       }
     }
@@ -574,6 +575,7 @@ const fragmentShader = `
 
 // 1x1 fallback texture to guarantee WebGL sampler is always bound
 const fallbackPaintTexture = new THREE.DataTexture(new Uint8Array([223, 227, 235, 255]), 1, 1);
+fallbackPaintTexture.colorSpace = THREE.SRGBColorSpace;
 fallbackPaintTexture.needsUpdate = true;
 
 export function createMagicShaderMaterial(preset: ShaderPreset, paintTexture?: THREE.Texture | null): THREE.ShaderMaterial {
