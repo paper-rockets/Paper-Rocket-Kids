@@ -171,6 +171,8 @@ export class StudioEngine {
 
   // Active Stroke Drawing State
   private isDrawing: boolean = false;
+  private isStylusActive: boolean = false;
+  private lastStylusTime: number = 0;
   private activeStrokePoints: { x: number; y: number; z: number; pressure: number; time: number }[] = [];
   private raycaster: THREE.Raycaster = new THREE.Raycaster();
   private mousePos: THREE.Vector2 = new THREE.Vector2();
@@ -1071,14 +1073,26 @@ export class StudioEngine {
   }
 
   private bindEvents() {
-    let lastX = 0;
-    let lastY = 0;
     let lastDrawX = 0;
     let lastDrawY = 0;
 
     const handlePointerDown = (e: PointerEvent) => {
       lastDrawX = e.clientX;
       lastDrawY = e.clientY;
+
+      const isPen = e.pointerType === 'pen';
+      const isTouch = e.pointerType === 'touch';
+
+      if (isPen) {
+        this.isStylusActive = true;
+        this.lastStylusTime = Date.now();
+        this.controls.enabled = false; // Hard lock: Stylus never orbits
+      } else if (isTouch) {
+        // Hardware Palm Rejection: If pen is active or recently used, ignore touch completely
+        if (this.isStylusActive || Date.now() - this.lastStylusTime < 500) {
+          return;
+        }
+      }
 
       if (this.brushType === 'bucket') {
         this.floodFillPartAtPointer(e.clientX, e.clientY);
@@ -1114,11 +1128,31 @@ export class StudioEngine {
         }
       }
 
-      // Empty space tapped -> OrbitControls is active for orbit & pinch
+      // If Stylus tapped empty space: do NOT rotate camera
+      if (isPen) {
+        this.controls.enabled = false;
+        return;
+      }
+
+      // Empty space tapped with touch/mouse -> OrbitControls is active for orbit & pinch
       this.controls.enabled = true;
     };
 
     const handlePointerMove = (e: PointerEvent) => {
+      const isPen = e.pointerType === 'pen';
+      const isTouch = e.pointerType === 'touch';
+
+      if (isPen) {
+        this.lastStylusTime = Date.now();
+        this.isStylusActive = true;
+        this.controls.enabled = false; // Hard lock
+      } else if (isTouch) {
+        // Hardware Palm Rejection
+        if (this.isStylusActive || Date.now() - this.lastStylusTime < 500) {
+          return;
+        }
+      }
+
       if (this.isDrawing && this.currentToyGroup) {
         const rect = this.canvas.getBoundingClientRect();
         const distPx = Math.hypot(e.clientX - lastDrawX, e.clientY - lastDrawY);
@@ -1149,8 +1183,17 @@ export class StudioEngine {
       }
     };
 
-    const handlePointerUp = () => {
-      this.controls.enabled = true;
+    const handlePointerUp = (e: PointerEvent) => {
+      const isPen = e.pointerType === 'pen';
+
+      if (isPen) {
+        this.lastStylusTime = Date.now();
+        this.isStylusActive = false;
+        this.controls.enabled = false;
+      } else {
+        this.controls.enabled = true;
+      }
+
       if (this.isDrawing) {
         this.isDrawing = false;
         // Reset lastUV on all meshes
@@ -1205,6 +1248,7 @@ export class StudioEngine {
     this.canvas.addEventListener('pointerdown', handlePointerDown);
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp);
+    window.addEventListener('pointercancel', handlePointerUp);
     this.canvas.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('keydown', this.handleKeyDown);
   }
