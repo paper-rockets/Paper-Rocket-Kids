@@ -3,24 +3,10 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig} from 'vite';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
   return {
-    base: '/Paper-Rocket-Kids/',
-    plugins: [
-      react(),
-      tailwindcss(),
-      {
-        name: 'html-dev-transform',
-        transformIndexHtml(html, ctx) {
-          if (ctx.server) {
-            return html
-              .replace(/<script type="module" crossorigin src=".*?"><\/script>/, '<script type="module" src="/src/main.tsx"></script>')
-              .replace(/<link rel="stylesheet" crossorigin href=".*?">/, '');
-          }
-          return html;
-        },
-      },
-    ],
+    base: mode === 'production' ? '/Paper-Rocket-Kids/' : '/',
+    plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
