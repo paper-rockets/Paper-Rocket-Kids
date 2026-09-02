@@ -211,10 +211,13 @@ export class StudioEngine {
     this.camera.position.set(2.4, 2.0, 4.2);
     this.camera.lookAt(this.targetLookAt);
 
-    // 2b. Native Canvas OrbitControls (Touch & Mouse Gestures)
+    // 2b. Native Canvas OrbitControls (Touch & Mouse Gestures - Calibrated for smooth tracking)
     this.controls = new OrbitControls(this.camera, this.canvas);
     this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.08;
+    this.controls.dampingFactor = 0.05;
+    this.controls.rotateSpeed = 0.45;
+    this.controls.zoomSpeed = 0.55;
+    this.controls.panSpeed = 0.45;
     this.controls.target.copy(this.targetLookAt);
     this.controls.minDistance = 2.0;
     this.controls.maxDistance = 12.0;
@@ -679,6 +682,11 @@ export class StudioEngine {
    */
   public applyShaderToModel(shader: ShaderPreset) {
     this.activeShader = shader;
+    this.remixColorA = shader.colorA;
+    this.remixColorB = shader.colorB;
+    this.remixGlow = shader.glow;
+    this.remixSpeed = shader.speed;
+
     if (!this.currentToyGroup) return;
 
     this.currentToyGroup.traverse((child) => {
@@ -686,13 +694,7 @@ export class StudioEngine {
         const mesh = child as THREE.Mesh;
         const paintData = this.meshPaintData.get(mesh.uuid);
         const shaderMat = createMagicShaderMaterial(
-          {
-            ...shader,
-            colorA: this.brushColor || shader.colorA,
-            colorB: this.remixColorB || shader.colorB,
-            glow: this.remixGlow,
-            speed: this.remixSpeed,
-          },
+          shader,
           paintData?.texture || null
         );
         mesh.material = shaderMat;

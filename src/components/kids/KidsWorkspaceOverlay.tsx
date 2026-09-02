@@ -122,10 +122,8 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
 
   const handleSelectColor = (color: string) => {
     setActiveColor(color);
-    setRemixColorA(color);
     if (engine) {
       engine.brushColor = color;
-      engine.updateShaderUniforms(color, remixColorB, remixGlow, remixSpeed);
     }
   };
 
@@ -286,10 +284,22 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
             colorB={remixColorB}
             glow={remixGlow}
             speed={remixSpeed}
-            onChangeColorA={(col) => setRemixColorA(col)}
-            onChangeColorB={(col) => setRemixColorB(col)}
-            onChangeGlow={(g) => setRemixGlow(g)}
-            onChangeSpeed={(s) => setRemixSpeed(s)}
+            onChangeColorA={(col) => {
+              setRemixColorA(col);
+              if (engine) engine.updateShaderUniforms(col, remixColorB, remixGlow, remixSpeed);
+            }}
+            onChangeColorB={(col) => {
+              setRemixColorB(col);
+              if (engine) engine.updateShaderUniforms(remixColorA, col, remixGlow, remixSpeed);
+            }}
+            onChangeGlow={(g) => {
+              setRemixGlow(g);
+              if (engine) engine.updateShaderUniforms(remixColorA, remixColorB, g, remixSpeed);
+            }}
+            onChangeSpeed={(s) => {
+              setRemixSpeed(s);
+              if (engine) engine.updateShaderUniforms(remixColorA, remixColorB, remixGlow, s);
+            }}
             onOpenShadersModal={() => {
               setConsoleInitialTab('shaders');
               setIsToyConsoleOpen(true);
