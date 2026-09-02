@@ -6,7 +6,21 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     base: '/Paper-Rocket-Kids/',
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        name: 'html-dev-transform',
+        transformIndexHtml(html, ctx) {
+          if (ctx.server) {
+            return html
+              .replace(/<script type="module" crossorigin src=".*?"><\/script>/, '<script type="module" src="/src/main.tsx"></script>')
+              .replace(/<link rel="stylesheet" crossorigin href=".*?">/, '');
+          }
+          return html;
+        },
+      },
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
