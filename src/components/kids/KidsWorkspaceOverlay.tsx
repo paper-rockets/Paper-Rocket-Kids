@@ -276,35 +276,48 @@ export const KidsWorkspaceOverlay: React.FC<KidsWorkspaceOverlayProps> = ({
           />
         </div>
 
-        {/* RIGHT DOCK: Glossy 3-Track Shader Remix Card */}
-        <div className="pointer-events-auto hidden md:block">
-          <KidsShaderRemixCard
-            activeShader={activeShader}
-            colorA={remixColorA}
-            colorB={remixColorB}
-            glow={remixGlow}
-            speed={remixSpeed}
-            onChangeColorA={(col) => {
-              setRemixColorA(col);
-              if (engine) engine.updateShaderUniforms(col, remixColorB, remixGlow, remixSpeed);
-            }}
-            onChangeColorB={(col) => {
-              setRemixColorB(col);
-              if (engine) engine.updateShaderUniforms(remixColorA, col, remixGlow, remixSpeed);
-            }}
-            onChangeGlow={(g) => {
-              setRemixGlow(g);
-              if (engine) engine.updateShaderUniforms(remixColorA, remixColorB, g, remixSpeed);
-            }}
-            onChangeSpeed={(s) => {
-              setRemixSpeed(s);
-              if (engine) engine.updateShaderUniforms(remixColorA, remixColorB, remixGlow, s);
-            }}
-            onOpenShadersModal={() => {
-              setConsoleInitialTab('shaders');
-              setIsToyConsoleOpen(true);
-            }}
-          />
+        {/* RIGHT COLUMN: Glossy Shader Remix Card + 3D Navigator Tool */}
+        <div className="flex flex-col justify-between items-end gap-3 pointer-events-none">
+          {/* Upper Right: Glossy 3-Track Shader Remix Card */}
+          <div className="pointer-events-auto hidden md:block">
+            <KidsShaderRemixCard
+              activeShader={activeShader}
+              colorA={remixColorA}
+              colorB={remixColorB}
+              glow={remixGlow}
+              speed={remixSpeed}
+              onChangeColorA={(col) => {
+                setRemixColorA(col);
+                if (engine) engine.updateShaderUniforms(col, remixColorB, remixGlow, remixSpeed);
+              }}
+              onChangeColorB={(col) => {
+                setRemixColorB(col);
+                if (engine) engine.updateShaderUniforms(remixColorA, col, remixGlow, remixSpeed);
+              }}
+              onChangeGlow={(g) => {
+                setRemixGlow(g);
+                if (engine) engine.updateShaderUniforms(remixColorA, remixColorB, g, remixSpeed);
+              }}
+              onChangeSpeed={(s) => {
+                setRemixSpeed(s);
+                if (engine) engine.updateShaderUniforms(remixColorA, remixColorB, remixGlow, s);
+              }}
+              onOpenShadersModal={() => {
+                setConsoleInitialTab('shaders');
+                setIsToyConsoleOpen(true);
+              }}
+            />
+          </div>
+
+          {/* Lower Right: 3D Navigator Tool (D-Pad, Pitch, Orbit, Zoom & Reset) */}
+          <div className="pointer-events-auto">
+            <KidsMagicFaceDial
+              onRotateAzimuth={(delta) => engine?.orbitAzimuth(delta)}
+              onRotateElevation={(delta) => engine?.orbitElevation(delta)}
+              onZoomChange={(delta) => engine?.zoomDelta(delta)}
+              onResetCamera={() => engine?.resetCamera()}
+            />
+          </div>
         </div>
       </div>
 

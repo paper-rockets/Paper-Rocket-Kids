@@ -1097,6 +1097,9 @@ export class StudioEngine {
 
     this.camera.position.set(x, y, z);
     this.camera.lookAt(this.targetLookAt);
+    if (this.controls) {
+      this.controls.target.copy(this.targetLookAt);
+    }
   }
 
   private bindEvents() {
