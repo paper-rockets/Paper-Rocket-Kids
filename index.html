@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Magic Minecraft World Maker & Skin Studio</title>
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Top Navigation Switcher -->
+      <header class="top-bar">
+        <div class="app-switcher">
+          <button id="btn-switch-skin" class="app-switch-btn active" title="Switch to 3D Skin Painter">
+            👑 3D Skin Painter
+          </button>
+          <button id="btn-switch-world" class="app-switch-btn" title="Switch to World Map Maker">
+            🌍 World Map Maker
+          </button>
+        </div>
+
+        <!-- Skin Painter Top Actions -->
+        <div id="skin-top-actions" class="top-actions">
+          <button id="btn-top-export-skin" class="btn btn-accent" title="Download 64x64 PNG for Phone">
+            🚀 Download Skin
+          </button>
+        </div>
+
+        <!-- World Maker Top Actions (Visible when in World mode) -->
+        <div id="world-top-actions" class="top-actions hidden">
+          <button id="btn-theme-modal" class="btn btn-magic" title="1-Click Magic Themes">✨ Magic Themes</button>
+          <button id="btn-maps-modal" class="btn btn-secondary" title="Pre-made Adventure Maps">🏰 Pre-made Maps</button>
+          <button id="btn-import-modal" class="btn btn-secondary" title="Import Map or Photo">📥 Import</button>
+          <button id="btn-export-modal" class="btn btn-accent" title="Download for Minecraft Android">🚀 Export to Minecraft</button>
+        </div>
+      </header>
+
+      <!-- ============================================================= -->
+      <!-- VIEW 1: 3D SKIN PAINTER (DEFAULT FULLSCREEN VIEW)             -->
+      <!-- ============================================================= -->
+      <main id="view-skin-studio" class="app-view">
+        <div class="skin-fullscreen-layout">
+          
+          <!-- 3D Character Viewport Column -->
+          <div class="skin-viewport-col">
+            <div class="skin-canvas-container">
+              <canvas id="skin-canvas"></canvas>
+              
+              <!-- Floating Overlay Controls -->
+              <div class="skin-overlay-controls">
+                <div class="skin-mode-toggle">
+                  <button id="btn-skin-mode-paint" class="btn btn-sm active" title="Paint directly on 3D character">🎨 Paint</button>
+                  <button id="btn-skin-mode-orbit" class="btn btn-sm" title="Rotate and zoom view">🪐 Orbit</button>
+                </div>
+                <div class="skin-anim-selector">
+                  <label>Pose:</label>
+                  <select id="select-skin-anim">
+                    <option value="stand">🧍 Stand</option>
+                    <option value="walk">🚶 Walk</option>
+                    <option value="wave">👋 Wave</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Paint Toolbar -->
+            <div class="skin-paint-bar">
+              <div class="skin-tools">
+                <button class="skin-tool-btn active" data-tool="pencil" title="Pixel Pencil">✏️ Pencil</button>
+                <button class="skin-tool-btn" data-tool="fill" title="Fill Color">🪣 Fill</button>
+                <button class="skin-tool-btn" data-tool="picker" title="Eyedropper">💉 Pick</button>
+                <button class="skin-tool-btn" data-tool="eraser" title="Eraser">🧹 Erase</button>
+                <button id="btn-skin-undo" class="skin-tool-btn" title="Undo">↩️ Undo</button>
+                <button id="btn-skin-redo" class="skin-tool-btn" title="Redo">↪️ Redo</button>
+              </div>
+              
+              <div class="skin-color-bar">
+                <input type="color" id="skin-color-picker" value="#ec4899" title="Pick Color" />
+                <div class="skin-quick-colors">
+                  <span class="color-dot" style="background:#f43f5e" data-color="#f43f5e"></span>
+                  <span class="color-dot" style="background:#ec4899" data-color="#ec4899"></span>
+                  <span class="color-dot" style="background:#fcd34d" data-color="#fcd34d"></span>
+                  <span class="color-dot" style="background:#fde68a" data-color="#fde68a"></span>
+                  <span class="color-dot" style="background:#38bdf8" data-color="#38bdf8"></span>
+                  <span class="color-dot" style="background:#a855f7" data-color="#a855f7"></span>
+                  <span class="color-dot" style="background:#34d399" data-color="#34d399"></span>
+                  <span class="color-dot" style="background:#a16207" data-color="#a16207"></span>
+                  <span class="color-dot" style="background:#ffffff" data-color="#ffffff"></span>
+                  <span class="color-dot" style="background:#18181b" data-color="#18181b"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar: Presets & 3D Layers -->
+          <div class="skin-controls-col">
+            <div class="studio-tabs">
+              <button class="studio-tab-btn active" data-tab="wardrobe">👗 Style & Hair</button>
+              <button class="studio-tab-btn" data-tab="presets">🎀 Presets</button>
+              <button class="studio-tab-btn" data-tab="layers">👕 3D Layers</button>
+            </div>
+
+            <!-- Tab 0: Wardrobe & Hair Studio -->
+            <div id="tab-wardrobe" class="studio-tab-content active">
+              <div class="shader-category-title">🎨 Skin Tone</div>
+              <div class="skin-tone-row">
+                <button class="skin-tone-btn" data-tone="deep_cocoa" style="background:#3B2219" title="Deep Cocoa"></button>
+                <button class="skin-tone-btn" data-tone="warm_espresso" style="background:#583623" title="Warm Espresso"></button>
+                <button class="skin-tone-btn active" data-tone="caramel_bronze" style="background:#875635" title="Caramel Bronze"></button>
+                <button class="skin-tone-btn" data-tone="honey_almond" style="background:#B57D56" title="Honey Almond"></button>
+                <button class="skin-tone-btn" data-tone="warm_peach" style="background:#DE9F78" title="Warm Peach"></button>
+                <button class="skin-tone-btn" data-tone="soft_fair" style="background:#F8D3B4" title="Soft Fair"></button>
+              </div>
+              <div id="active-tone-label" class="tone-label">Skin: Caramel Bronze</div>
+
+              <div class="shader-category-title">💇‍♀️ Hairstyle & Texture</div>
+              <div class="preset-btn-grid" id="grid-hairstyles">
+                <button class="wardrobe-btn active" data-type="hairStyle" data-val="afro_puffs">🪐 Afro Space Buns</button>
+                <button class="wardrobe-btn" data-type="hairStyle" data-val="box_braids">👑 Box Braids</button>
+                <button class="wardrobe-btn" data-type="hairStyle" data-val="curly_puff">☁️ Curly High Puff</button>
+                <button class="wardrobe-btn" data-type="hairStyle" data-val="long_waves">🌊 Long Waves</button>
+                <button class="wardrobe-btn" data-type="hairStyle" data-val="bob_bangs">💇‍♀️ Bob & Bangs</button>
+                <button class="wardrobe-btn" data-type="hairStyle" data-val="short_coils">🌀 Short Coils</button>
+              </div>
+
+              <div class="shader-category-title">🎨 Hair Color</div>
+              <div class="swatch-row" id="row-hair-colors">
+                <button class="hair-color-btn active" data-color="natural_black" style="background:#191514" title="Natural Black"></button>
+                <button class="hair-color-btn" data-color="dark_chocolate" style="background:#362118" title="Dark Chocolate"></button>
+                <button class="hair-color-btn" data-color="chestnut_brown" style="background:#593623" title="Chestnut Brown"></button>
+                <button class="hair-color-btn" data-color="honey_blonde" style="background:#D4A045" title="Honey Blonde"></button>
+                <button class="hair-color-btn" data-color="pastel_pink" style="background:#F472B6" title="Pastel Pink"></button>
+                <button class="hair-color-btn" data-color="electric_purple" style="background:#9333EA" title="Electric Purple"></button>
+                <button class="hair-color-btn" data-color="cherry_red" style="background:#DC2626" title="Cherry Red"></button>
+                <button class="hair-color-btn" data-color="sky_cyan" style="background:#0EA5E9" title="Sky Cyan"></button>
+              </div>
+
+              <div class="shader-category-title">👁️ Eye Color</div>
+              <div class="swatch-row" id="row-eye-colors">
+                <button class="eye-color-btn active" data-color="deep_brown" style="background:#2E190E" title="Brown"></button>
+                <button class="eye-color-btn" data-color="hazel" style="background:#5E4122" title="Hazel"></button>
+                <button class="eye-color-btn" data-color="ocean_blue" style="background:#2563EB" title="Blue"></button>
+                <button class="eye-color-btn" data-color="emerald" style="background:#059669" title="Emerald"></button>
+                <button class="eye-color-btn" data-color="violet" style="background:#7C3AED" title="Violet"></button>
+              </div>
+
+                            <!-- 1-Tap Outfits Carousel -->
+              <div class="carousel-header">
+                <div class="shader-category-title">✨ 1-Tap Complete Outfits (15 Sets)</div>
+                <div class="carousel-nav-arrows">
+                  <button type="button" class="carousel-arrow-btn" id="btn-outfits-prev" title="Previous Outfits">◀</button>
+                  <button type="button" class="carousel-arrow-btn" id="btn-outfits-next" title="Next Outfits">▶</button>
+                </div>
+              </div>
+              <div class="outfit-carousel-track" id="track-complete-outfits">
+                <div class="outfit-card active" data-outfit="outfit_strawberry">
+                  <span class="outfit-badge">Trending</span>
+                  <div class="outfit-card-icon">🍓</div>
+                  <div class="outfit-card-name">Strawberry Milk</div>
+                  <div class="outfit-card-desc">Pastel strawberry hoodie & tennis skirt</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_froggy">
+                  <span class="outfit-badge">Cute</span>
+                  <div class="outfit-card-icon">🐸</div>
+                  <div class="outfit-card-name">Kawaii Froggy</div>
+                  <div class="outfit-card-desc">Mint froggy hoodie & overalls</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_matcha">
+                  <span class="outfit-badge">Cozy</span>
+                  <div class="outfit-card-icon">🍵</div>
+                  <div class="outfit-card-name">Matcha Boba</div>
+                  <div class="outfit-card-desc">Sage green knit sweater & joggers</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_lavender">
+                  <span class="outfit-badge">Aesthetic</span>
+                  <div class="outfit-card-icon">💜</div>
+                  <div class="outfit-card-name">Lavender Dream</div>
+                  <div class="outfit-card-desc">Cloud cardigan & lilac ruffle skirt</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_denim_overalls">
+                  <span class="outfit-badge">Streetwear</span>
+                  <div class="outfit-card-icon">👖</div>
+                  <div class="outfit-card-name">Denim Overalls</div>
+                  <div class="outfit-card-desc">Denim overalls over white tee</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_varsity">
+                  <span class="outfit-badge">Cool</span>
+                  <div class="outfit-card-icon">⚾</div>
+                  <div class="outfit-card-name">Varsity Bomber</div>
+                  <div class="outfit-card-desc">Varsity jacket & cargo pants</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_sunflower">
+                  <span class="outfit-badge">Summer</span>
+                  <div class="outfit-card-icon">🌻</div>
+                  <div class="outfit-card-name">Sunflower Dress</div>
+                  <div class="outfit-card-desc">Golden sundress & sandals</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_puffer">
+                  <span class="outfit-badge">Winter</span>
+                  <div class="outfit-card-icon">🧸</div>
+                  <div class="outfit-card-name">Sherpa Puffer</div>
+                  <div class="outfit-card-desc">Cream fleece puffer & boots</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_sailor">
+                  <span class="outfit-badge">Classic</span>
+                  <div class="outfit-card-icon">⚓</div>
+                  <div class="outfit-card-name">Academia Sailor</div>
+                  <div class="outfit-card-desc">Navy sailor top & pleated skirt</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_cheer">
+                  <span class="outfit-badge">Active</span>
+                  <div class="outfit-card-icon">📣</div>
+                  <div class="outfit-card-name">Sporty Cheer</div>
+                  <div class="outfit-card-desc">Red cheer crop top & skirt</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_dino">
+                  <span class="outfit-badge">Comfy</span>
+                  <div class="outfit-card-icon">🦕</div>
+                  <div class="outfit-card-name">Dino Onesie</div>
+                  <div class="outfit-card-desc">Teal dino pajama onesie</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_princess">
+                  <span class="outfit-badge">Royal</span>
+                  <div class="outfit-card-icon">👑</div>
+                  <div class="outfit-card-name">Royal Princess</div>
+                  <div class="outfit-card-desc">Ballroom gown & golden tiara</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_cyber">
+                  <span class="outfit-badge">Gamer</span>
+                  <div class="outfit-card-icon">🎮</div>
+                  <div class="outfit-card-name">Cyber Gamer</div>
+                  <div class="outfit-card-desc">Street hoodie & cat headphones</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_rainbow">
+                  <span class="outfit-badge">Vibrant</span>
+                  <div class="outfit-card-icon">🌈</div>
+                  <div class="outfit-card-name">Rainbow Pop</div>
+                  <div class="outfit-card-desc">Pastel rainbow sweater & shorts</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_casual_pink">
+                  <span class="outfit-badge">Everyday</span>
+                  <div class="outfit-card-icon">🌸</div>
+                  <div class="outfit-card-name">Pink Casual</div>
+                  <div class="outfit-card-desc">Pink hoodie & blue jeans</div>
+                </div>
+              </div>
+
+              <!-- Mix & Match Sections -->
+              <div class="shader-category-title">👚 Tops & Hoodies (17)</div>
+              <div class="chip-carousel-track" id="track-tops">
+                <button class="wardrobe-chip active" data-type="top" data-val="hoodie_strawberry">🍓 Strawberry Hoodie</button>
+                <button class="wardrobe-chip" data-type="top" data-val="hoodie_froggy">🐸 Froggy Mint</button>
+                <button class="wardrobe-chip" data-type="top" data-val="sweater_matcha">🍵 Matcha Boba</button>
+                <button class="wardrobe-chip" data-type="top" data-val="cardigan_lavender">💜 Lavender Cloud</button>
+                <button class="wardrobe-chip" data-type="top" data-val="overalls_denim">👖 Denim Overalls</button>
+                <button class="wardrobe-chip" data-type="top" data-val="varsity_jacket">⚾ Varsity Bomber</button>
+                <button class="wardrobe-chip" data-type="top" data-val="sundress_sunflower">🌻 Sunflower Dress</button>
+                <button class="wardrobe-chip" data-type="top" data-val="puffer_sherpa">🧸 Sherpa Puffer</button>
+                <button class="wardrobe-chip" data-type="top" data-val="sailor_uniform">⚓ Academia Sailor</button>
+                <button class="wardrobe-chip" data-type="top" data-val="cheer_top">📣 Sporty Cheer</button>
+                <button class="wardrobe-chip" data-type="top" data-val="onesie_dino">🦕 Dino Onesie</button>
+                <button class="wardrobe-chip" data-type="top" data-val="hoodie_pink">💖 Pink Cozy</button>
+                <button class="wardrobe-chip" data-type="top" data-val="hoodie_black">🖤 Black Street</button>
+                <button class="wardrobe-chip" data-type="top" data-val="graphic_tee_heart">👕 Heart T-Shirt</button>
+                <button class="wardrobe-chip" data-type="top" data-val="princess_gown">👑 Princess Top</button>
+                <button class="wardrobe-chip" data-type="top" data-val="denim_jacket">🧥 Denim Jacket</button>
+                <button class="wardrobe-chip" data-type="top" data-val="rainbow_sweater">🌈 Rainbow Knit</button>
+              </div>
+
+              <div class="shader-category-title">👖 Bottoms & Skirts (14)</div>
+              <div class="chip-carousel-track" id="track-bottoms">
+                <button class="wardrobe-chip active" data-type="bottom" data-val="skirt_tennis">🎾 Tennis Skirt</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="overalls_pants">👖 Overall Pants</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="cargo_pants">🎒 Cargo Pants</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="skirt_lavender">💜 Lavender Skirt</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="corduroy_pants">🤎 Corduroy Pants</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="cheer_skirt">📣 Cheer Skirt</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="shorts_biker">🚴 Biker Shorts</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="onesie_legs">🦕 Dino Legs</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="jeans_blue">👖 Blue Jeans</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="jeans_black">🖤 Black Jeans</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="skater_skirt">💜 Pleated Skirt</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="princess_skirt">👑 Princess Skirt</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="shorts_denim">🩳 Denim Shorts</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="pastel_joggers">🏃‍♀️ Pastel Joggers</button>
+              </div>
+
+              <div class="shader-category-title">👟 Shoes (4)</div>
+              <div class="chip-carousel-track" id="track-shoes">
+                <button class="wardrobe-chip active" data-type="shoes" data-val="sneakers_white">👟 High-Top Sneakers</button>
+                <button class="wardrobe-chip" data-type="shoes" data-val="boots_black">🥾 Combat Boots</button>
+                <button class="wardrobe-chip" data-type="shoes" data-val="slippers_royal">🥿 Royal Slippers</button>
+                <button class="wardrobe-chip" data-type="shoes" data-val="sandals_summer">👡 Summer Sandals</button>
+              </div>
+
+              <div class="shader-category-title">✨ 3D Accessories (5)</div>
+              <div class="chip-carousel-track" id="track-accessories">
+                <button class="wardrobe-chip" data-type="accessory" data-val="cat_headphones">🎧 Cat Headphones</button>
+                <button class="wardrobe-chip" data-type="accessory" data-val="flower_crown">🌸 Flower Crown</button>
+                <button class="wardrobe-chip" data-type="accessory" data-val="princess_tiara">👑 Golden Tiara</button>
+                <button class="wardrobe-chip active" data-type="accessory" data-val="heart_glasses">🕶️ Heart Glasses</button>
+                <button class="wardrobe-chip" data-type="accessory" data-val="none">❌ None</button>
+              </div>
+
+              <div class="skin-export-footer" style="margin-top: 14px;">
+                <button id="btn-wardrobe-export-png" class="btn btn-accent" style="width:100%; font-size:15px; padding:12px;">
+                  🚀 Download 64x64 Skin (100% Bedrock Compatible)
+                </button>
+              </div>
+            </div>
+
+            <!-- Tab 1: Presets (Top 30 Real 64x64 Minecraft Skins) -->
+            <div id="tab-presets" class="studio-tab-content">
+              <div class="shader-category-title">⭐ Community Favorites & NameMC Picks</div>
+              <div class="preset-skin-grid">
+                <button class="preset-skin-btn" data-skin="namemc_gumball_138724">🐱 Gumball Watterson</button>
+                <button class="preset-skin-btn" data-skin="namemc_special_22100e">⭐ Favorite Capy</button>
+                <button class="preset-skin-btn" data-skin="namemc_special_d6fb5c">⭐ Capy Charm</button>
+                <button class="preset-skin-btn" data-skin="tynker_lankybox_foxy">🦊 LankyBox Foxy</button>
+              </div>
+
+              <div class="shader-category-title">✨ Diverse, Braids & Aesthetics (10)</div>
+              <div class="preset-skin-grid">
+                <button class="preset-skin-btn" data-skin="afro_beauty">🪐 Afro Beauty</button>
+                <button class="preset-skin-btn" data-skin="zendaya_glow">👑 Zendaya Glow</button>
+                <button class="preset-skin-btn" data-skin="rihanna_chic">✨ Rihanna Chic</button>
+                <button class="preset-skin-btn" data-skin="cocoa_cutie">🍫 Cocoa Cutie</button>
+                <button class="preset-skin-btn" data-skin="zara_streetwear">👟 Zara Street</button>
+                <button class="preset-skin-btn" data-skin="honey_girl">🍯 Honey Golden</button>
+                <button class="preset-skin-btn" data-skin="sophie_braids">🌸 Sophie Braids</button>
+                <button class="preset-skin-btn" data-skin="hailey_aesthetic">🦋 Hailey Style</button>
+                <button class="preset-skin-btn" data-skin="bella_cute">💖 Bella Pink</button>
+                <button class="preset-skin-btn" data-skin="violet_pastel">💜 Violet Pastel</button>
+              </div>
+
+              <div class="shader-category-title">👑 Princesses & Fairies (8)</div>
+              <div class="preset-skin-grid">
+                <button class="preset-skin-btn" data-skin="princess_sparkle">👑 Princess Sparkle</button>
+                <button class="preset-skin-btn" data-skin="princess_bella">💖 Princess Bella</button>
+                <button class="preset-skin-btn" data-skin="princess_lily">🌷 Princess Lily</button>
+                <button class="preset-skin-btn" data-skin="moonlight_fairy">🌙 Moonlight Fairy</button>
+                <button class="preset-skin-btn" data-skin="flower_princess">🌸 Flower Princess</button>
+                <button class="preset-skin-btn" data-skin="starlight_girl">⭐ Starlight Dream</button>
+                <button class="preset-skin-btn" data-skin="rainbow_pastel">🌈 Rainbow Girl</button>
+                <button class="preset-skin-btn" data-skin="butterfly_fairy">🦋 Butterfly Fairy</button>
+              </div>
+
+              <div class="shader-category-title">🦊 LankyBox & Tynker Front Page (22)</div>
+              <div class="preset-skin-grid">
+                <button class="preset-skin-btn" data-skin="tynker_lankybox_foxy">🦊 LankyBox Foxy</button>
+                <button class="preset-skin-btn" data-skin="lankybox_official">📦 LankyBox Official</button>
+                <button class="preset-skin-btn" data-skin="lankybox_justin">🧢 LankyBox Justin</button>
+                <button class="preset-skin-btn" data-skin="lankybox_rocky">🪨 LankyBox Rocky</button>
+                <button class="preset-skin-btn" data-skin="tynker_cherry_blossom">🌸 Cherry Blossom</button>
+                <button class="preset-skin-btn" data-skin="tynker_cute_ninja">🥷 Cute Ninja</button>
+                <button class="preset-skin-btn" data-skin="tynker_sub_zero">❄️ Sub-Zero</button>
+                <button class="preset-skin-btn" data-skin="tynker_scorpion">🦂 Scorpion</button>
+                <button class="preset-skin-btn" data-skin="tynker_kris_deltarune">🗡️ Kris Deltarune</button>
+                <button class="preset-skin-btn" data-skin="tynker_ironman">🦾 Iron Man</button>
+                <button class="preset-skin-btn" data-skin="tynker_reptile">🦎 Reptile Fighter</button>
+                <button class="preset-skin-btn" data-skin="tynker_eggchan">🥚 Eggchan</button>
+                <button class="preset-skin-btn" data-skin="tynker_galaxy_steve">🌌 Galaxy Steve</button>
+                <button class="preset-skin-btn" data-skin="tynker_fire_steve">🔥 Fire Steve</button>
+                <button class="preset-skin-btn" data-skin="tynker_stevey">👤 Stevey Hero</button>
+                <button class="preset-skin-btn" data-skin="tynker_symbiote">🕷️ Symbiote Venom</button>
+                <button class="preset-skin-btn" data-skin="tynker_spamton">🎭 Spamton</button>
+                <button class="preset-skin-btn" data-skin="tynker_hopper">🐰 Hopper Hero</button>
+                <button class="preset-skin-btn" data-skin="tynker_jj">🕶️ JJ Player</button>
+                <button class="preset-skin-btn" data-skin="tynker_alex_cute">👗 Cute Alex</button>
+                <button class="preset-skin-btn" data-skin="tynker_shadow_alex">👤 Shadow Warrior</button>
+                <button class="preset-skin-btn" data-skin="tynker_weeping_one">👻 The Weeping One</button>
+              </div>
+
+              <div class="shader-category-title">🐾 Cute Animal Costumes & Hoodies (8)</div>
+              <div class="preset-skin-grid">
+                <button class="preset-skin-btn" data-skin="cute_eevee">🦊 Cozy Eevee</button>
+                <button class="preset-skin-btn" data-skin="pikachu_girl">⚡ Pikachu Girl</button>
+                <button class="preset-skin-btn" data-skin="kawaii_cat">🐱 Kawaii Cat</button>
+                <button class="preset-skin-btn" data-skin="fluffy_bunny">🐰 Fluffy Bunny</button>
+                <button class="preset-skin-btn" data-skin="wolf_cutie">🐺 Wolf Cutie</button>
+                <button class="preset-skin-btn" data-skin="cozy_capybara">🍊 Cozy Capybara</button>
+                <button class="preset-skin-btn" data-skin="cupcake_sweet">🧁 Cupcake Sweet</button>
+                <button class="preset-skin-btn" data-skin="froggy_hat">🐸 Froggy Bucket</button>
+              </div>
+
+              <div class="shader-category-title">🍊 Official Capybara Collection (12)</div>
+              <div class="preset-skin-grid">
+                <button class="preset-skin-btn" data-skin="namemc_special_22100e">⭐ Favorite Capy</button>
+                <button class="preset-skin-btn" data-skin="namemc_special_d6fb5c">⭐ Capy Charm</button>
+                <button class="preset-skin-btn" data-skin="capy_classic">🍊 Classic Capy</button>
+                <button class="preset-skin-btn" data-skin="capy_girl">🎀 Capy Girl</button>
+                <button class="preset-skin-btn" data-skin="capy_queen">👑 Capy Queen</button>
+                <button class="preset-skin-btn" data-skin="capy_king">👑 King Capy</button>
+                <button class="preset-skin-btn" data-skin="capy_cute">🧸 Cute Capy</button>
+                <button class="preset-skin-btn" data-skin="capy_dapper">🎩 Mr. Capy (Suit)</button>
+                <button class="preset-skin-btn" data-skin="capy_drip">👟 Capy Drip</button>
+                <button class="preset-skin-btn" data-skin="capy_kid">🎒 Capy Kid</button>
+                <button class="preset-skin-btn" data-skin="capy_lord">⚔️ Lord Capy</button>
+                <button class="preset-skin-btn" data-skin="capy_golden">✨ Golden Capy</button>
+              </div>
+
+                            <div class="shader-category-title">🍊 NameMC Community Capybaras (87)</div>
+              <div class="namemc-capy-pages">
+                <button class="namemc-tab-btn active" data-page="1">Page 1 (#1-30)</button>
+                <button class="namemc-tab-btn" data-page="2">Page 2 (#31-60)</button>
+                <button class="namemc-tab-btn" data-page="3">Page 3 (#61-87)</button>
+              </div>
+
+              <div id="namemc-page-1" class="namemc-page-view">
+                <div class="preset-skin-grid">
+                  <button class="preset-skin-btn" data-skin="namemc_capy_1_b2d073">🍊 Capy #1</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_2_89345c">🍊 Capy #2</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_3_46bf89">🍊 Capy #3</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_4_1a0ee6">🍊 Capy #4</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_5_755811">🍊 Capy #5</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_6_437275">🍊 Capy #6</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_7_931184">🍊 Capy #7</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_8_be06a8">🍊 Capy #8</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_9_086219">🍊 Capy #9</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_10_af4b77">🍊 Capy #10</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_11_0b6eb7">🍊 Capy #11</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_12_15bcdb">🍊 Capy #12</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_13_10d3da">🍊 Capy #13</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_14_32160a">🍊 Capy #14</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_15_36feb9">🍊 Capy #15</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_16_2ef420">🍊 Capy #16</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_17_5bbadd">🍊 Capy #17</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_18_2e12e4">🍊 Capy #18</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_19_eadbba">🍊 Capy #19</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_20_1469bc">🍊 Capy #20</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_21_105fbc">🍊 Capy #21</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_22_1d3afb">🍊 Capy #22</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_24_3179ee">🍊 Capy #23</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_25_afc458">🍊 Capy #24</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_26_50de68">🍊 Capy #25</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_27_1e68d0">🍊 Capy #26</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_28_c0b111">🍊 Capy #27</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_29_4ab857">🍊 Capy #28</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_30_5c574a">🍊 Capy #29</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_31_ab31c4">🍊 Capy #30</button>
+                </div>
+              </div>
+
+              <div id="namemc-page-2" class="namemc-page-view hidden">
+                <div class="preset-skin-grid">
+                  <button class="preset-skin-btn" data-skin="namemc_capy_32_32c654">🍊 Capy #31</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_33_ec6c65">🍊 Capy #32</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_34_5b23e6">🍊 Capy #33</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_35_79f1bd">🍊 Capy #34</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_36_c6ed93">🍊 Capy #35</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_37_dd6d2e">🍊 Capy #36</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_38_bb430c">🍊 Capy #37</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_39_ee8252">🍊 Capy #38</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_40_ef51ef">🍊 Capy #39</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_41_3a5257">🍊 Capy #40</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_42_700962">🍊 Capy #41</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_43_6b86be">🍊 Capy #42</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_44_fda409">🍊 Capy #43</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_45_2e2077">🍊 Capy #44</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_46_230c18">🍊 Capy #45</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_47_53be95">🍊 Capy #46</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_48_0df743">🍊 Capy #47</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_49_e4f179">🍊 Capy #48</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_50_655927">🍊 Capy #49</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_51_cabef7">🍊 Capy #50</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_52_f71e22">🍊 Capy #51</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_53_ec2b13">🍊 Capy #52</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_54_85c4fb">🍊 Capy #53</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_55_df9d10">🍊 Capy #54</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_56_1502c7">🍊 Capy #55</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_57_833b74">🍊 Capy #56</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_58_62b14d">🍊 Capy #57</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_59_ced1a2">🍊 Capy #58</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_60_c52e38">🍊 Capy #59</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_61_29e2f1">🍊 Capy #60</button>
+                </div>
+              </div>
+
+              <div id="namemc-page-3" class="namemc-page-view hidden">
+                <div class="preset-skin-grid">
+                  <button class="preset-skin-btn" data-skin="namemc_capy_62_a340e8">🍊 Capy #61</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_63_a525b9">🍊 Capy #62</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_64_f04a64">🍊 Capy #63</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_65_66f632">🍊 Capy #64</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_66_2dbc87">🍊 Capy #65</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_67_2c02e1">🍊 Capy #66</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_68_3a2db2">🍊 Capy #67</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_69_b9a01b">🍊 Capy #68</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_70_4a01db">🍊 Capy #69</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_72_603981">🍊 Capy #70</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_73_2bd8ec">🍊 Capy #71</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_74_c02f4e">🍊 Capy #72</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_75_886df0">🍊 Capy #73</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_77_30ff9c">🍊 Capy #74</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_78_f24960">🍊 Capy #75</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_79_59bb00">🍊 Capy #76</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_80_dae1e2">🍊 Capy #77</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_81_9c83cc">🍊 Capy #78</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_82_74ad67">🍊 Capy #79</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_83_fb7efc">🍊 Capy #80</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_84_504b85">🍊 Capy #81</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_85_56bfc8">🍊 Capy #82</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_86_2dac42">🍊 Capy #83</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_87_d91d88">🍊 Capy #84</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_88_38edf7">🍊 Capy #85</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_89_e05ceb">🍊 Capy #86</button>
+                  <button class="preset-skin-btn" data-skin="namemc_capy_90_90d034">🍊 Capy #87</button>
+                </div>
+              </div>
+
+<div class="shader-category-title">🎮 Gamers & Minecraft Classics (4)</div>
+              <div class="preset-skin-grid">
+                <button class="preset-skin-btn" data-skin="gamer_queen">🎧 Kawaii Gamer</button>
+                <button class="preset-skin-btn" data-skin="sakura_anime">🌸 Sakura Anime</button>
+                <button class="preset-skin-btn" data-skin="diamond_knight">⚔️ Diamond Knight</button>
+                <button class="preset-skin-btn" data-skin="steve_hero">👤 Steve Classic</button>
+              </div>
+
+              <div class="shader-category-title">🔍 Search Player Skin</div>
+              <div class="username-search-box">
+                <input type="text" id="input-skin-username" placeholder="Minecraft username..." />
+                <button id="btn-load-username" class="btn btn-secondary">Load</button>
+              </div>
+
+              <div class="shader-category-title">📁 Import PNG File</div>
+              <input type="file" id="input-skin-file" accept="image/png,image/jpeg" class="file-input" />
+              <label for="input-skin-file" class="btn btn-secondary" style="width:100%; text-align:center;">Choose PNG from Phone/PC</label>
+
+              <div class="skin-export-footer" style="margin-top: 14px;">
+                <button id="btn-skin-export-png" class="btn btn-accent" style="width:100%; font-size:15px; padding:12px;">
+                  🚀 Download 64x64 Skin (100% Bedrock Compatible)
+                </button>
+              </div>
+            </div>
+
+            <!-- Tab 2: 3D Layers & Body Part Toggles -->
+            <div id="tab-layers" class="studio-tab-content">
+              <div class="shader-category-title">👕 3D Outer Layer (Hat, Crown, Jacket, Boots)</div>
+              <div class="accessory-desc">Minecraft skins have an outer layer that sticks out in 3D:</div>
+              <button id="btn-toggle-overlay" class="btn btn-secondary" style="width:100%; margin-bottom:14px;">
+                👁️ 3D Outer Clothes Layer: ON
+              </button>
+
+              <div class="shader-category-title">🧩 Hide/Show Body Parts (To Paint Inside Surfaces)</div>
+              <div class="preset-btn-grid">
+                <button class="part-toggle-btn active" data-part="head">Head</button>
+                <button class="part-toggle-btn active" data-part="body">Body</button>
+                <button class="part-toggle-btn active" data-part="leftArm">Left Arm</button>
+                <button class="part-toggle-btn active" data-part="rightArm">Right Arm</button>
+                <button class="part-toggle-btn active" data-part="leftLeg">Left Leg</button>
+                <button class="part-toggle-btn active" data-part="rightLeg">Right Leg</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============================================================= -->
+      <!-- VIEW 2: WORLD MAP MAKER (HIDDEN INITIALLY)                    -->
+      <!-- ============================================================= -->
+      <div id="view-world-maker" class="app-view hidden">
+        <!-- 3D World Canvas Viewport -->
+        <canvas id="webgl-canvas"></canvas>
+
+      <!-- Left Toolbox (Tools & Brushes) -->
+      <aside class="left-toolbar">
+        <div class="tool-section-title">Tools</div>
+        <button class="tool-btn active" data-tool="raise" title="Raise Mountain">
+          <span class="icon">⛰️</span>
+          <span class="label">Raise Hill</span>
+        </button>
+        <button class="tool-btn" data-tool="dig" title="Dig Lake or Cave">
+          <span class="icon">⛏️</span>
+          <span class="label">Dig Lake</span>
+        </button>
+        <button class="tool-btn" data-tool="flatten" title="Make Ground Flat">
+          <span class="icon">📐</span>
+          <span class="label">Flatten</span>
+        </button>
+        <button class="tool-btn" data-tool="paint" title="Paint Block Surface">
+          <span class="icon">🎨</span>
+          <span class="label">Paint</span>
+        </button>
+        <button class="tool-btn" data-tool="place" title="Place 1 Block">
+          <span class="icon">📦</span>
+          <span class="label">Place</span>
+        </button>
+        <button class="tool-btn" data-tool="erase" title="Erase Block">
+          <span class="icon">🧹</span>
+          <span class="label">Erase</span>
+        </button>
+        <button class="tool-btn" data-tool="stamp" title="Drop ready-made toys/houses">
+          <span class="icon">🏰</span>
+          <span class="label">Stamps</span>
+        </button>
+
+        <div class="brush-size-control">
+          <label>Brush Size</label>
+          <div class="size-buttons">
+            <button class="size-btn" data-size="1">S</button>
+            <button class="size-btn active" data-size="2">M</button>
+            <button class="size-btn" data-size="3">L</button>
+          </div>
+        </div>
+
+        <div class="history-controls">
+          <button id="btn-undo" class="btn-icon" title="Undo">↩️ Undo</button>
+          <button id="btn-redo" class="btn-icon" title="Redo">↪️ Redo</button>
+          <button id="btn-clear" class="btn-icon danger" title="Clear World">🗑️ Clear</button>
+        </div>
+      </aside>
+
+      <!-- Right Panel: Stamps & Block Palette -->
+      <aside class="right-toolbar">
+        <!-- Stamp Drawer (Visible when Stamp tool is selected) -->
+        <div id="stamp-drawer" class="drawer-panel hidden">
+          <div class="tool-section-title">Magic Stamps</div>
+          <div class="stamp-grid">
+            <button class="stamp-item active" data-stamp="tree_oak">🌳 Oak Tree</button>
+            <button class="stamp-item" data-stamp="tree_pine">🌲 Pine Tree</button>
+            <button class="stamp-item" data-stamp="tree_palm">🌴 Palm Tree</button>
+            <button class="stamp-item" data-stamp="cottage">🏠 House</button>
+            <button class="stamp-item" data-stamp="tower">🏰 Castle Tower</button>
+            <button class="stamp-item" data-stamp="volcano_mini">🌋 Mini Volcano</button>
+            <button class="stamp-item" data-stamp="treasure">💎 Treasure Vault</button>
+          </div>
+        </div>
+
+        <!-- Block Palette -->
+        <div class="tool-section-title">Block Colors</div>
+        <div id="block-palette" class="block-grid">
+          <!-- Dynamically populated with pixel art thumbnails -->
+        </div>
+      </aside>
+
+      <!-- Bottom Floating Controls (Camera / Mode Switch) -->
+      <div class="bottom-bar">
+        <button id="btn-mode-orbit" class="mode-btn active" title="Sky Builder View">
+          🪐 Sky View
+        </button>
+        <button id="btn-mode-player" class="mode-btn" title="Walk Inside (Player View)">
+          🚶 Walk Inside!
+        </button>
+        <button id="btn-reset-view" class="mode-btn" title="Reset Camera View">
+          🎯 Reset View
+        </button>
+        <div class="zoom-controls">
+          <button id="btn-zoom-in" class="mode-btn icon-only" title="Zoom In">➕</button>
+          <button id="btn-zoom-out" class="mode-btn icon-only" title="Zoom Out">➖</button>
+        </div>
+        <button id="btn-sound-toggle" class="mode-btn icon-only" title="Toggle Sound">
+          🔊
+        </button>
+      </div>
+
+      <!-- Exit Walk Mode Button (Visible in walk mode) -->
+      <button id="btn-exit-walk" class="btn-exit-walk hidden">
+        ❌ Exit Walk Mode
+      </button>
+
+      <!-- First-person controls hint overlay -->
+      <div id="player-hints" class="player-hints hidden">
+        <span>Use <b>Left Joystick</b> to Walk • Drag Screen to Look • Tap <b>JUMP</b> to Jump</span>
+      </div>
+
+        <!-- Touch Joystick for Walk Mode -->
+        <div id="touch-controls" class="touch-controls hidden">
+          <div id="joystick-zone" class="joystick-zone">
+            <div id="joystick-knob" class="joystick-knob"></div>
+          </div>
+          <button id="btn-touch-jump" class="touch-jump-btn">JUMP</button>
+        </div>
+      </div>
+
+      <!-- MODALS -->
+
+      <!-- 1. Magic Themes Modal -->
+      <div id="modal-themes" class="modal-overlay hidden">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h2>✨ Pick a Magic World Theme!</h2>
+            <button class="btn-close">&times;</button>
+          </div>
+          <div class="modal-body">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; padding: 10px 16px; background: rgba(0,0,0,0.06); border-radius: 12px;">
+              <input type="checkbox" id="toggle-include-ores" checked style="width: 20px; height: 20px; cursor: pointer; accent-color: #f59e0b;">
+              <label for="toggle-include-ores" style="cursor: pointer; font-weight: 600; font-size: 14px; color: #1e293b;">⛏️ Add Underground Precious Ores (Gold & Diamonds)</label>
+            </div>
+            <div class="theme-cards">
+            <div class="theme-card" data-theme="floating_islands">
+              <div class="theme-icon">🏝️</div>
+              <h3>Floating Sky Islands</h3>
+              <p>Magic islands floating in the sky with waterfalls, bridges, and treasures!</p>
+              <button class="btn btn-magic">Generate</button>
+            </div>
+            <div class="theme-card" data-theme="volcano">
+              <div class="theme-icon">🌋</div>
+              <h3>Volcano Realm</h3>
+              <p>Dramatic smoking volcano with boiling lava streams and magma rocks!</p>
+              <button class="btn btn-magic">Generate</button>
+            </div>
+            <div class="theme-card" data-theme="enchanted_forest">
+              <div class="theme-icon">🌲</div>
+              <h3>Enchanted Forest</h3>
+              <p>Gentle green hills, winding blue rivers, big trees, and a cozy cottage!</p>
+              <button class="btn btn-magic">Generate</button>
+            </div>
+            <div class="theme-card" data-theme="snowy_ice_realm">
+              <div class="theme-icon">❄️</div>
+              <h3>Snowy Ice Kingdom</h3>
+              <p>Snow-capped peaks, frozen ice river, pine trees, and a mountain fortress!</p>
+              <button class="btn btn-magic">Generate</button>
+            </div>
+            <div class="theme-card" data-theme="desert_oasis">
+              <div class="theme-icon">🏜️</div>
+              <h3>Desert Oasis & Pyramid</h3>
+              <p>Golden sand dunes, palm trees, cool blue oasis water, and a hidden pyramid!</p>
+              <button class="btn btn-magic">Generate</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+
+      <!-- 2. Pre-made Adventure Maps Modal -->
+      <div id="modal-maps" class="modal-overlay hidden">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h2>🏰 Pre-made Adventure Maps</h2>
+            <button class="btn-close">&times;</button>
+          </div>
+          <div class="modal-body map-cards">
+            <div class="map-card" data-map="fairy_castle">
+              <div class="theme-icon">👑</div>
+              <h3>Fairy Princess Palace</h3>
+              <p>Fairytale royal palace with crystal towers, golden roofs, royal throne room, gardens, and moat.</p>
+              <button class="btn btn-magic">Load & Play</button>
+            </div>
+            <div class="map-card" data-map="castle_kingdom">
+              <div class="theme-icon">🏰</div>
+              <h3>Castle Kingdom Island</h3>
+              <p>Complete stone fortress with 4 towers, moat, courtyard, and treasure vault.</p>
+              <button class="btn btn-primary">Load & Customize</button>
+            </div>
+            <div class="map-card" data-map="pirate_cove">
+              <div class="theme-icon">🏴‍☠️</div>
+              <h3>Pirate Cove & Ship</h3>
+              <p>Secret lagoon with a voxel pirate ship, sandy beach, palm trees, and loot.</p>
+              <button class="btn btn-primary">Load & Customize</button>
+            </div>
+            <div class="map-card" data-map="cozy_village">
+              <div class="theme-icon">🏡</div>
+              <h3>Cozy Farming Village</h3>
+              <p>Peaceful countryside with 3 cottages, farm plots, river, and oak trees.</p>
+              <button class="btn btn-primary">Load & Customize</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Import Modal -->
+      <div id="modal-import" class="modal-overlay hidden">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h2>📥 Import Map or Photo</h2>
+            <button class="btn-close">&times;</button>
+          </div>
+          <div class="modal-body import-options">
+            <div class="import-box highlight" style="border: 2px dashed #4caf50; background: rgba(76, 175, 80, 0.12); padding: 16px; border-radius: 6px;">
+              <h3 style="color: #81c784; font-size: 16px; margin-bottom: 6px;">📤 Send Downloaded File from Phone to PC</h3>
+              <p style="margin-bottom: 12px; font-size: 13px; color: #ddd;">Did your phone say <b>"file unsupported"</b> when you downloaded a castle or map? Tap below to send the file straight from your phone to your PC so we can inspect and fix it!</p>
+              <input type="file" id="input-phone-upload" class="file-input" />
+              <label for="input-phone-upload" class="btn btn-accent" style="width: 100%; font-size: 15px; padding: 12px; cursor: pointer;">📁 Select Downloaded File from Phone & Upload</label>
+              <div id="upload-status" style="margin-top: 10px; font-weight: bold; font-size: 13px; display: none;"></div>
+            </div>
+
+            <div class="import-box">
+              <h3>🖼️ Turn a Photo / Drawing into 3D Terrain</h3>
+              <p>Upload any picture or drawing. Dark spots become valleys, bright spots become mountains!</p>
+              <input type="file" id="input-heightmap" accept="image/*" class="file-input" />
+              <label for="input-heightmap" class="btn btn-secondary">Choose Photo</label>
+            </div>
+
+            <div class="import-box">
+              <h3>📂 Open a Saved Project File (.json)</h3>
+              <p>Re-open a saved world project you downloaded earlier.</p>
+              <input type="file" id="input-json" accept=".json" class="file-input" />
+              <label for="input-json" class="btn btn-secondary">Choose .JSON File</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. Export to Minecraft Modal -->
+      <div id="modal-export" class="modal-overlay hidden">
+        <div class="modal-card">
+          <div class="modal-header">
+            <h2>🚀 Export & Play Your World</h2>
+            <button class="btn-close">&times;</button>
+          </div>
+          <div class="modal-body export-options">
+            <div class="export-box highlight">
+              <div class="export-icon">📱</div>
+              <div class="export-info">
+                <h3>Minecraft Bedrock (Phone & Tablet)</h3>
+                <p><b>1-Tap to Play:</b> Full, valid Bedrock world! Tap to open directly into Minecraft and spawn your custom 3D terrain!</p>
+              </div>
+              <div class="export-buttons">
+                <button id="btn-dl-mcworld" class="btn btn-accent">✨ 1-Tap Open in Minecraft (.mcworld)</button>
+                <button id="btn-dl-mcstructure" class="btn btn-secondary">📦 Download .mcstructure</button>
+              </div>
+            </div>
+
+            <div class="export-box">
+              <div class="export-icon">🌐</div>
+              <div class="export-info">
+                <h3>3D Model (.glb for Three.js & Web)</h3>
+                <p>Standard 3D file format for web 3D viewers and 3D printing.</p>
+              </div>
+              <button id="btn-dl-glb" class="btn btn-secondary">Download .GLB</button>
+            </div>
+
+            <div class="export-box">
+              <div class="export-icon">💾</div>
+              <div class="export-info">
+                <h3>Save Project (.json)</h3>
+                <p>Save your work to your computer or phone so you can edit it again later.</p>
+              </div>
+              <button id="btn-dl-json" class="btn btn-secondary">Save Project File</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
