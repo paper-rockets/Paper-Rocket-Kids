@@ -1,0 +1,435 @@
+[
+  {
+    "id": "namemc_gumball_138724",
+    "name": "Gumball (138724)",
+    "category": "cartoon",
+    "source": "https://namemc.com/skin/1387247b2d967606",
+    "desc": "Official Gumball skin from NameMC"
+  },
+  {
+    "id": "namemc_special_d6fb5c",
+    "name": "Capy Charm (d6fb5c)",
+    "category": "capybara",
+    "source": "https://namemc.com/skin/d6fb5c47a6a4a7c9",
+    "desc": "Favorite community Capybara from NameMC"
+  },
+  {
+    "id": "namemc_special_22100e",
+    "name": "Favorite Capy (22100e)",
+    "category": "capybara",
+    "source": "https://namemc.com/skin/22100e679bac1b3b",
+    "desc": "Favorite community Capybara from NameMC"
+  },
+  {
+    "id": "afro_beauty",
+    "name": "Afro Beauty",
+    "category": "diverse",
+    "source": "Afro",
+    "desc": "Natural curls with cute aesthetic outfit"
+  },
+  {
+    "id": "zendaya_glow",
+    "name": "Zendaya Glow",
+    "category": "diverse",
+    "source": "Zendaya",
+    "desc": "Caramel glowing skin with sleek hair"
+  },
+  {
+    "id": "rihanna_chic",
+    "name": "Rihanna Chic",
+    "category": "diverse",
+    "source": "Rihanna",
+    "desc": "Warm espresso skin with stylish braids"
+  },
+  {
+    "id": "cocoa_cutie",
+    "name": "Cocoa Cutie",
+    "category": "diverse",
+    "source": "Cocoa",
+    "desc": "Deep cocoa skin with soft curly hair"
+  },
+  {
+    "id": "zara_streetwear",
+    "name": "Zara Streetwear",
+    "category": "diverse",
+    "source": "Zara",
+    "desc": "Trendy streetwear hoodie and ripped jeans"
+  },
+  {
+    "id": "honey_girl",
+    "name": "Honey Golden",
+    "category": "diverse",
+    "source": "Honey",
+    "desc": "Honey tones with cozy knit sweater"
+  },
+  {
+    "id": "sophie_braids",
+    "name": "Sophie Braids",
+    "category": "diverse",
+    "source": "Sophie",
+    "desc": "Crown braids with pretty floral dress"
+  },
+  {
+    "id": "hailey_aesthetic",
+    "name": "Hailey Aesthetic",
+    "category": "diverse",
+    "source": "Hailey",
+    "desc": "Butterfly clips and pastel sweater"
+  },
+  {
+    "id": "bella_cute",
+    "name": "Bella Pink",
+    "category": "diverse",
+    "source": "Bella",
+    "desc": "Sweet aesthetic girl with pink highlights"
+  },
+  {
+    "id": "violet_pastel",
+    "name": "Violet Pastel",
+    "category": "diverse",
+    "source": "Violet",
+    "desc": "Lilac hair and oversized hoodie"
+  },
+  {
+    "id": "princess_sparkle",
+    "name": "Princess Sparkle",
+    "category": "princess",
+    "source": "PrincessSparkle",
+    "desc": "Royal golden crown and sparkling gown"
+  },
+  {
+    "id": "princess_bella",
+    "name": "Princess Bella",
+    "category": "princess",
+    "source": "PrincessBella",
+    "desc": "Pink ballroom gown with gems"
+  },
+  {
+    "id": "princess_lily",
+    "name": "Princess Lily",
+    "category": "princess",
+    "source": "PrincessLily",
+    "desc": "Fairytale floral tiara princess"
+  },
+  {
+    "id": "moonlight_fairy",
+    "name": "Moonlight Fairy",
+    "category": "princess",
+    "source": "Moonlight",
+    "desc": "Pastel celestial fairy with wings"
+  },
+  {
+    "id": "flower_princess",
+    "name": "Flower Princess",
+    "category": "princess",
+    "source": "FlowerGirl",
+    "desc": "Cottagecore flower crown dress"
+  },
+  {
+    "id": "starlight_girl",
+    "name": "Starlight Dream",
+    "category": "princess",
+    "source": "Starlight",
+    "desc": "Galaxy star dress"
+  },
+  {
+    "id": "rainbow_pastel",
+    "name": "Rainbow Girl",
+    "category": "princess",
+    "source": "Rainbow",
+    "desc": "Pastel rainbow gradient hoodie"
+  },
+  {
+    "id": "butterfly_fairy",
+    "name": "Butterfly Fairy",
+    "category": "princess",
+    "source": "ButterflyGirl",
+    "desc": "Delicate butterfly wings & dress"
+  },
+  {
+    "id": "cute_eevee",
+    "name": "Cozy Eevee",
+    "category": "animal",
+    "source": "CuteEevee",
+    "desc": "Cute Eevee onesie hoodie with ears"
+  },
+  {
+    "id": "pikachu_girl",
+    "name": "Pikachu Girl",
+    "category": "animal",
+    "source": "Pikachu",
+    "desc": "Electric Pikachu hoodie with ears"
+  },
+  {
+    "id": "kawaii_cat",
+    "name": "Kawaii Cat Girl",
+    "category": "animal",
+    "source": "CatGirl",
+    "desc": "Cat ear headphones and cute tail"
+  },
+  {
+    "id": "fluffy_bunny",
+    "name": "Fluffy Bunny",
+    "category": "animal",
+    "source": "BunnyGirl",
+    "desc": "Fluffy bunny ears with sneakers"
+  },
+  {
+    "id": "wolf_cutie",
+    "name": "Wolf Cutie",
+    "category": "animal",
+    "source": "WolfGirl",
+    "desc": "Wolf ears hoodie and boots"
+  },
+  {
+    "id": "cozy_capybara",
+    "name": "Cozy Capybara",
+    "category": "animal",
+    "source": "Capybara",
+    "desc": "Capybara sweater and tiny orange"
+  },
+  {
+    "id": "cupcake_sweet",
+    "name": "Cupcake Sweet",
+    "category": "animal",
+    "source": "CupcakeGirl",
+    "desc": "Sweet dessert bakery hoodie"
+  },
+  {
+    "id": "froggy_hat",
+    "name": "Froggy Bucket",
+    "category": "animal",
+    "source": "Froggy",
+    "desc": "Cute frog bucket hat and sweater"
+  },
+  {
+    "id": "gamer_queen",
+    "name": "Kawaii Gamer",
+    "category": "classics",
+    "source": "KawaiiGamer",
+    "desc": "Gamer headset with cat ears"
+  },
+  {
+    "id": "sakura_anime",
+    "name": "Sakura Anime",
+    "category": "classics",
+    "source": "SakuraGirl",
+    "desc": "Anime school uniform and ribbon"
+  },
+  {
+    "id": "diamond_knight",
+    "name": "Diamond Knight",
+    "category": "classics",
+    "source": "Diamond",
+    "desc": "Shining diamond armor warrior"
+  },
+  {
+    "id": "steve_hero",
+    "name": "Steve Classic",
+    "category": "classics",
+    "source": "MHF_Steve",
+    "desc": "Original Minecraft hero"
+  },
+  {
+    "id": "capy_classic",
+    "name": "Classic Capybara",
+    "category": "capybara",
+    "source": "Capybara",
+    "desc": "The authentic chill Capybara skin"
+  },
+  {
+    "id": "capy_girl",
+    "name": "Capybara Girl",
+    "category": "capybara",
+    "source": "CapybaraGirl",
+    "desc": "Cute Capybara with pink ribbon and pastel style"
+  },
+  {
+    "id": "capy_queen",
+    "name": "Capy Queen",
+    "category": "capybara",
+    "source": "CapyQueen",
+    "desc": "Royal Capybara Queen with crown"
+  },
+  {
+    "id": "capy_king",
+    "name": "King Capybara",
+    "category": "capybara",
+    "source": "KingCapybara",
+    "desc": "Majestic King Capybara with gold mantle"
+  },
+  {
+    "id": "capy_cute",
+    "name": "Cute Capybara",
+    "category": "capybara",
+    "source": "CuteCapybara",
+    "desc": "Sweet cozy Capybara buddy"
+  },
+  {
+    "id": "capy_dapper",
+    "name": "Mr. Capybara",
+    "category": "capybara",
+    "source": "MrCapybara",
+    "desc": "Fancy Capybara in a classy suit and bowtie"
+  },
+  {
+    "id": "capy_drip",
+    "name": "Capybara Drip",
+    "category": "capybara",
+    "source": "CapybaraDrip",
+    "desc": "Cool Capybara in modern streetwear sneakers"
+  },
+  {
+    "id": "capy_kid",
+    "name": "Capybara Kid",
+    "category": "capybara",
+    "source": "CapybaraKid",
+    "desc": "Playful Capybara wearing comfy clothes"
+  },
+  {
+    "id": "capy_lord",
+    "name": "Lord Capybara",
+    "category": "capybara",
+    "source": "LordCapybara",
+    "desc": "Epic adventurer Capybara"
+  },
+  {
+    "id": "capy_golden",
+    "name": "Golden Capybara God",
+    "category": "capybara",
+    "source": "CapybaraGod",
+    "desc": "Legendary radiant Capybara deity"
+  },
+  {
+    "id": "tynker_lankybox_foxy",
+    "name": "LankyBox Foxy",
+    "tynkerId": "6585d614278f56403e1859ec",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_cherry_blossom",
+    "name": "Cherry Blossom Girl",
+    "tynkerId": "6a94406b8d34f07bbd3cf0d6",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_cute_ninja",
+    "name": "Cute Ninja",
+    "tynkerId": "6a92205066eebd08b43d2bb9",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_sub_zero",
+    "name": "Mortal Kombat Sub-Zero",
+    "tynkerId": "6a90e2250c6b264cc07af546",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_scorpion",
+    "name": "Mortal Kombat Scorpion",
+    "tynkerId": "6a91874335cb7411975d4048",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_kris_deltarune",
+    "name": "Kris Deltarune",
+    "tynkerId": "6a9851173b71f338e915399c",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_ironman",
+    "name": "Iron Man Mark 30",
+    "tynkerId": "6a90e9d546e7ce698f0043c9",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_reptile",
+    "name": "Reptile Fighter",
+    "tynkerId": "6a948a6391a93131e00c6b3a",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_eggchan",
+    "name": "Eggchan Cute",
+    "tynkerId": "6a9661c692585f187f4a8de2",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_stevey",
+    "name": "Stevey Adventurer",
+    "tynkerId": "6a958e67fec4e80dbc2b6872",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_weeping_one",
+    "name": "The Weeping One",
+    "tynkerId": "6a8db5b1d8966c4a0b112f41",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_symbiote",
+    "name": "Symbiote Venom",
+    "tynkerId": "6a95a6f83b58fd1c676394b6",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_spamton",
+    "name": "Spamton Deltarune",
+    "tynkerId": "6a91bc80baec8a57d155c962",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_hopper",
+    "name": "Hopper Hero",
+    "tynkerId": "6a93405c51564d74f715e151",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_jj",
+    "name": "JJ Player",
+    "tynkerId": "6a8c96bef6ebc96d8a199779",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_alex_cute",
+    "name": "Tynker Cute Alex",
+    "tynkerId": "6a416987d08c286ecd4047cf",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_shadow_alex",
+    "name": "Shadow Warrior",
+    "tynkerId": "697ebbbd1c7659191052a23a",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_galaxy_steve",
+    "name": "Galaxy Steve",
+    "tynkerId": "692b5165d6efca3fc66d4217",
+    "category": "tynker"
+  },
+  {
+    "id": "tynker_fire_steve",
+    "name": "Fire Elemental",
+    "tynkerId": "683b196d464f3a333231acc9",
+    "category": "tynker"
+  },
+  {
+    "id": "lankybox_official",
+    "name": "LankyBox Official",
+    "source": "LankyBox",
+    "category": "lankybox"
+  },
+  {
+    "id": "lankybox_justin",
+    "name": "LankyBox Justin",
+    "source": "LankyBoxJustin",
+    "category": "lankybox"
+  },
+  {
+    "id": "lankybox_rocky",
+    "name": "LankyBox Rocky",
+    "source": "Rocky",
+    "category": "lankybox"
+  }
+]

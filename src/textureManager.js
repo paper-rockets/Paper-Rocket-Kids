@@ -626,19 +626,31 @@ export class TextureManager {
 
   loadFromUrl(url) {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      if (url.startsWith('http://') || url.startsWith('https://')) {
-        img.crossOrigin = 'Anonymous';
-      }
-      img.onload = () => {
-        this.ctx.clearRect(0, 0, 64, 64);
-        this.ctx.drawImage(img, 0, 0, 64, 64);
-        this.update();
-        this.saveState();
-        resolve(true);
+      const tryLoad = (srcPath) => {
+        const img = new Image();
+        if (srcPath.startsWith('http://') || srcPath.startsWith('https://')) {
+          img.crossOrigin = 'Anonymous';
+        }
+        img.onload = () => {
+          this.ctx.clearRect(0, 0, 64, 64);
+          this.ctx.drawImage(img, 0, 0, 64, 64);
+          this.update();
+          this.saveState();
+          resolve(true);
+        };
+        img.onerror = () => {
+          // Automatic fallback for GitHub Pages or static host directory differences
+          if (srcPath.includes('/presets/') && !srcPath.includes('/public/presets/')) {
+            tryLoad(srcPath.replace('/presets/', '/public/presets/'));
+          } else if (srcPath.includes('/public/presets/')) {
+            tryLoad(srcPath.replace('/public/presets/', '/presets/'));
+          } else {
+            reject(new Error('Failed to load skin image'));
+          }
+        };
+        img.src = srcPath;
       };
-      img.onerror = (err) => reject(new Error('Failed to load skin image'));
-      img.src = url;
+      tryLoad(url);
     });
   }
 

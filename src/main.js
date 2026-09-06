@@ -948,7 +948,7 @@ function initSkinStudio() {
     skinScene.add(skinModel.group);
 
     // Load initial top-tier real Minecraft skin (Afro Beauty)
-    textureMgr.loadFromUrl('/presets/afro_beauty.png').catch(() => {
+    textureMgr.loadFromUrl('./presets/afro_beauty.png').catch(() => {
       const wardrobe = new WardrobeEngine();
       wardrobe.compose(textureMgr.ctx);
       textureMgr.update();
@@ -1192,7 +1192,7 @@ function initSkinStudio() {
         viewSkinStudio.querySelectorAll('.preset-skin-btn').forEach((b) => b.classList.remove('active'));
         btn.classList.add('active');
         const skinId = btn.dataset.skin;
-        const skinUrl = `/presets/${skinId}.png`;
+        const skinUrl = `./presets/${skinId}.png`;
         try {
           await textureMgr.loadFromUrl(skinUrl);
           sounds.playPop();
