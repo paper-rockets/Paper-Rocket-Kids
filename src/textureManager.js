@@ -62,6 +62,31 @@ export class TextureManager {
     if (this.onUpdateCallback) {
       this.onUpdateCallback();
     }
+    this.debounceAutoSave();
+  }
+
+  debounceAutoSave() {
+    if (this._saveTimeout) clearTimeout(this._saveTimeout);
+    this._saveTimeout = setTimeout(() => {
+      try {
+        const dataUrl = this.canvas.toDataURL('image/png');
+        localStorage.setItem('minecraft_skin_autosave', dataUrl);
+      } catch (e) {
+        // Silently ignore storage quota or private browsing errors
+      }
+    }, 600);
+  }
+
+  loadFromLocalStorage() {
+    try {
+      const saved = localStorage.getItem('minecraft_skin_autosave');
+      if (saved && saved.startsWith('data:image/png')) {
+        return this.loadFromUrl(saved);
+      }
+    } catch (e) {
+      // Silently ignore
+    }
+    return Promise.resolve(false);
   }
 
   saveState() {

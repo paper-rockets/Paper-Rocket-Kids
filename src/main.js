@@ -94,8 +94,40 @@ scene.add(clouds);
 const world = new VoxelWorld(48, 32, 48);
 scene.add(world.meshGroup);
 
-// Generate default start world: Floating Sky Islands
-generateTheme(world, 'floating_islands', 12345, true);
+// Auto-save helper for custom and downloaded maps
+let worldSaveTimeout = null;
+function autoSaveWorld() {
+  if (worldSaveTimeout) clearTimeout(worldSaveTimeout);
+  worldSaveTimeout = setTimeout(() => {
+    try {
+      const data = {
+        version: 1,
+        sizeX: world.sizeX,
+        sizeY: world.sizeY,
+        sizeZ: world.sizeZ,
+        blocks: Array.from(world.blocks)
+      };
+      localStorage.setItem('minecraft_world_autosave', JSON.stringify(data));
+    } catch (e) {
+      // Silently ignore storage quota or private browsing errors
+    }
+  }, 600);
+}
+
+// Auto-load previously saved world, or generate default start world
+let restoredWorld = false;
+try {
+  const savedWorld = localStorage.getItem('minecraft_world_autosave');
+  if (savedWorld) {
+    restoredWorld = loadJSON(world, savedWorld);
+  }
+} catch (e) {
+  console.warn('Could not restore autosaved world:', e);
+}
+
+if (!restoredWorld) {
+  generateTheme(world, 'floating_islands', 12345, true);
+}
 
 // First-Person Walk Controller
 const player = {
@@ -193,14 +225,20 @@ document.querySelectorAll('.stamp-item').forEach((btn) => {
 const btnUndo = document.getElementById('btn-undo');
 if (btnUndo) {
   btnUndo.addEventListener('click', () => {
-    if (world.undo()) sounds.playPop();
+    if (world.undo()) {
+      sounds.playPop();
+      autoSaveWorld();
+    }
   });
 }
 
 const btnRedo = document.getElementById('btn-redo');
 if (btnRedo) {
   btnRedo.addEventListener('click', () => {
-    if (world.redo()) sounds.playPop();
+    if (world.redo()) {
+      sounds.playPop();
+      autoSaveWorld();
+    }
   });
 }
 
@@ -209,6 +247,9 @@ if (btnClear) {
   btnClear.addEventListener('click', () => {
     if (confirm('Clear the whole world and start fresh?')) {
       world.clear();
+      try {
+        localStorage.removeItem('minecraft_world_autosave');
+      } catch (e) {}
       sounds.playDig();
     }
   });
@@ -375,6 +416,7 @@ document.querySelectorAll('.theme-card').forEach((card) => {
       const includeOres = oreToggle ? oreToggle.checked : true;
       generateTheme(world, theme, Math.floor(Math.random() * 99999), includeOres);
       resetCameraView();
+      autoSaveWorld();
       const modal = document.getElementById('modal-themes');
       if (modal) modal.classList.add('hidden');
       sounds.playMagicChime();
@@ -391,6 +433,7 @@ document.querySelectorAll('.map-card').forEach((card) => {
     if (mapKey && PREMADE_MAPS[mapKey]) {
       PREMADE_MAPS[mapKey].generate(world);
       resetCameraView();
+      autoSaveWorld();
       const modal = document.getElementById('modal-maps');
       if (modal) modal.classList.add('hidden');
       sounds.playMagicChime();
@@ -407,6 +450,7 @@ if (inputHeightmap) {
       const img = new Image();
       img.onload = () => {
         loadHeightmapImage(world, img);
+        autoSaveWorld();
         const modal = document.getElementById('modal-import');
         if (modal) modal.classList.add('hidden');
         sounds.playMagicChime();
@@ -425,6 +469,7 @@ if (inputJson) {
       const reader = new FileReader();
       reader.onload = (evt) => {
         if (loadJSON(world, evt.target.result)) {
+          autoSaveWorld();
           const modal = document.getElementById('modal-import');
           if (modal) modal.classList.add('hidden');
           sounds.playMagicChime();
@@ -533,13 +578,16 @@ function handlePointerAction(e) {
         const oz = res.adjacent.z - Math.floor(stampObj.sizeZ / 2);
         world.stampStructure(stampObj, ox, oy, oz);
         sounds.playStamp();
+        autoSaveWorld();
       }
     } else if (state.activeTool === 'place') {
       world.applyBrush('place', res.adjacent.x, res.adjacent.y, res.adjacent.z, 1, state.activeBlock);
       sounds.playPop();
+      autoSaveWorld();
     } else if (state.activeTool === 'erase') {
       world.applyBrush('erase', res.target.x, res.target.y, res.target.z, 1);
       sounds.playDig();
+      autoSaveWorld();
     } else {
       // raise, dig, flatten, paint
       world.applyBrush(
@@ -552,6 +600,7 @@ function handlePointerAction(e) {
       );
       if (state.activeTool === 'dig') sounds.playDig();
       else sounds.playPop();
+      autoSaveWorld();
     }
   }
 }
@@ -952,8 +1001,12 @@ function initSkinStudio() {
     skinModel = new SkinModel(textureMgr.texture);
     skinScene.add(skinModel.group);
 
-    // Load initial top-tier real Minecraft skin (Afro Beauty)
-    textureMgr.loadFromUrl('./presets/afro_beauty.png').catch(() => {
+    // Auto-load previously saved skin, or fallback to default preset (Afro Beauty)
+    textureMgr.loadFromLocalStorage().then((loaded) => {
+      if (!loaded) {
+        return textureMgr.loadFromUrl('./presets/afro_beauty.png');
+      }
+    }).catch(() => {
       const wardrobe = new WardrobeEngine();
       wardrobe.compose(textureMgr.ctx);
       textureMgr.update();

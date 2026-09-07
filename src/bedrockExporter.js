@@ -376,8 +376,8 @@ export function exportJSON(world, filename = 'my_minecraft_world.json') {
 // Load Project snapshot from JSON
 export function loadJSON(world, jsonStr) {
   try {
-    const data = JSON.parse(jsonStr);
-    if (data.blocks && Array.isArray(data.blocks)) {
+    const data = typeof jsonStr === 'string' ? JSON.parse(jsonStr) : jsonStr;
+    if (data && data.blocks && Array.isArray(data.blocks)) {
       world.saveState();
       world.blocks.set(new Uint8Array(data.blocks));
       world.rebuildMesh();
