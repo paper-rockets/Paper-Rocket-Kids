@@ -599,6 +599,7 @@ canvas.addEventListener('pointerup', (e) => {
 
 // Keyboard Controls for First-Person Walk
 window.addEventListener('keydown', (e) => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
   if (state.viewMode !== 'player') return;
   if (e.code === 'KeyW' || e.code === 'ArrowUp') player.moveForward = true;
   if (e.code === 'KeyS' || e.code === 'ArrowDown') player.moveBackward = true;
@@ -615,6 +616,7 @@ window.addEventListener('keydown', (e) => {
 });
 
 window.addEventListener('keyup', (e) => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable)) return;
   if (e.code === 'KeyW' || e.code === 'ArrowUp') player.moveForward = false;
   if (e.code === 'KeyS' || e.code === 'ArrowDown') player.moveBackward = false;
   if (e.code === 'KeyA' || e.code === 'ArrowLeft') player.moveLeft = false;
@@ -744,6 +746,9 @@ const clock = new THREE.Clock();
 
 function animate() {
   requestAnimationFrame(animate);
+  if (document.hidden) return;
+  const viewWorldMaker = document.getElementById('view-world-maker');
+  if (viewWorldMaker && viewWorldMaker.classList.contains('hidden')) return;
   const delta = Math.min(clock.getDelta(), 0.1);
 
   // Slowly drift clouds
@@ -1301,6 +1306,7 @@ function initSkinStudio() {
     const skinClock = new THREE.Clock();
     function animateSkin() {
       requestAnimationFrame(animateSkin);
+      if (document.hidden) return;
       if (!viewSkinStudio.classList.contains('hidden')) {
         const elapsed = skinClock.getElapsedTime();
         if (skinModel) {
