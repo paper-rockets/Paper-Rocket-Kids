@@ -441,6 +441,42 @@ document.querySelectorAll('.map-card').forEach((card) => {
   });
 });
 
+// Real Minecraft Bedrock Castles & Add-ons 1-Tap Download / Open
+document.querySelectorAll('.bedrock-card').forEach((card) => {
+  card.style.cursor = 'pointer';
+  card.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const filePath = card.dataset.dlFile;
+    const filename = card.dataset.dlName;
+    const type = card.dataset.dlType;
+    if (!filePath || !filename) return;
+
+    sounds.playMagicChime();
+    const btn = card.querySelector('.btn-dl-bedrock-asset');
+    const originalText = btn ? btn.textContent : '';
+    if (btn) btn.textContent = '⏳ Opening in Minecraft...';
+
+    try {
+      const resp = await fetch(filePath);
+      if (!resp.ok) throw new Error('File not found');
+      const blob = await resp.blob();
+      const mimeType = type === 'world' ? 'application/vnd.minecraft.world' : 'application/octet-stream';
+      await shareOrDownloadFile(blob, filename, mimeType);
+    } catch (err) {
+      console.error('Failed to open Minecraft asset:', err);
+      // Fallback: direct browser navigation to download link
+      const a = document.createElement('a');
+      a.href = filePath;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } finally {
+      if (btn) btn.textContent = originalText;
+    }
+  });
+});
+
 // Import Heightmap Image
 const inputHeightmap = document.getElementById('input-heightmap');
 if (inputHeightmap) {
@@ -887,10 +923,13 @@ animate();
 function initSkinStudio() {
   const viewSkinStudio = document.getElementById('view-skin-studio');
   const viewWorldMaker = document.getElementById('view-world-maker');
+  const viewAddonsStudio = document.getElementById('view-addons-studio');
   const btnSwitchSkin = document.getElementById('btn-switch-skin');
   const btnSwitchWorld = document.getElementById('btn-switch-world');
+  const btnSwitchAddons = document.getElementById('btn-switch-addons');
   const skinTopActions = document.getElementById('skin-top-actions');
   const worldTopActions = document.getElementById('world-top-actions');
+  const addonsTopActions = document.getElementById('addons-top-actions');
   const skinCanvas = document.getElementById('skin-canvas');
 
   if (!viewSkinStudio || !skinCanvas) return;
@@ -1015,6 +1054,13 @@ function initSkinStudio() {
     // 4. Painter Engine
     painter = new Painter(skinCanvas, skinCamera, skinModel, textureMgr, skinControls);
     painter.setColor('#ec4899');
+    painter.onColorPicked = (rgba) => {
+      const hex = '#' + [rgba.r, rgba.g, rgba.b].map(x => x.toString(16).padStart(2, '0')).join('');
+      const pickerEl = document.getElementById('skin-color-picker');
+      if (pickerEl) pickerEl.value = hex;
+      painter.setColor(hex);
+      sounds.playPop();
+    };
 
     // 5. Wire UI Controls
 
@@ -1376,35 +1422,54 @@ function initSkinStudio() {
     animateSkin();
   }
 
-  // Switcher Handlers
-  if (btnSwitchSkin && btnSwitchWorld) {
-    btnSwitchSkin.addEventListener('click', () => {
-      btnSwitchSkin.classList.add('active');
-      btnSwitchWorld.classList.remove('active');
-      viewSkinStudio.classList.remove('hidden');
-      if (skinTopActions) skinTopActions.classList.remove('hidden');
-      if (viewWorldMaker) viewWorldMaker.classList.add('hidden');
-      if (worldTopActions) worldTopActions.classList.add('hidden');
+  // 3-Way Switcher Handlers (Skin, World, Addons)
+  function switchView(target) {
+    if (btnSwitchSkin) btnSwitchSkin.classList.toggle('active', target === 'skin');
+    if (btnSwitchWorld) btnSwitchWorld.classList.toggle('active', target === 'world');
+    if (btnSwitchAddons) btnSwitchAddons.classList.toggle('active', target === 'addons');
 
+    if (viewSkinStudio) viewSkinStudio.classList.toggle('hidden', target !== 'skin');
+    if (viewWorldMaker) viewWorldMaker.classList.toggle('hidden', target !== 'world');
+    if (viewAddonsStudio) viewAddonsStudio.classList.toggle('hidden', target !== 'addons');
+
+    if (skinTopActions) skinTopActions.classList.toggle('hidden', target !== 'skin');
+    if (worldTopActions) worldTopActions.classList.toggle('hidden', target !== 'world');
+    if (addonsTopActions) addonsTopActions.classList.toggle('hidden', target !== 'addons');
+
+    sounds.playPop();
+
+    if (target === 'skin') {
       setTimeout(resizeSkinCanvas, 30);
-      sounds.playPop();
-    });
-
-    btnSwitchWorld.addEventListener('click', () => {
-      btnSwitchWorld.classList.add('active');
-      btnSwitchSkin.classList.remove('active');
-      viewSkinStudio.classList.add('hidden');
-      if (skinTopActions) skinTopActions.classList.add('hidden');
-      if (viewWorldMaker) viewWorldMaker.classList.remove('hidden');
-      if (worldTopActions) worldTopActions.classList.remove('hidden');
-
-      // Trigger world resize
+    } else if (target === 'world') {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      sounds.playPop();
-    });
+    }
   }
+
+  if (btnSwitchSkin) btnSwitchSkin.addEventListener('click', () => switchView('skin'));
+  if (btnSwitchWorld) btnSwitchWorld.addEventListener('click', () => switchView('world'));
+  if (btnSwitchAddons) btnSwitchAddons.addEventListener('click', () => switchView('addons'));
+
+  // Category filter tabs for Add-ons Studio
+  const filterBtns = document.querySelectorAll('.addon-filter-btn');
+  const addonCards = document.querySelectorAll('#view-addons-studio .bedrock-card');
+  filterBtns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const cat = btn.dataset.filter;
+      sounds.playPop();
+
+      addonCards.forEach((card) => {
+        if (cat === 'all' || card.dataset.category === cat) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
 
   // Immediately initialize Skin 3D
   setupSkin3D();

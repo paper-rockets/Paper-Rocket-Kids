@@ -28,6 +28,9 @@
           <button id="btn-switch-world" class="app-switch-btn" title="Switch to World Map Maker">
             🌍 World Map Maker
           </button>
+          <button id="btn-switch-addons" class="app-switch-btn" title="Switch to Add-ons & Mods">
+            🦄 Add-ons & Mods
+          </button>
         </div>
 
         <!-- Skin Painter Top Actions -->
@@ -43,6 +46,11 @@
           <button id="btn-maps-modal" class="btn btn-secondary" title="Pre-made Adventure Maps">🏰 Pre-made Maps</button>
           <button id="btn-import-modal" class="btn btn-secondary" title="Import Map or Photo">📥 Import</button>
           <button id="btn-export-modal" class="btn btn-accent" title="Download for Minecraft Android">🚀 Export to Minecraft</button>
+        </div>
+
+        <!-- Addons Top Actions (Visible when in Addons mode) -->
+        <div id="addons-top-actions" class="top-actions hidden">
+          <span class="addons-top-hint">📱 Tap any pack to open directly in Android Minecraft</span>
         </div>
       </header>
 
@@ -567,6 +575,119 @@
       </main>
 
       <!-- ============================================================= -->
+      <!-- VIEW 3: ADD-ONS & MODS STUDIO (ONE-TAP MINECRAFT BEDROCK)     -->
+      <!-- ============================================================= -->
+      <main id="view-addons-studio" class="app-view hidden">
+        <div class="addons-studio-scroll">
+          <div class="addons-studio-container">
+            <!-- Header Banner -->
+            <div class="addons-hero-banner">
+              <div class="addons-hero-text">
+                <h2>✨ Magical Add-ons & Mods for Minecraft</h2>
+                <p>Capybaras, Princess Wands, Royal Carriages, Cute Pets & Castle Decor — 1-Tap to install directly into Minecraft on Android!</p>
+              </div>
+              <div class="addons-hero-steps">
+                <div class="step-pill"><span>1</span> Tap any Add-on</div>
+                <div class="step-arrow">➜</div>
+                <div class="step-pill"><span>2</span> Choose "Open with Minecraft"</div>
+                <div class="step-arrow">➜</div>
+                <div class="step-pill"><span>3</span> Play in your World!</div>
+              </div>
+            </div>
+
+            <!-- Filter Category Tabs -->
+            <div class="addons-filter-tabs">
+              <button class="addon-filter-btn active" data-filter="all">🌟 All Add-ons (7)</button>
+              <button class="addon-filter-btn" data-filter="creatures">🐾 Capybaras & Cute Pets</button>
+              <button class="addon-filter-btn" data-filter="magic">🪄 Princess Magic Wands</button>
+              <button class="addon-filter-btn" data-filter="transport">🎠 Carriages & Rides</button>
+              <button class="addon-filter-btn" data-filter="decor">🛋️ Furniture & Decor</button>
+            </div>
+
+            <!-- Add-ons Cards Grid -->
+            <div class="addons-grid">
+              <!-- 1. Capybara -->
+              <div class="bedrock-card" data-category="creatures" data-dl-file="./addons/capybara.mcaddon" data-dl-name="Capybara Companion Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/capybara.png" alt="Capybara Companion" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-yellow">Capybara Friend</span>
+                </div>
+                <h3>Cute Capybaras Companion</h3>
+                <p>Friendly capybaras spawn in rivers & jungles! Tame them with watermelon treats, ride them through water, and explore together.</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🐾 1-Tap Install Capybaras</button>
+              </div>
+
+              <!-- 2. Princess Wands -->
+              <div class="bedrock-card" data-category="magic" data-dl-file="./addons/princess_wands.mcaddon" data-dl-name="Princess Magic Wands Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/princess_wands.png" alt="Princess Magic Wands" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-purple">Princess Magic</span>
+                </div>
+                <h3>Princess Star & Amethyst Wands</h3>
+                <p>Cast royal spells! Golden Star Wand (Speed & Night Vision), Royal Purple Amethyst Wand (Floating & Levitation), and Fairy Blossom Wand (Instant Hearts).</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🪄 1-Tap Install Magic Wands</button>
+              </div>
+
+              <!-- 3. Royal Carriage & Unicorns -->
+              <div class="bedrock-card" data-category="transport" data-dl-file="./addons/royal_carriage.mcaddon" data-dl-name="Royal Carriage & Unicorns Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/royal_carriage.png" alt="Royal Carriage & Unicorns" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-yellow">Royal Ride</span>
+                </div>
+                <h3>Royal Carriage & Flying Unicorns</h3>
+                <p>Ride through your kingdom in a golden & royal purple passenger carriage, or take flight across the skies on a winged unicorn mount!</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🎠 1-Tap Install Royal Carriage</button>
+              </div>
+
+              <!-- 4. Princess Castle Decor -->
+              <div class="bedrock-card" data-category="decor" data-dl-file="./addons/princess_decor.mcaddon" data-dl-name="Princess Castle Decor Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/princess_decor.png" alt="Princess Castle Decor" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-purple">Castle Decor</span>
+                </div>
+                <h3>Princess Castle & Bedroom Decor</h3>
+                <p>Decorate your palace with royal yellow canopy beds, velvet purple thrones, golden heart vanity mirrors, and cuddly plush capybaras!</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">👑 1-Tap Install Castle Decor</button>
+              </div>
+
+              <!-- 5. FurniDeco -->
+              <div class="bedrock-card" data-category="decor" data-dl-file="./addons/furnideco.mcaddon" data-dl-name="FurniDeco Furniture Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/furnideco.png" alt="FurniDeco Furniture" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-teal">Working Furniture</span>
+                </div>
+                <h3>FurniDeco Cozy Furniture</h3>
+                <p>Hundreds of cozy modern furniture pieces: soft sofas, armchairs, lamps, dining tables, and paint brushes you can dye any color!</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🛋️ 1-Tap Install Furniture</button>
+              </div>
+
+              <!-- 6. Cute Dogs -->
+              <div class="bedrock-card" data-category="creatures" data-dl-file="./addons/cuterdog.mcaddon" data-dl-name="Cute Dogs Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/cuterdog.png" alt="Cute Dogs" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-pink">Puppy Pets</span>
+                </div>
+                <h3>Cute Dogs (15+ Breeds)</h3>
+                <p>Adds lovable puppies to adopt: Corgis, Pugs, Golden Retrievers, Shiba Inus, dog bowls, and squeaky toys for your home!</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🐕 1-Tap Install Cute Dogs</button>
+              </div>
+
+              <!-- 7. Faye Garden Fairies -->
+              <div class="bedrock-card" data-category="creatures" data-dl-file="./addons/faye_creatures.mcaddon" data-dl-name="Faye Garden Creatures Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/faye_creatures.png" alt="Faye Creatures" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-green">Garden Fairies</span>
+                </div>
+                <h3>Faye Garden Fairies & Friends</h3>
+                <p>Enchant your world with winged garden fairies, enchanted cows, and friendly little mushroom companions that follow you.</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🧚 1-Tap Install Fairies</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ============================================================= -->
       <!-- VIEW 2: WORLD MAP MAKER (HIDDEN INITIALLY)                    -->
       <!-- ============================================================= -->
       <div id="view-world-maker" class="app-view hidden">
@@ -737,33 +858,148 @@
       <div id="modal-maps" class="modal-overlay hidden">
         <div class="modal-card">
           <div class="modal-header">
-            <h2>🏰 Pre-made Adventure Maps</h2>
+            <h2>🏰 Adventure Maps, Castles & Add-ons</h2>
             <button class="btn-close">&times;</button>
           </div>
-          <div class="modal-body map-cards">
-            <div class="map-card" data-map="fairy_castle">
-              <div class="theme-icon">👑</div>
-              <h3>Fairy Princess Palace</h3>
-              <p>Fairytale royal palace with crystal towers, golden roofs, royal throne room, gardens, and moat.</p>
-              <button class="btn btn-magic">Load & Play</button>
+          <div class="modal-body">
+            <!-- Section 1: Real Bedrock Castles & Add-ons -->
+            <div class="modal-section-title">
+              <span>🏰 Real Minecraft Bedrock Castles & Add-ons</span>
+              <span class="section-subtitle">1-Tap to Open & Play directly in Minecraft (Phone / Tablet / PC)</span>
             </div>
-            <div class="map-card" data-map="castle_kingdom">
-              <div class="theme-icon">🏰</div>
-              <h3>Castle Kingdom Island</h3>
-              <p>Complete stone fortress with 4 towers, moat, courtyard, and treasure vault.</p>
-              <button class="btn btn-primary">Load & Customize</button>
+            <div class="theme-cards bedrock-asset-grid">
+              <div class="bedrock-card" data-dl-file="./worlds/pink_castle.mcworld" data-dl-name="Pink Castle - v1.1.mcworld" data-dl-type="world">
+                <div class="asset-img-wrap">
+                  <img src="./worlds/pink_castle.jpg" alt="Pink Castle" class="asset-card-img" />
+                  <span class="asset-badge">Full Bedrock World</span>
+                </div>
+                <h3>Pink Castle</h3>
+                <p>Magical pink fairytale castle with grand towers, gardens, and royal decor.</p>
+                <button class="btn btn-accent btn-dl-bedrock-asset">🚀 1-Tap Open in Minecraft</button>
+              </div>
+
+              <div class="bedrock-card" data-dl-file="./worlds/medieval_castle.mcworld" data-dl-name="Medieval Worldcraft Castle.mcworld" data-dl-type="world">
+                <div class="asset-img-wrap">
+                  <img src="./worlds/medieval_castle.jpg" alt="Medieval Castle" class="asset-card-img" />
+                  <span class="asset-badge">Full Bedrock World</span>
+                </div>
+                <h3>Medieval Castle</h3>
+                <p>Massive stone fortress with battle towers, moat, courtyard, and dungeons.</p>
+                <button class="btn btn-accent btn-dl-bedrock-asset">🚀 1-Tap Open in Minecraft</button>
+              </div>
+
+              <div class="bedrock-card" data-dl-file="./worlds/fantasy_castle.mcworld" data-dl-name="Fantasy Castle - v1.2 (Hardcore Mode).mcworld" data-dl-type="world">
+                <div class="asset-img-wrap">
+                  <img src="./worlds/fantasy_castle.jpg" alt="Fantasy Castle" class="asset-card-img" />
+                  <span class="asset-badge">Full Bedrock World</span>
+                </div>
+                <h3>Fantasy Castle</h3>
+                <p>Epic mountain realm with towering peaks, grand bridges, and adventure lands.</p>
+                <button class="btn btn-accent btn-dl-bedrock-asset">🚀 1-Tap Open in Minecraft</button>
+              </div>
+
+              <!-- Add-ons -->
+              <div class="bedrock-card" data-dl-file="./addons/capybara.mcaddon" data-dl-name="Capybara Companion Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/capybara.png" alt="Capybara Companion" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-yellow">Capybara Friend</span>
+                </div>
+                <h3>Cute Capybaras Companion</h3>
+                <p>Tameable, rideable capybaras that love water and watermelon!</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🐾 1-Tap Install Capybaras</button>
+              </div>
+
+              <div class="bedrock-card" data-dl-file="./addons/princess_wands.mcaddon" data-dl-name="Princess Magic Wands Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/princess_wands.png" alt="Princess Magic Wands" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-purple">Princess Magic</span>
+                </div>
+                <h3>Princess Star & Amethyst Wands</h3>
+                <p>Yellow Star Wand (Speed) & Purple Amethyst Wand (Floating Magic).</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🪄 1-Tap Install Magic Wands</button>
+              </div>
+
+              <div class="bedrock-card" data-dl-file="./addons/royal_carriage.mcaddon" data-dl-name="Royal Carriage & Unicorns Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/royal_carriage.png" alt="Royal Carriage & Unicorns" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-yellow">Royal Ride</span>
+                </div>
+                <h3>Royal Carriage & Flying Unicorns</h3>
+                <p>Rideable golden royal carriage and flying winged unicorns!</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🎠 1-Tap Install Royal Carriage</button>
+              </div>
+
+              <div class="bedrock-card" data-dl-file="./addons/princess_decor.mcaddon" data-dl-name="Princess Castle Decor Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/princess_decor.png" alt="Princess Castle Decor" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-purple">Castle Decor</span>
+                </div>
+                <h3>Princess Castle & Bedroom Decor</h3>
+                <p>Yellow canopy beds, purple velvet thrones, and capybara plushies.</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">👑 1-Tap Install Castle Decor</button>
+              </div>
+
+              <div class="bedrock-card" data-dl-file="./addons/furnideco.mcaddon" data-dl-name="FurniDeco Furniture Add-on.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/furnideco.png" alt="FurniDeco Furniture" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-teal">Working Furniture</span>
+                </div>
+                <h3>FurniDeco Cozy Furniture</h3>
+                <p>Couches, armchairs, lamps, tables, and dyeable items.</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🛋️ 1-Tap Install Furniture</button>
+              </div>
+
+              <div class="bedrock-card" data-dl-file="./addons/cuterdog.mcaddon" data-dl-name="cuterdog.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/cuterdog.png" alt="Cute Dogs" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-pink">Bedrock Add-on</span>
+                </div>
+                <h3>Cute Dogs (15+ Breeds)</h3>
+                <p>Adds Corgis, Pugs, Golden Retrievers, Shiba Inus, dog bowls, and toys!</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🐕 1-Tap Install Dogs Add-on</button>
+              </div>
+
+              <div class="bedrock-card" data-dl-file="./addons/faye_creatures.mcaddon" data-dl-name="Faye Garden Creatures 26.1.mcaddon" data-dl-type="addon">
+                <div class="asset-img-wrap">
+                  <img src="./addons/faye_creatures.png" alt="Faye Creatures" class="asset-card-img" />
+                  <span class="asset-badge addon-badge-green">Bedrock Add-on</span>
+                </div>
+                <h3>Faye Garden Creatures</h3>
+                <p>Magical garden fairies, enchanted cows, and cute mushroom companions.</p>
+                <button class="btn btn-magic btn-dl-bedrock-asset">🧚 1-Tap Install Fairies Add-on</button>
+              </div>
             </div>
-            <div class="map-card" data-map="pirate_cove">
-              <div class="theme-icon">🏴‍☠️</div>
-              <h3>Pirate Cove & Ship</h3>
-              <p>Secret lagoon with a voxel pirate ship, sandy beach, palm trees, and loot.</p>
-              <button class="btn btn-primary">Load & Customize</button>
+
+            <!-- Section 2: 3D Interactive Web Maps -->
+            <div class="modal-section-title" style="margin-top: 24px;">
+              <span>🎨 3D Interactive Builder Maps</span>
+              <span class="section-subtitle">Load inside the browser to sculpt, build, and customize</span>
             </div>
-            <div class="map-card" data-map="cozy_village">
-              <div class="theme-icon">🏡</div>
-              <h3>Cozy Farming Village</h3>
-              <p>Peaceful countryside with 3 cottages, farm plots, river, and oak trees.</p>
-              <button class="btn btn-primary">Load & Customize</button>
+            <div class="map-cards">
+              <div class="map-card" data-map="fairy_castle">
+                <div class="theme-icon">👑</div>
+                <h3>Fairy Princess Palace</h3>
+                <p>Fairytale royal palace with crystal towers, golden roofs, royal throne room, gardens, and moat.</p>
+                <button class="btn btn-magic">Load & Play in 3D</button>
+              </div>
+              <div class="map-card" data-map="castle_kingdom">
+                <div class="theme-icon">🏰</div>
+                <h3>Castle Kingdom Island</h3>
+                <p>Complete stone fortress with 4 towers, moat, courtyard, and treasure vault.</p>
+                <button class="btn btn-primary">Load & Customize</button>
+              </div>
+              <div class="map-card" data-map="pirate_cove">
+                <div class="theme-icon">🏴‍☠️</div>
+                <h3>Pirate Cove & Ship</h3>
+                <p>Secret lagoon with a voxel pirate ship, sandy beach, palm trees, and loot.</p>
+                <button class="btn btn-primary">Load & Customize</button>
+              </div>
+              <div class="map-card" data-map="cozy_village">
+                <div class="theme-icon">🏡</div>
+                <h3>Cozy Farming Village</h3>
+                <p>Peaceful countryside with 3 cottages, farm plots, river, and oak trees.</p>
+                <button class="btn btn-primary">Load & Customize</button>
+              </div>
             </div>
           </div>
         </div>

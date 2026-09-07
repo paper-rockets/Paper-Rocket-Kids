@@ -1,4 +1,4 @@
-﻿# Auto detect text files and perform LF normalization
+# Auto detect text files and perform LF normalization
 * text=auto eol=lf
 
 # Binary files - commit directly without Git LFS
@@ -10,5 +10,6 @@
 *.ico binary
 *.zip binary
 *.mcpack binary
+*.mcaddon binary
 *.mcworld binary
 *.wasm binary
