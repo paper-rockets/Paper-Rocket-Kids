@@ -727,6 +727,23 @@
         <!-- 3D World Canvas Viewport -->
         <canvas id="webgl-canvas"></canvas>
 
+        <!-- 3D Castle Showcase Overlay (Active when viewing castles) -->
+        <div id="castle-showcase-overlay" class="castle-showcase-bar hidden">
+          <div class="showcase-info">
+            <button id="btn-showcase-back" class="btn-showcase-nav" title="Back to Castles">◀ Castles</button>
+            <div class="showcase-title-wrap">
+              <span id="showcase-castle-title" class="showcase-castle-title">🍄 Peach's Castle 64</span>
+              <span class="showcase-castle-subtitle">✨ 3D Model Showcase • Touch to rotate & zoom</span>
+            </div>
+          </div>
+          <div class="showcase-actions">
+            <button id="btn-showcase-spin" class="btn-showcase-action" title="Toggle Auto-Rotate">🔄 Spin View</button>
+            <button id="btn-showcase-sky" class="btn-showcase-action" title="Change Lighting">☀️ Day</button>
+            <button id="btn-showcase-edit" class="btn-showcase-action" title="Customize in Builder">✏️ Edit Blocks</button>
+            <button id="btn-showcase-mc" class="btn-showcase-action btn-showcase-highlight" title="Open in Minecraft">🚀 Minecraft</button>
+          </div>
+        </div>
+
       <!-- Left Toolbox (Tools & Brushes) -->
       <aside class="left-toolbar">
         <div class="tool-section-title">Tools</div>
@@ -909,7 +926,7 @@
                 <h3>Pink Castle</h3>
                 <p>Magical pink fairytale castle with grand towers, gardens, and royal decor.</p>
                 <div class="bedrock-actions-row">
-                  <button class="btn btn-view-castle-3d" data-map="pink_castle">🏰 View in 3D</button>
+                  <button class="btn btn-view-castle-3d" data-map="pink_castle">🏰 3D Showcase</button>
                   <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
                 </div>
               </div>
@@ -922,7 +939,7 @@
                 <h3>Medieval Castle</h3>
                 <p>Massive stone fortress with battle towers, moat, courtyard, and dungeons.</p>
                 <div class="bedrock-actions-row">
-                  <button class="btn btn-view-castle-3d" data-map="medieval_castle">🏰 View in 3D</button>
+                  <button class="btn btn-view-castle-3d" data-map="medieval_castle">🏰 3D Showcase</button>
                   <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
                 </div>
               </div>
@@ -935,7 +952,7 @@
                 <h3>Fantasy Castle</h3>
                 <p>Epic mountain realm with towering peaks, grand bridges, and adventure lands.</p>
                 <div class="bedrock-actions-row">
-                  <button class="btn btn-view-castle-3d" data-map="fantasy_castle">🏰 View in 3D</button>
+                  <button class="btn btn-view-castle-3d" data-map="fantasy_castle">🏰 3D Showcase</button>
                   <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
                 </div>
               </div>
@@ -948,7 +965,7 @@
                 <h3>Peach's Castle (Super Mario 64)</h3>
                 <p>Play inside Peach's Castle with custom music, paintings, and royal courtyards!</p>
                 <div class="bedrock-actions-row">
-                  <button class="btn btn-view-castle-3d" data-map="proj64">🏰 View in 3D</button>
+                  <button class="btn btn-view-castle-3d" data-map="proj64">🏰 3D Showcase</button>
                   <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
                 </div>
               </div>
@@ -1153,6 +1170,43 @@
                 <p>Save your work to your computer or phone so you can edit it again later.</p>
               </div>
               <button id="btn-dl-json" class="btn btn-secondary">Save Project File</button>
+            </div>
+      <!-- 5. Minecraft Android 1-Tap Helper Modal -->
+      <div id="modal-mc-helper" class="modal-overlay hidden">
+        <div class="modal-card modal-mc-card">
+          <div class="modal-header">
+            <h2>🚀 Open in Minecraft</h2>
+            <button class="btn-close">&times;</button>
+          </div>
+          <div class="modal-body mc-helper-body">
+            <div class="mc-helper-icon">🏰</div>
+            <h3 id="mc-helper-title">Downloading Castle World...</h3>
+            <p class="mc-helper-subtitle">Follow these 2 easy steps on your Android tablet:</p>
+            
+            <div class="mc-helper-steps">
+              <div class="mc-step-item">
+                <div class="mc-step-num">1</div>
+                <div class="mc-step-text">
+                  <strong>Swipe down your top notification bar</strong>
+                  <span>Look for the finished download notification.</span>
+                </div>
+              </div>
+              <div class="mc-step-item">
+                <div class="mc-step-num">2</div>
+                <div class="mc-step-text">
+                  <strong>Tap the downloaded file</strong>
+                  <span>Minecraft will automatically open and import the world ready to play!</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mc-helper-tip">
+              💡 <em>Tip:</em> You can also open the <strong>My Files</strong> or <strong>Downloads</strong> app on your tablet and tap the castle file anytime!
+            </div>
+
+            <div class="mc-helper-actions">
+              <button id="btn-mc-helper-share" class="btn btn-secondary">📲 Send via Share Sheet</button>
+              <button id="btn-mc-helper-ok" class="btn btn-magic">✨ Got It!</button>
             </div>
           </div>
         </div>

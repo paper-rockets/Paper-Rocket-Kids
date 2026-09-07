@@ -189,6 +189,67 @@ function createBlockTexture(type) {
       ctx.strokeRect(0, 0, 16, 16);
       break;
 
+    case 'red_roof':
+      fillNoise(185, 38, 38, 15);
+      ctx.fillStyle = '#9b1c1c';
+      ctx.fillRect(0, 7, 16, 1);
+      ctx.fillRect(0, 15, 16, 1);
+      ctx.fillRect(7, 0, 1, 7);
+      ctx.fillRect(15, 8, 1, 7);
+      break;
+
+    case 'cherry_leaves':
+      fillNoise(251, 182, 206, 18);
+      ctx.fillStyle = '#f472b6';
+      for (let i = 0; i < 16; i++) ctx.fillRect(rand(0, 15), rand(0, 15), 2, 2);
+      ctx.fillStyle = '#ffffff';
+      for (let i = 0; i < 8; i++) ctx.fillRect(rand(0, 15), rand(0, 15), 1, 1);
+      break;
+
+    case 'stone_brick':
+      fillNoise(140, 140, 140, 12);
+      ctx.strokeStyle = '#555555';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, 8, 8);
+      ctx.strokeRect(8, 0, 8, 8);
+      ctx.strokeRect(4, 8, 8, 8);
+      ctx.strokeRect(0, 8, 4, 8);
+      ctx.strokeRect(12, 8, 4, 8);
+      break;
+
+    case 'dark_oak':
+      fillNoise(66, 40, 20, 12);
+      ctx.fillStyle = '#311d0e';
+      ctx.fillRect(0, 3, 16, 1);
+      ctx.fillRect(0, 7, 16, 1);
+      ctx.fillRect(0, 11, 16, 1);
+      ctx.fillRect(0, 15, 16, 1);
+      break;
+
+    case 'prismarine':
+      fillNoise(88, 158, 146, 20);
+      ctx.fillStyle = '#78cfbe';
+      for (let i = 0; i < 8; i++) ctx.fillRect(rand(0, 15), rand(0, 15), 2, 2);
+      break;
+
+    case 'peach_window':
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(0, 0, 16, 16);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(2, 2, 12, 12);
+      ctx.fillStyle = '#fde047';
+      ctx.fillRect(4, 3, 8, 5);
+      ctx.fillStyle = '#fbcfe8';
+      ctx.fillRect(6, 2, 4, 2);
+      ctx.fillStyle = '#ffedd5';
+      ctx.fillRect(5, 5, 6, 5);
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(6, 6, 1, 1);
+      ctx.fillRect(9, 6, 1, 1);
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(4, 10, 8, 4);
+      break;
+
     default:
       fillNoise(150, 150, 150, 20);
   }
@@ -222,7 +283,13 @@ export const BLOCKS = {
   TNT: 17,
   PINK_CONCRETE: 18,
   PURPLE_BLOCK: 19,
-  QUARTZ: 20
+  QUARTZ: 20,
+  RED_ROOF: 21,
+  CHERRY_LEAVES: 22,
+  STONE_BRICK: 23,
+  DARK_OAK: 24,
+  PRISMARINE: 25,
+  PEACH_WINDOW: 26
 };
 
 export const BLOCK_DEFS = {
@@ -403,6 +470,58 @@ export const BLOCK_DEFS = {
     icon: '🏛️',
     color: '#f1f5f9',
     texture: 'quartz'
+  },
+  [BLOCKS.RED_ROOF]: {
+    id: BLOCKS.RED_ROOF,
+    name: 'Red Castle Roof',
+    bedrockName: 'minecraft:red_concrete',
+    icon: '🔴',
+    color: '#9b1c1c',
+    texture: 'red_roof'
+  },
+  [BLOCKS.CHERRY_LEAVES]: {
+    id: BLOCKS.CHERRY_LEAVES,
+    name: 'Cherry Blossom Leaves',
+    bedrockName: 'minecraft:cherry_leaves',
+    icon: '🌸',
+    color: '#f472b6',
+    texture: 'cherry_leaves',
+    transparent: true,
+    opacity: 0.9
+  },
+  [BLOCKS.STONE_BRICK]: {
+    id: BLOCKS.STONE_BRICK,
+    name: 'Stone Bricks',
+    bedrockName: 'minecraft:stone_bricks',
+    icon: '🧱',
+    color: '#8c8c8c',
+    texture: 'stone_brick'
+  },
+  [BLOCKS.DARK_OAK]: {
+    id: BLOCKS.DARK_OAK,
+    name: 'Dark Oak Wood',
+    bedrockName: 'minecraft:dark_oak_planks',
+    icon: '🪵',
+    color: '#311d0e',
+    texture: 'dark_oak'
+  },
+  [BLOCKS.PRISMARINE]: {
+    id: BLOCKS.PRISMARINE,
+    name: 'Prismarine Crystal',
+    bedrockName: 'minecraft:prismarine',
+    icon: '💎',
+    color: '#78cfbe',
+    texture: 'prismarine'
+  },
+  [BLOCKS.PEACH_WINDOW]: {
+    id: BLOCKS.PEACH_WINDOW,
+    name: 'Princess Peach Stained Glass',
+    bedrockName: 'minecraft:yellow_stained_glass',
+    icon: '👑',
+    color: '#fbbf24',
+    texture: 'peach_window',
+    emissive: '#fbbf24',
+    emissiveIntensity: 0.4
   }
 };
 

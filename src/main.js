@@ -431,6 +431,13 @@ document.querySelectorAll('.map-card').forEach((card) => {
     e.preventDefault();
     const mapKey = card.dataset.map;
     if (mapKey && PREMADE_MAPS[mapKey]) {
+      if (['pink_castle', 'medieval_castle', 'fantasy_castle', 'proj64'].includes(mapKey)) {
+        openCastleShowcase(mapKey);
+        return;
+      }
+      if (window.switchAppView) {
+        window.switchAppView('world');
+      }
       PREMADE_MAPS[mapKey].generate(world);
       resetCameraView();
       autoSaveWorld();
@@ -441,34 +448,135 @@ document.querySelectorAll('.map-card').forEach((card) => {
   });
 });
 
-// 3D Castle Exploration Viewer Buttons (Loads procedural 3D castle in browser)
+// =========================================================================
+// 🏰 3D CASTLE SHOWCASE & MINECRAFT OPENER
+// =========================================================================
+let activeCastleShowcase = null;
+let activeCastleFile = null;
+let activeCastleFilename = null;
+let showcaseSkyState = 'day';
+let lastDownloadedBlob = null;
+let lastDownloadedFilename = '';
+
+function setCastleSky(sky) {
+  showcaseSkyState = sky;
+  const skyBtn = document.getElementById('btn-showcase-sky');
+  if (sky === 'day') {
+    scene.background = new THREE.Color(0x87ceeb);
+    ambientLight.intensity = 0.9;
+    ambientLight.color.setHex(0xffffff);
+    sunLight.intensity = 1.3;
+    sunLight.color.setHex(0xfff4e0);
+    if (skyBtn) skyBtn.textContent = '☀️ Day';
+  } else if (sky === 'sunset') {
+    scene.background = new THREE.Color(0xfb923c);
+    ambientLight.intensity = 0.75;
+    ambientLight.color.setHex(0xfed7aa);
+    sunLight.intensity = 1.1;
+    sunLight.color.setHex(0xf97316);
+    if (skyBtn) skyBtn.textContent = '🌅 Sunset';
+  } else if (sky === 'night') {
+    scene.background = new THREE.Color(0x0f172a);
+    ambientLight.intensity = 0.35;
+    ambientLight.color.setHex(0x93c5fd);
+    sunLight.intensity = 0.3;
+    sunLight.color.setHex(0x60a5fa);
+    if (skyBtn) skyBtn.textContent = '🌙 Night';
+  }
+}
+
+function openCastleShowcase(mapKey, dlFile, dlName) {
+  if (!mapKey || !PREMADE_MAPS[mapKey]) return;
+
+  activeCastleShowcase = mapKey;
+  activeCastleFile = dlFile || null;
+  activeCastleFilename = dlName || null;
+
+  if (window.switchAppView) {
+    window.switchAppView('world');
+  }
+
+  // Generate the authentic, high-detail castle
+  PREMADE_MAPS[mapKey].generate(world);
+
+  // Activate Showcase Mode UI
+  const worldMakerEl = document.getElementById('view-world-maker');
+  if (worldMakerEl) worldMakerEl.classList.add('showcase-mode');
+
+  const showcaseOverlay = document.getElementById('castle-showcase-overlay');
+  if (showcaseOverlay) showcaseOverlay.classList.remove('hidden');
+
+  const titleEl = document.getElementById('showcase-castle-title');
+  if (titleEl) {
+    titleEl.textContent = PREMADE_MAPS[mapKey].name || 'Castle Showcase';
+  }
+
+  // Setup majestic camera framing & auto-rotation
+  setViewMode('orbit');
+  orbitControls.target.set(0, 16, 0);
+  camera.position.set(0, 32, 60);
+  camera.lookAt(0, 16, 0);
+  orbitControls.autoRotate = true;
+  orbitControls.autoRotateSpeed = 0.8;
+
+  setCastleSky('day');
+
+  const spinBtn = document.getElementById('btn-showcase-spin');
+  if (spinBtn) spinBtn.classList.add('active');
+
+  const modal = document.getElementById('modal-maps');
+  if (modal) modal.classList.add('hidden');
+
+  sounds.playMagicChime();
+}
+
+async function triggerMinecraftDownload(filePath, filename, type = 'world') {
+  sounds.playMagicChime();
+
+  // Show Helper Modal with title
+  const modalHelper = document.getElementById('modal-mc-helper');
+  const helperTitle = document.getElementById('mc-helper-title');
+  if (helperTitle) helperTitle.textContent = `📥 Downloading ${filename}...`;
+  if (modalHelper) modalHelper.classList.remove('hidden');
+
+  // Trigger browser download via anchor (direct download to tablet)
+  const a = document.createElement('a');
+  a.href = filePath;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Fetch blob in background to support native share sheet button
+  try {
+    const resp = await fetch(filePath);
+    if (resp.ok) {
+      lastDownloadedBlob = await resp.blob();
+      lastDownloadedFilename = filename;
+    }
+  } catch (e) {
+    // Direct anchor download is already in progress
+  }
+}
+
+// 3D Castle Showcase View Buttons
 document.querySelectorAll('.btn-view-castle-3d').forEach((btn) => {
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
     e.preventDefault();
     const mapKey = btn.dataset.map;
-    if (mapKey && PREMADE_MAPS[mapKey]) {
-      if (window.switchAppView) {
-        window.switchAppView('world');
-      }
-      PREMADE_MAPS[mapKey].generate(world);
-      setViewMode('orbit');
-      resetCameraView();
-      autoSaveWorld();
-      const modal = document.getElementById('modal-maps');
-      if (modal) modal.classList.add('hidden');
-      sounds.playMagicChime();
-    }
+    const card = btn.closest('.bedrock-card');
+    const dlFile = card?.dataset.dlFile;
+    const dlName = card?.dataset.dlName;
+    openCastleShowcase(mapKey, dlFile, dlName);
   });
 });
 
-// Real Minecraft Bedrock Castles & Add-ons 1-Tap Download / Open
+// Real Minecraft Bedrock Castles & Add-ons 1-Tap Download
 document.querySelectorAll('.bedrock-card').forEach((card) => {
   card.style.cursor = 'pointer';
   card.addEventListener('click', async (e) => {
-    // If clicked on the 3D view button, ignore download
     if (e.target.closest('.btn-view-castle-3d')) return;
-    // If card has dual actions, only download when clicking download button or card background
     if (card.querySelector('.btn-view-castle-3d') && !e.target.closest('.btn-dl-bedrock-asset') && e.target.tagName === 'BUTTON') {
       return;
     }
@@ -479,31 +587,90 @@ document.querySelectorAll('.bedrock-card').forEach((card) => {
     const type = card.dataset.dlType;
     if (!filePath || !filename) return;
 
-    sounds.playMagicChime();
-    const btn = card.querySelector('.btn-dl-bedrock-asset');
-    const originalText = btn ? btn.textContent : '';
-    if (btn) btn.textContent = '⏳ Opening in Minecraft...';
-
-    try {
-      const resp = await fetch(filePath);
-      if (!resp.ok) throw new Error('File not found');
-      const blob = await resp.blob();
-      const mimeType = type === 'world' ? 'application/vnd.minecraft.world' : 'application/octet-stream';
-      await shareOrDownloadFile(blob, filename, mimeType);
-    } catch (err) {
-      console.error('Failed to open Minecraft asset:', err);
-      // Fallback: direct browser navigation to download link
-      const a = document.createElement('a');
-      a.href = filePath;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    } finally {
-      if (btn) btn.textContent = originalText;
-    }
+    await triggerMinecraftDownload(filePath, filename, type);
   });
 });
+
+// Showcase Overlay: Back button
+const btnShowcaseBack = document.getElementById('btn-showcase-back');
+if (btnShowcaseBack) {
+  btnShowcaseBack.addEventListener('click', () => {
+    orbitControls.autoRotate = false;
+    const worldMakerEl = document.getElementById('view-world-maker');
+    if (worldMakerEl) worldMakerEl.classList.remove('showcase-mode');
+    const showcaseOverlay = document.getElementById('castle-showcase-overlay');
+    if (showcaseOverlay) showcaseOverlay.classList.add('hidden');
+    setCastleSky('day');
+    const modal = document.getElementById('modal-maps');
+    if (modal) modal.classList.remove('hidden');
+    sounds.playPop();
+  });
+}
+
+// Showcase Overlay: Auto-Spin button
+const btnShowcaseSpin = document.getElementById('btn-showcase-spin');
+if (btnShowcaseSpin) {
+  btnShowcaseSpin.addEventListener('click', () => {
+    orbitControls.autoRotate = !orbitControls.autoRotate;
+    orbitControls.autoRotateSpeed = 0.8;
+    btnShowcaseSpin.classList.toggle('active', orbitControls.autoRotate);
+    sounds.playPop();
+  });
+}
+
+// Showcase Overlay: Sky / Lighting button
+const btnShowcaseSky = document.getElementById('btn-showcase-sky');
+if (btnShowcaseSky) {
+  btnShowcaseSky.addEventListener('click', () => {
+    if (showcaseSkyState === 'day') setCastleSky('sunset');
+    else if (showcaseSkyState === 'sunset') setCastleSky('night');
+    else setCastleSky('day');
+    sounds.playPop();
+  });
+}
+
+// Showcase Overlay: Customize in Builder Mode
+const btnShowcaseEdit = document.getElementById('btn-showcase-edit');
+if (btnShowcaseEdit) {
+  btnShowcaseEdit.addEventListener('click', () => {
+    orbitControls.autoRotate = false;
+    const worldMakerEl = document.getElementById('view-world-maker');
+    if (worldMakerEl) worldMakerEl.classList.remove('showcase-mode');
+    const showcaseOverlay = document.getElementById('castle-showcase-overlay');
+    if (showcaseOverlay) showcaseOverlay.classList.add('hidden');
+    sounds.playPop();
+  });
+}
+
+// Showcase Overlay: Open in Minecraft
+const btnShowcaseMC = document.getElementById('btn-showcase-mc');
+if (btnShowcaseMC) {
+  btnShowcaseMC.addEventListener('click', () => {
+    if (activeCastleFile && activeCastleFilename) {
+      triggerMinecraftDownload(activeCastleFile, activeCastleFilename, 'world');
+    }
+  });
+}
+
+// Minecraft Helper Modal: OK Button
+const btnMcHelperOk = document.getElementById('btn-mc-helper-ok');
+if (btnMcHelperOk) {
+  btnMcHelperOk.addEventListener('click', () => {
+    const modal = document.getElementById('modal-mc-helper');
+    if (modal) modal.classList.add('hidden');
+    sounds.playPop();
+  });
+}
+
+// Minecraft Helper Modal: Share Sheet Button
+const btnMcHelperShare = document.getElementById('btn-mc-helper-share');
+if (btnMcHelperShare) {
+  btnMcHelperShare.addEventListener('click', async () => {
+    if (lastDownloadedBlob && lastDownloadedFilename) {
+      await shareOrDownloadFile(lastDownloadedBlob, lastDownloadedFilename, 'application/vnd.minecraft.world');
+    }
+  });
+}
 
 // Import Heightmap Image
 const inputHeightmap = document.getElementById('input-heightmap');

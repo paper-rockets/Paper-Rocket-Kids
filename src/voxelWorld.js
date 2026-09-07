@@ -76,6 +76,16 @@ export class VoxelWorld {
     this.rebuildMesh();
   }
 
+  resize(sizeX = 48, sizeY = 32, sizeZ = 48) {
+    this.sizeX = sizeX;
+    this.sizeY = sizeY;
+    this.sizeZ = sizeZ;
+    this.blocks = new Uint8Array(sizeX * sizeY * sizeZ);
+    this.history = [];
+    this.historyIndex = -1;
+    this.rebuildMesh();
+  }
+
   saveState() {
     // Keep max 15 undo steps
     if (this.historyIndex < this.history.length - 1) {
