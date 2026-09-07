@@ -77,8 +77,24 @@ export class TextureManager {
     }, 600);
   }
 
+  loadPrincess() {
+    this.wardrobe.setOutfit('outfit_princess');
+    this.wardrobe.set('skinTone', 'soft_fair');
+    this.wardrobe.set('hairStyle', 'long_waves');
+    this.wardrobe.set('hairColor', 'honey_blonde');
+    this.wardrobe.set('eyeColor', 'violet');
+    this.wardrobe.compose(this.ctx);
+    this.update();
+    this.saveState();
+  }
+
   loadFromLocalStorage() {
     try {
+      if (localStorage.getItem('minecraft_skin_v2') !== 'true') {
+        localStorage.removeItem('minecraft_skin_autosave');
+        localStorage.setItem('minecraft_skin_v2', 'true');
+        return Promise.resolve(false);
+      }
       const saved = localStorage.getItem('minecraft_skin_autosave');
       if (saved && saved.startsWith('data:image/png')) {
         return this.loadFromUrl(saved);

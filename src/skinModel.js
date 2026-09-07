@@ -16,6 +16,7 @@ export class SkinModel {
     this.pivots = {};
     this.overlayVisible = true;
     this.animationState = 'stand';
+    this.modelType = 'slim'; // Default to girl/princess slim model (3px arms)
 
     this.initMaterials();
     this.buildModel();
@@ -38,6 +39,11 @@ export class SkinModel {
   }
 
   buildModel() {
+    const isSlim = this.modelType === 'slim';
+    const armWidth = isSlim ? 3 : 4;
+    const rightArmPivotX = isSlim ? -5.5 : -6;
+    const leftArmPivotX = isSlim ? 5.5 : 6;
+
     const partDefs = {
       head: {
         w: 8, h: 8, d: 8,
@@ -54,17 +60,17 @@ export class SkinModel {
         meshOffset: [0, 6, 0]
       },
       rightArm: {
-        w: 4, h: 12, d: 4,
+        w: armWidth, h: 12, d: 4,
         baseUV: { ox: 40, oy: 16 },
         overUV: { ox: 40, oy: 32 },
-        pivotPos: [-6, 22, 0],
+        pivotPos: [rightArmPivotX, 22, 0],
         meshOffset: [0, -4, 0]
       },
       leftArm: {
-        w: 4, h: 12, d: 4,
+        w: armWidth, h: 12, d: 4,
         baseUV: { ox: 32, oy: 48 },
         overUV: { ox: 48, oy: 48 },
-        pivotPos: [6, 22, 0],
+        pivotPos: [leftArmPivotX, 22, 0],
         meshOffset: [0, -4, 0]
       },
       rightLeg: {
@@ -114,6 +120,38 @@ export class SkinModel {
   setAnimation(anim) {
     this.animationState = anim;
     this.resetPose();
+  }
+
+  setModelType(type = 'slim') {
+    if (this.modelType === type) return;
+    this.modelType = type;
+
+    const isSlim = type === 'slim';
+    const armWidth = isSlim ? 3 : 4;
+    const rightPivotX = isSlim ? -5.5 : -6;
+    const leftPivotX = isSlim ? 5.5 : 6;
+
+    if (this.pivots.rightArm && this.parts.rightArm && this.overlays.rightArm) {
+      this.pivots.rightArm.position.x = rightPivotX;
+      const baseUVs = getMinecraftCuboidUVs(40, 16, armWidth, 12, 4);
+      this.parts.rightArm.geometry.dispose();
+      this.parts.rightArm.geometry = createMinecraftBoxGeometry(armWidth, 12, 4, baseUVs, 0);
+
+      const overUVs = getMinecraftCuboidUVs(40, 32, armWidth, 12, 4);
+      this.overlays.rightArm.geometry.dispose();
+      this.overlays.rightArm.geometry = createMinecraftBoxGeometry(armWidth, 12, 4, overUVs, 0.5);
+    }
+
+    if (this.pivots.leftArm && this.parts.leftArm && this.overlays.leftArm) {
+      this.pivots.leftArm.position.x = leftPivotX;
+      const baseUVs = getMinecraftCuboidUVs(32, 48, armWidth, 12, 4);
+      this.parts.leftArm.geometry.dispose();
+      this.parts.leftArm.geometry = createMinecraftBoxGeometry(armWidth, 12, 4, baseUVs, 0);
+
+      const overUVs = getMinecraftCuboidUVs(48, 48, armWidth, 12, 4);
+      this.overlays.leftArm.geometry.dispose();
+      this.overlays.leftArm.geometry = createMinecraftBoxGeometry(armWidth, 12, 4, overUVs, 0.5);
+    }
   }
 
   resetPose() {

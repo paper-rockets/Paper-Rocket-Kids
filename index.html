@@ -140,33 +140,41 @@
 
             <!-- Tab 0: Wardrobe & Hair Studio -->
             <div id="tab-wardrobe" class="studio-tab-content active">
+              <div class="shader-category-title">👤 Character Model & Gender</div>
+              <div class="model-gender-row">
+                <button class="model-gender-btn active" data-gender="girl" data-model="slim" id="btn-model-girl">👧 Girl (Slim 3px Alex)</button>
+                <button class="model-gender-btn" data-gender="boy" data-model="classic" id="btn-model-boy">👦 Boy (Classic 4px Steve)</button>
+              </div>
+
               <div class="shader-category-title">🎨 Skin Tone</div>
               <div class="skin-tone-row">
                 <button class="skin-tone-btn" data-tone="deep_cocoa" style="background:#3B2219" title="Deep Cocoa"></button>
                 <button class="skin-tone-btn" data-tone="warm_espresso" style="background:#583623" title="Warm Espresso"></button>
-                <button class="skin-tone-btn active" data-tone="caramel_bronze" style="background:#875635" title="Caramel Bronze"></button>
+                <button class="skin-tone-btn" data-tone="caramel_bronze" style="background:#875635" title="Caramel Bronze"></button>
                 <button class="skin-tone-btn" data-tone="honey_almond" style="background:#B57D56" title="Honey Almond"></button>
                 <button class="skin-tone-btn" data-tone="warm_peach" style="background:#DE9F78" title="Warm Peach"></button>
-                <button class="skin-tone-btn" data-tone="soft_fair" style="background:#F8D3B4" title="Soft Fair"></button>
+                <button class="skin-tone-btn active" data-tone="soft_fair" style="background:#F8D3B4" title="Soft Fair"></button>
               </div>
-              <div id="active-tone-label" class="tone-label">Skin: Caramel Bronze</div>
+              <div id="active-tone-label" class="tone-label">Skin: Soft Fair</div>
 
               <div class="shader-category-title">💇‍♀️ Hairstyle & Texture</div>
               <div class="preset-btn-grid" id="grid-hairstyles">
-                <button class="wardrobe-btn active" data-type="hairStyle" data-val="afro_puffs">🪐 Afro Space Buns</button>
+                <button class="wardrobe-btn active" data-type="hairStyle" data-val="long_waves">🌊 Long Waves</button>
+                <button class="wardrobe-btn" data-type="hairStyle" data-val="afro_puffs">🪐 Afro Space Buns</button>
                 <button class="wardrobe-btn" data-type="hairStyle" data-val="box_braids">👑 Box Braids</button>
                 <button class="wardrobe-btn" data-type="hairStyle" data-val="curly_puff">☁️ Curly High Puff</button>
-                <button class="wardrobe-btn" data-type="hairStyle" data-val="long_waves">🌊 Long Waves</button>
                 <button class="wardrobe-btn" data-type="hairStyle" data-val="bob_bangs">💇‍♀️ Bob & Bangs</button>
                 <button class="wardrobe-btn" data-type="hairStyle" data-val="short_coils">🌀 Short Coils</button>
+                <button class="wardrobe-btn" data-type="hairStyle" data-val="short_messy">⚡ Messy Spikes</button>
+                <button class="wardrobe-btn" data-type="hairStyle" data-val="classic_part">🗡️ Classic Hero</button>
               </div>
 
               <div class="shader-category-title">🎨 Hair Color</div>
               <div class="swatch-row" id="row-hair-colors">
-                <button class="hair-color-btn active" data-color="natural_black" style="background:#191514" title="Natural Black"></button>
+                <button class="hair-color-btn active" data-color="honey_blonde" style="background:#D4A045" title="Honey Blonde"></button>
+                <button class="hair-color-btn" data-color="natural_black" style="background:#191514" title="Natural Black"></button>
                 <button class="hair-color-btn" data-color="dark_chocolate" style="background:#362118" title="Dark Chocolate"></button>
                 <button class="hair-color-btn" data-color="chestnut_brown" style="background:#593623" title="Chestnut Brown"></button>
-                <button class="hair-color-btn" data-color="honey_blonde" style="background:#D4A045" title="Honey Blonde"></button>
                 <button class="hair-color-btn" data-color="pastel_pink" style="background:#F472B6" title="Pastel Pink"></button>
                 <button class="hair-color-btn" data-color="electric_purple" style="background:#9333EA" title="Electric Purple"></button>
                 <button class="hair-color-btn" data-color="cherry_red" style="background:#DC2626" title="Cherry Red"></button>
@@ -175,11 +183,11 @@
 
               <div class="shader-category-title">👁️ Eye Color</div>
               <div class="swatch-row" id="row-eye-colors">
-                <button class="eye-color-btn active" data-color="deep_brown" style="background:#2E190E" title="Brown"></button>
+                <button class="eye-color-btn active" data-color="violet" style="background:#7C3AED" title="Violet"></button>
+                <button class="eye-color-btn" data-color="deep_brown" style="background:#2E190E" title="Brown"></button>
                 <button class="eye-color-btn" data-color="hazel" style="background:#5E4122" title="Hazel"></button>
                 <button class="eye-color-btn" data-color="ocean_blue" style="background:#2563EB" title="Blue"></button>
                 <button class="eye-color-btn" data-color="emerald" style="background:#059669" title="Emerald"></button>
-                <button class="eye-color-btn" data-color="violet" style="background:#7C3AED" title="Violet"></button>
               </div>
 
                             <!-- 1-Tap Outfits Carousel -->
@@ -191,7 +199,19 @@
                 </div>
               </div>
               <div class="outfit-carousel-track" id="track-complete-outfits">
-                <div class="outfit-card active" data-outfit="outfit_strawberry">
+                <div class="outfit-card active" data-outfit="outfit_princess">
+                  <span class="outfit-badge">Royal</span>
+                  <div class="outfit-card-icon">👑</div>
+                  <div class="outfit-card-name">Royal Princess</div>
+                  <div class="outfit-card-desc">Ballroom gown & golden tiara</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_hero">
+                  <span class="outfit-badge">Hero</span>
+                  <div class="outfit-card-icon">⚔️</div>
+                  <div class="outfit-card-name">Hero Explorer</div>
+                  <div class="outfit-card-desc">Bomber jacket, jeans & boots</div>
+                </div>
+                <div class="outfit-card" data-outfit="outfit_strawberry">
                   <span class="outfit-badge">Trending</span>
                   <div class="outfit-card-icon">🍓</div>
                   <div class="outfit-card-name">Strawberry Milk</div>
@@ -257,12 +277,6 @@
                   <div class="outfit-card-name">Dino Onesie</div>
                   <div class="outfit-card-desc">Teal dino pajama onesie</div>
                 </div>
-                <div class="outfit-card" data-outfit="outfit_princess">
-                  <span class="outfit-badge">Royal</span>
-                  <div class="outfit-card-icon">👑</div>
-                  <div class="outfit-card-name">Royal Princess</div>
-                  <div class="outfit-card-desc">Ballroom gown & golden tiara</div>
-                </div>
                 <div class="outfit-card" data-outfit="outfit_cyber">
                   <span class="outfit-badge">Gamer</span>
                   <div class="outfit-card-icon">🎮</div>
@@ -286,7 +300,8 @@
               <!-- Mix & Match Sections -->
               <div class="shader-category-title">👚 Tops & Hoodies (17)</div>
               <div class="chip-carousel-track" id="track-tops">
-                <button class="wardrobe-chip active" data-type="top" data-val="hoodie_strawberry">🍓 Strawberry Hoodie</button>
+                <button class="wardrobe-chip active" data-type="top" data-val="princess_gown">👑 Princess Top</button>
+                <button class="wardrobe-chip" data-type="top" data-val="hoodie_strawberry">🍓 Strawberry Hoodie</button>
                 <button class="wardrobe-chip" data-type="top" data-val="hoodie_froggy">🐸 Froggy Mint</button>
                 <button class="wardrobe-chip" data-type="top" data-val="sweater_matcha">🍵 Matcha Boba</button>
                 <button class="wardrobe-chip" data-type="top" data-val="cardigan_lavender">💜 Lavender Cloud</button>
@@ -300,14 +315,14 @@
                 <button class="wardrobe-chip" data-type="top" data-val="hoodie_pink">💖 Pink Cozy</button>
                 <button class="wardrobe-chip" data-type="top" data-val="hoodie_black">🖤 Black Street</button>
                 <button class="wardrobe-chip" data-type="top" data-val="graphic_tee_heart">👕 Heart T-Shirt</button>
-                <button class="wardrobe-chip" data-type="top" data-val="princess_gown">👑 Princess Top</button>
                 <button class="wardrobe-chip" data-type="top" data-val="denim_jacket">🧥 Denim Jacket</button>
                 <button class="wardrobe-chip" data-type="top" data-val="rainbow_sweater">🌈 Rainbow Knit</button>
               </div>
 
               <div class="shader-category-title">👖 Bottoms & Skirts (14)</div>
               <div class="chip-carousel-track" id="track-bottoms">
-                <button class="wardrobe-chip active" data-type="bottom" data-val="skirt_tennis">🎾 Tennis Skirt</button>
+                <button class="wardrobe-chip active" data-type="bottom" data-val="princess_skirt">👑 Princess Skirt</button>
+                <button class="wardrobe-chip" data-type="bottom" data-val="skirt_tennis">🎾 Tennis Skirt</button>
                 <button class="wardrobe-chip" data-type="bottom" data-val="overalls_pants">👖 Overall Pants</button>
                 <button class="wardrobe-chip" data-type="bottom" data-val="cargo_pants">🎒 Cargo Pants</button>
                 <button class="wardrobe-chip" data-type="bottom" data-val="skirt_lavender">💜 Lavender Skirt</button>
@@ -318,25 +333,24 @@
                 <button class="wardrobe-chip" data-type="bottom" data-val="jeans_blue">👖 Blue Jeans</button>
                 <button class="wardrobe-chip" data-type="bottom" data-val="jeans_black">🖤 Black Jeans</button>
                 <button class="wardrobe-chip" data-type="bottom" data-val="skater_skirt">💜 Pleated Skirt</button>
-                <button class="wardrobe-chip" data-type="bottom" data-val="princess_skirt">👑 Princess Skirt</button>
                 <button class="wardrobe-chip" data-type="bottom" data-val="shorts_denim">🩳 Denim Shorts</button>
                 <button class="wardrobe-chip" data-type="bottom" data-val="pastel_joggers">🏃‍♀️ Pastel Joggers</button>
               </div>
 
               <div class="shader-category-title">👟 Shoes (4)</div>
               <div class="chip-carousel-track" id="track-shoes">
-                <button class="wardrobe-chip active" data-type="shoes" data-val="sneakers_white">👟 High-Top Sneakers</button>
+                <button class="wardrobe-chip active" data-type="shoes" data-val="slippers_royal">🥿 Royal Slippers</button>
+                <button class="wardrobe-chip" data-type="shoes" data-val="sneakers_white">👟 High-Top Sneakers</button>
                 <button class="wardrobe-chip" data-type="shoes" data-val="boots_black">🥾 Combat Boots</button>
-                <button class="wardrobe-chip" data-type="shoes" data-val="slippers_royal">🥿 Royal Slippers</button>
                 <button class="wardrobe-chip" data-type="shoes" data-val="sandals_summer">👡 Summer Sandals</button>
               </div>
 
               <div class="shader-category-title">✨ 3D Accessories (5)</div>
               <div class="chip-carousel-track" id="track-accessories">
+                <button class="wardrobe-chip active" data-type="accessory" data-val="princess_tiara">👑 Golden Tiara</button>
                 <button class="wardrobe-chip" data-type="accessory" data-val="cat_headphones">🎧 Cat Headphones</button>
                 <button class="wardrobe-chip" data-type="accessory" data-val="flower_crown">🌸 Flower Crown</button>
-                <button class="wardrobe-chip" data-type="accessory" data-val="princess_tiara">👑 Golden Tiara</button>
-                <button class="wardrobe-chip active" data-type="accessory" data-val="heart_glasses">🕶️ Heart Glasses</button>
+                <button class="wardrobe-chip" data-type="accessory" data-val="heart_glasses">🕶️ Heart Glasses</button>
                 <button class="wardrobe-chip" data-type="accessory" data-val="none">❌ None</button>
               </div>
 
@@ -894,7 +908,10 @@
                 </div>
                 <h3>Pink Castle</h3>
                 <p>Magical pink fairytale castle with grand towers, gardens, and royal decor.</p>
-                <button class="btn btn-accent btn-dl-bedrock-asset">🚀 1-Tap Open in Minecraft</button>
+                <div class="bedrock-actions-row">
+                  <button class="btn btn-view-castle-3d" data-map="pink_castle">🏰 View in 3D</button>
+                  <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
+                </div>
               </div>
 
               <div class="bedrock-card" data-dl-file="./worlds/medieval_castle.mcworld" data-dl-name="Medieval Worldcraft Castle.mcworld" data-dl-type="world">
@@ -904,7 +921,10 @@
                 </div>
                 <h3>Medieval Castle</h3>
                 <p>Massive stone fortress with battle towers, moat, courtyard, and dungeons.</p>
-                <button class="btn btn-accent btn-dl-bedrock-asset">🚀 1-Tap Open in Minecraft</button>
+                <div class="bedrock-actions-row">
+                  <button class="btn btn-view-castle-3d" data-map="medieval_castle">🏰 View in 3D</button>
+                  <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
+                </div>
               </div>
 
               <div class="bedrock-card" data-dl-file="./worlds/fantasy_castle.mcworld" data-dl-name="Fantasy Castle - v1.2 (Hardcore Mode).mcworld" data-dl-type="world">
@@ -914,7 +934,10 @@
                 </div>
                 <h3>Fantasy Castle</h3>
                 <p>Epic mountain realm with towering peaks, grand bridges, and adventure lands.</p>
-                <button class="btn btn-accent btn-dl-bedrock-asset">🚀 1-Tap Open in Minecraft</button>
+                <div class="bedrock-actions-row">
+                  <button class="btn btn-view-castle-3d" data-map="fantasy_castle">🏰 View in 3D</button>
+                  <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
+                </div>
               </div>
 
               <div class="bedrock-card" data-dl-file="./worlds/proj64.mcworld" data-dl-name="PROJ 64 Peach's Castle.mcworld" data-dl-type="world">
@@ -924,7 +947,10 @@
                 </div>
                 <h3>Peach's Castle (Super Mario 64)</h3>
                 <p>Play inside Peach's Castle with custom music, paintings, and royal courtyards!</p>
-                <button class="btn btn-accent btn-dl-bedrock-asset">🚀 1-Tap Open in Minecraft</button>
+                <div class="bedrock-actions-row">
+                  <button class="btn btn-view-castle-3d" data-map="proj64">🏰 View in 3D</button>
+                  <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
+                </div>
               </div>
 
               <!-- Add-ons -->
@@ -1005,6 +1031,30 @@
               <span class="section-subtitle">Load inside the browser to sculpt, build, and customize</span>
             </div>
             <div class="map-cards">
+              <div class="map-card" data-map="pink_castle">
+                <div class="theme-icon">🌸</div>
+                <h3>Pink Fairytale Castle</h3>
+                <p>Fairytale palace with pink towers, quartz courtyards, rose gardens, and royal throne room.</p>
+                <button class="btn btn-magic">Load & Explore in 3D</button>
+              </div>
+              <div class="map-card" data-map="medieval_castle">
+                <div class="theme-icon">🏰</div>
+                <h3>Medieval Fortress Castle</h3>
+                <p>Massive stone fortress with 4 watchtowers, courtyard well, ramparts, and central keep.</p>
+                <button class="btn btn-primary">Load & Explore in 3D</button>
+              </div>
+              <div class="map-card" data-map="fantasy_castle">
+                <div class="theme-icon">🏔️</div>
+                <h3>Fantasy Mountain Citadel</h3>
+                <p>Soaring mountain citadel with arched stone bridge, flowing waterfall, and crystal spires.</p>
+                <button class="btn btn-primary">Load & Explore in 3D</button>
+              </div>
+              <div class="map-card" data-map="proj64">
+                <div class="theme-icon">🍄</div>
+                <h3>Peach's Castle (SM64)</h3>
+                <p>Super Mario 64 Peach's Castle with front bridge, stained glass window, and red towers.</p>
+                <button class="btn btn-magic">Load & Explore in 3D</button>
+              </div>
               <div class="map-card" data-map="fairy_castle">
                 <div class="theme-icon">👑</div>
                 <h3>Fairy Princess Palace</h3>

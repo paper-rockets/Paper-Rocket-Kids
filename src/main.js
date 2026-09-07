@@ -441,10 +441,38 @@ document.querySelectorAll('.map-card').forEach((card) => {
   });
 });
 
+// 3D Castle Exploration Viewer Buttons (Loads procedural 3D castle in browser)
+document.querySelectorAll('.btn-view-castle-3d').forEach((btn) => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    const mapKey = btn.dataset.map;
+    if (mapKey && PREMADE_MAPS[mapKey]) {
+      if (window.switchAppView) {
+        window.switchAppView('world');
+      }
+      PREMADE_MAPS[mapKey].generate(world);
+      setViewMode('orbit');
+      resetCameraView();
+      autoSaveWorld();
+      const modal = document.getElementById('modal-maps');
+      if (modal) modal.classList.add('hidden');
+      sounds.playMagicChime();
+    }
+  });
+});
+
 // Real Minecraft Bedrock Castles & Add-ons 1-Tap Download / Open
 document.querySelectorAll('.bedrock-card').forEach((card) => {
   card.style.cursor = 'pointer';
   card.addEventListener('click', async (e) => {
+    // If clicked on the 3D view button, ignore download
+    if (e.target.closest('.btn-view-castle-3d')) return;
+    // If card has dual actions, only download when clicking download button or card background
+    if (card.querySelector('.btn-view-castle-3d') && !e.target.closest('.btn-dl-bedrock-asset') && e.target.tagName === 'BUTTON') {
+      return;
+    }
+
     e.preventDefault();
     const filePath = card.dataset.dlFile;
     const filename = card.dataset.dlName;
@@ -1040,14 +1068,14 @@ function initSkinStudio() {
     skinModel = new SkinModel(textureMgr.texture);
     skinScene.add(skinModel.group);
 
-    // Auto-load previously saved skin, or fallback to default preset (Afro Beauty)
+    // Auto-load previously saved skin, or fallback to default Royal Princess character
     textureMgr.loadFromLocalStorage().then((loaded) => {
       if (!loaded) {
-        return textureMgr.loadFromUrl('./presets/afro_beauty.png');
+        textureMgr.wardrobe.compose(textureMgr.ctx);
+        textureMgr.update();
       }
     }).catch(() => {
-      const wardrobe = new WardrobeEngine();
-      wardrobe.compose(textureMgr.ctx);
+      textureMgr.wardrobe.compose(textureMgr.ctx);
       textureMgr.update();
     });
 
@@ -1153,6 +1181,76 @@ function initSkinStudio() {
     // Wardrobe Interactive Controls:
     const wardrobe = textureMgr.wardrobe;
     const activeToneLabel = document.getElementById('active-tone-label');
+
+    // 0. Character Model & Gender Switcher (Girl / Slim vs Boy / Classic)
+    const btnModelGirl = document.getElementById('btn-model-girl');
+    const btnModelBoy = document.getElementById('btn-model-boy');
+
+    if (btnModelGirl && btnModelBoy) {
+      btnModelGirl.addEventListener('click', () => {
+        btnModelGirl.classList.add('active');
+        btnModelBoy.classList.remove('active');
+        skinModel.setModelType('slim');
+        wardrobe.setGender('girl');
+        // Sync UI active states for girl
+        const girlTopChip = viewSkinStudio.querySelector('.wardrobe-chip[data-type="top"][data-val="princess_gown"]');
+        if (girlTopChip) {
+          viewSkinStudio.querySelectorAll('#track-tops .wardrobe-chip').forEach(c => c.classList.remove('active'));
+          girlTopChip.classList.add('active');
+        }
+        const girlBottomChip = viewSkinStudio.querySelector('.wardrobe-chip[data-type="bottom"][data-val="princess_skirt"]');
+        if (girlBottomChip) {
+          viewSkinStudio.querySelectorAll('#track-bottoms .wardrobe-chip').forEach(c => c.classList.remove('active'));
+          girlBottomChip.classList.add('active');
+        }
+        const girlTiara = viewSkinStudio.querySelector('.wardrobe-chip[data-type="accessory"][data-val="princess_tiara"]');
+        if (girlTiara) {
+          viewSkinStudio.querySelectorAll('#track-accessories .wardrobe-chip').forEach(c => c.classList.remove('active'));
+          girlTiara.classList.add('active');
+        }
+        const girlHair = viewSkinStudio.querySelector('.wardrobe-btn[data-type="hairStyle"][data-val="long_waves"]');
+        if (girlHair) {
+          viewSkinStudio.querySelectorAll('#grid-hairstyles .wardrobe-btn').forEach(b => b.classList.remove('active'));
+          girlHair.classList.add('active');
+        }
+        wardrobe.compose(textureMgr.ctx);
+        textureMgr.update();
+        textureMgr.saveState();
+        sounds.playPop();
+      });
+
+      btnModelBoy.addEventListener('click', () => {
+        btnModelBoy.classList.add('active');
+        btnModelGirl.classList.remove('active');
+        skinModel.setModelType('classic');
+        wardrobe.setGender('boy');
+        // Sync UI active states for boy
+        const boyTopChip = viewSkinStudio.querySelector('.wardrobe-chip[data-type="top"][data-val="varsity_jacket"]');
+        if (boyTopChip) {
+          viewSkinStudio.querySelectorAll('#track-tops .wardrobe-chip').forEach(c => c.classList.remove('active'));
+          boyTopChip.classList.add('active');
+        }
+        const boyBottomChip = viewSkinStudio.querySelector('.wardrobe-chip[data-type="bottom"][data-val="jeans_blue"]');
+        if (boyBottomChip) {
+          viewSkinStudio.querySelectorAll('#track-bottoms .wardrobe-chip').forEach(c => c.classList.remove('active'));
+          boyBottomChip.classList.add('active');
+        }
+        const boyAccNone = viewSkinStudio.querySelector('.wardrobe-chip[data-type="accessory"][data-val="none"]');
+        if (boyAccNone) {
+          viewSkinStudio.querySelectorAll('#track-accessories .wardrobe-chip').forEach(c => c.classList.remove('active'));
+          boyAccNone.classList.add('active');
+        }
+        const boyHair = viewSkinStudio.querySelector('.wardrobe-btn[data-type="hairStyle"][data-val="short_messy"]');
+        if (boyHair) {
+          viewSkinStudio.querySelectorAll('#grid-hairstyles .wardrobe-btn').forEach(b => b.classList.remove('active'));
+          boyHair.classList.add('active');
+        }
+        wardrobe.compose(textureMgr.ctx);
+        textureMgr.update();
+        textureMgr.saveState();
+        sounds.playPop();
+      });
+    }
 
     // 1. Skin Tone Buttons
     viewSkinStudio.querySelectorAll('.skin-tone-btn').forEach((btn) => {
@@ -1446,6 +1544,8 @@ function initSkinStudio() {
       renderer.setSize(window.innerWidth, window.innerHeight);
     }
   }
+
+  window.switchAppView = switchView;
 
   if (btnSwitchSkin) btnSwitchSkin.addEventListener('click', () => switchView('skin'));
   if (btnSwitchWorld) btnSwitchWorld.addEventListener('click', () => switchView('world'));

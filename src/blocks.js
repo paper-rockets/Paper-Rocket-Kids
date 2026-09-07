@@ -174,6 +174,21 @@ function createBlockTexture(type) {
       ctx.fillText('TNT', 2, 10);
       break;
 
+    case 'pink_concrete':
+      fillNoise(244, 114, 182, 12);
+      break;
+
+    case 'purple_block':
+      fillNoise(147, 51, 234, 15);
+      break;
+
+    case 'quartz':
+      fillNoise(241, 245, 249, 8);
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(0, 0, 16, 16);
+      break;
+
     default:
       fillNoise(150, 150, 150, 20);
   }
@@ -204,7 +219,10 @@ export const BLOCKS = {
   DIAMOND: 14,
   BRICK: 15,
   GLOWSTONE: 16,
-  TNT: 17
+  TNT: 17,
+  PINK_CONCRETE: 18,
+  PURPLE_BLOCK: 19,
+  QUARTZ: 20
 };
 
 export const BLOCK_DEFS = {
@@ -361,6 +379,30 @@ export const BLOCK_DEFS = {
     icon: '🧨',
     color: '#d73723',
     texture: 'tnt'
+  },
+  [BLOCKS.PINK_CONCRETE]: {
+    id: BLOCKS.PINK_CONCRETE,
+    name: 'Pink Concrete',
+    bedrockName: 'minecraft:pink_concrete',
+    icon: '🌸',
+    color: '#f472b6',
+    texture: 'pink_concrete'
+  },
+  [BLOCKS.PURPLE_BLOCK]: {
+    id: BLOCKS.PURPLE_BLOCK,
+    name: 'Purple Block',
+    bedrockName: 'minecraft:purple_concrete',
+    icon: '💜',
+    color: '#9333ea',
+    texture: 'purple_block'
+  },
+  [BLOCKS.QUARTZ]: {
+    id: BLOCKS.QUARTZ,
+    name: 'Quartz Block',
+    bedrockName: 'minecraft:quartz_block',
+    icon: '🏛️',
+    color: '#f1f5f9',
+    texture: 'quartz'
   }
 };
 

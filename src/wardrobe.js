@@ -151,12 +151,14 @@ export const EYE_COLORS = [
 ];
 
 export const HAIR_STYLES = [
+  { id: 'long_waves', name: 'Long Waves' },
   { id: 'afro_puffs', name: 'Afro Space Buns' },
   { id: 'box_braids', name: 'Box Braids' },
   { id: 'curly_puff', name: 'Curly High Puff' },
-  { id: 'long_waves', name: 'Long Waves' },
   { id: 'bob_bangs', name: 'Bob & Bangs' },
-  { id: 'short_coils', name: 'Short Coils' }
+  { id: 'short_coils', name: 'Short Coils' },
+  { id: 'short_messy', name: 'Messy Spikes' },
+  { id: 'classic_part', name: 'Classic Hero' }
 ];
 
 export const TOPS = [
@@ -197,6 +199,28 @@ export const BOTTOMS = [
 ];
 
 export const COMPLETE_OUTFITS = [
+  {
+    id: 'outfit_princess',
+    name: 'Royal Princess',
+    tag: 'Royal',
+    icon: '👑',
+    top: 'princess_gown',
+    bottom: 'princess_skirt',
+    shoes: 'slippers_royal',
+    accessory: 'princess_tiara',
+    desc: 'Majestic sparkling ballroom gown & golden tiara'
+  },
+  {
+    id: 'outfit_hero',
+    name: 'Hero Explorer',
+    tag: 'Hero',
+    icon: '⚔️',
+    top: 'varsity_jacket',
+    bottom: 'jeans_blue',
+    shoes: 'boots_black',
+    accessory: 'none',
+    desc: 'Cool hero jacket, classic blue jeans & adventure boots'
+  },
   {
     id: 'outfit_strawberry',
     name: 'Strawberry Milk',
@@ -319,17 +343,6 @@ export const COMPLETE_OUTFITS = [
     desc: 'Teal dinosaur pajama onesie with spikes'
   },
   {
-    id: 'outfit_princess',
-    name: 'Royal Princess',
-    tag: 'Royal',
-    icon: '👑',
-    top: 'princess_gown',
-    bottom: 'princess_skirt',
-    shoes: 'slippers_royal',
-    accessory: 'princess_tiara',
-    desc: 'Majestic sparkling ballroom gown & golden tiara'
-  },
-  {
     id: 'outfit_cyber',
     name: 'Cyber Gamer',
     tag: 'Gamer',
@@ -382,15 +395,41 @@ export const ACCESSORIES = [
 export class WardrobeEngine {
   constructor() {
     this.current = {
-      skinTone: 'caramel_bronze',
-      hairStyle: 'afro_puffs',
-      hairColor: 'natural_black',
-      eyeColor: 'deep_brown',
-      top: 'hoodie_pink',
-      bottom: 'jeans_blue',
-      shoes: 'sneakers_white',
-      accessory: 'cat_headphones'
+      skinTone: 'soft_fair',
+      hairStyle: 'long_waves',
+      hairColor: 'honey_blonde',
+      eyeColor: 'violet',
+      top: 'princess_gown',
+      bottom: 'princess_skirt',
+      shoes: 'slippers_royal',
+      accessory: 'princess_tiara',
+      gender: 'girl',
+      modelType: 'slim'
     };
+  }
+
+  setGender(gender = 'girl') {
+    this.current.gender = gender;
+    this.current.modelType = gender === 'boy' ? 'classic' : 'slim';
+    if (gender === 'boy') {
+      if (this.current.top === 'princess_gown') {
+        this.current.top = 'varsity_jacket';
+        this.current.bottom = 'jeans_blue';
+        this.current.shoes = 'boots_black';
+        this.current.accessory = 'none';
+        this.current.hairStyle = 'short_messy';
+        this.current.hairColor = 'dark_chocolate';
+      }
+    } else {
+      if (this.current.top === 'varsity_jacket') {
+        this.current.top = 'princess_gown';
+        this.current.bottom = 'princess_skirt';
+        this.current.shoes = 'slippers_royal';
+        this.current.accessory = 'princess_tiara';
+        this.current.hairStyle = 'long_waves';
+        this.current.hairColor = 'honey_blonde';
+      }
+    }
   }
 
   set(key, value) {
@@ -711,6 +750,28 @@ export class WardrobeEngine {
           this.p(ctx, x + 1, y, h.shadow);
         }
       }
+    } else if (style === 'short_messy') {
+      // Messy layered spikes & fringe
+      this.fill(ctx, 8, 8, 8, 2, h.base);
+      this.p(ctx, 9, 10, h.base);
+      this.p(ctx, 11, 10, h.highlight);
+      this.p(ctx, 13, 10, h.base);
+      this.fill(ctx, 40, 0, 8, 8, h.base);
+      for (let x = 40; x < 48; x += 2) {
+        this.p(ctx, x, 0, h.highlight2);
+        this.p(ctx, x + 1, 1, h.shadow);
+      }
+      this.fill(ctx, 40, 8, 8, 2, h.base);
+      this.p(ctx, 42, 9, h.highlight);
+      this.p(ctx, 45, 9, h.highlight);
+    } else if (style === 'classic_part') {
+      // Classic side-part hero hair
+      this.fill(ctx, 8, 8, 8, 3, h.base);
+      this.fill(ctx, 9, 9, 6, 1, h.highlight);
+      this.p(ctx, 10, 8, h.dark);
+      this.p(ctx, 10, 9, h.dark);
+      this.fill(ctx, 40, 0, 8, 8, h.base);
+      this.fill(ctx, 40, 8, 8, 2, h.base);
     }
   }
 

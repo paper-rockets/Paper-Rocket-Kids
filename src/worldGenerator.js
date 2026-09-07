@@ -958,6 +958,509 @@ export const PREMADE_MAPS = {
       world.stampStructure(STAMPS.tree_oak, cx + 14, 6, cz + 12);
       world.rebuildMesh();
     }
+  },
+
+  pink_castle: {
+    name: '🌸 Pink Fairytale Castle',
+    generate: (world) => {
+      world.clear();
+      const sx = world.sizeX, sz = world.sizeZ;
+      const cx = Math.floor(sx / 2), cz = Math.floor(sz / 2);
+
+      // Moat and Royal Courtyard
+      for (let x = 0; x < sx; x++) {
+        for (let z = 0; z < sz; z++) {
+          const dist = Math.hypot(x - cx, z - cz);
+          let h = 4;
+          if (dist > 20) h = 2;
+          else if (dist > 15) h = 3; // Moat
+          else if (dist < 12) h = 6; // Raised royal courtyard
+
+          for (let y = 0; y <= 5; y++) {
+            if (y <= h) {
+              world.setBlock(x, y, z, y === h ? BLOCKS.GRASS : BLOCKS.DIRT, false);
+            } else if (dist > 15) {
+              world.setBlock(x, y, z, BLOCKS.WATER, false);
+            }
+          }
+        }
+      }
+
+      // Outer Palace Walls (16 x 16) in Pink Concrete & Quartz
+      const r = 8;
+      for (let dx = -r; dx <= r; dx++) {
+        for (let dz = -r; dz <= r; dz++) {
+          const isWall = (Math.abs(dx) === r || Math.abs(dz) === r);
+          const isCorner = (Math.abs(dx) >= r - 1 && Math.abs(dz) >= r - 1);
+          const x = cx + dx;
+          const z = cz + dz;
+
+          // Courtyard floor: quartz pathways and garden
+          if (!isWall) {
+            if (Math.abs(dx) <= 2 || Math.abs(dz) <= 2) {
+              world.setBlock(x, 6, z, BLOCKS.QUARTZ, false);
+            } else {
+              world.setBlock(x, 6, z, BLOCKS.WOOD_PLANKS, false);
+            }
+          }
+
+          // Exterior Pink Walls
+          if (isWall && !isCorner) {
+            for (let y = 7; y <= 11; y++) {
+              if ((y === 8 || y === 9) && (Math.abs(dx) % 3 === 0 || Math.abs(dz) % 3 === 0)) {
+                world.setBlock(x, y, z, BLOCKS.GLASS, false);
+              } else {
+                world.setBlock(x, y, z, BLOCKS.PINK_CONCRETE, false);
+              }
+            }
+            if ((dx + dz) % 2 === 0) {
+              world.setBlock(x, 12, z, BLOCKS.QUARTZ, false);
+            }
+          }
+        }
+      }
+
+      // 4 Pink Grand Spires at corners
+      const towerCorners = [
+        [cx - r, cz - r],
+        [cx + r, cz - r],
+        [cx - r, cz + r],
+        [cx + r, cz + r]
+      ];
+
+      for (const [tx, tz] of towerCorners) {
+        // Tower Shaft
+        for (let y = 6; y <= 15; y++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dz = -1; dz <= 1; dz++) {
+              world.setBlock(tx + dx, y, tz + dz, BLOCKS.PINK_CONCRETE, false);
+            }
+          }
+        }
+        // Quartz balcony trim
+        for (let dx = -2; dx <= 2; dx++) {
+          for (let dz = -2; dz <= 2; dz++) {
+            if (Math.abs(dx) === 2 || Math.abs(dz) === 2) {
+              world.setBlock(tx + dx, 15, tz + dz, BLOCKS.QUARTZ, false);
+            }
+          }
+        }
+        world.setBlock(tx, 15, tz, BLOCKS.GLOWSTONE, false);
+
+        // Purple & Gold Conical Spire Roof
+        for (let dy = 0; dy <= 4; dy++) {
+          const roofR = 2 - Math.floor(dy / 1.5);
+          for (let dx = -roofR; dx <= roofR; dx++) {
+            for (let dz = -roofR; dz <= roofR; dz++) {
+              if (Math.abs(dx) + Math.abs(dz) <= roofR + 1) {
+                world.setBlock(tx + dx, 16 + dy, tz + dz, BLOCKS.PURPLE_BLOCK, false);
+              }
+            }
+          }
+        }
+        world.setBlock(tx, 21, tz, BLOCKS.GOLD, false);
+        world.setBlock(tx, 22, tz, BLOCKS.DIAMOND, false);
+      }
+
+      // Central Grand Pink Keep & Throne Room
+      for (let dx = -4; dx <= 4; dx++) {
+        for (let dz = -4; dz <= 4; dz++) {
+          for (let y = 7; y <= 15; y++) {
+            if (Math.abs(dx) === 4 || Math.abs(dz) === 4) {
+              const isWin = (y === 9 || y === 10 || y === 13) && (Math.abs(dx) <= 2 && Math.abs(dz) <= 2);
+              world.setBlock(cx + dx, y, cz + dz, isWin ? BLOCKS.GLASS : BLOCKS.PINK_CONCRETE, false);
+            }
+          }
+        }
+      }
+
+      // Grand Purple Dome / Conical Roof
+      for (let dy = 0; dy <= 4; dy++) {
+        const domR = 4 - dy;
+        for (let dx = -domR; dx <= domR; dx++) {
+          for (let dz = -domR; dz <= domR; dz++) {
+            world.setBlock(cx + dx, 16 + dy, cz + dz, BLOCKS.PURPLE_BLOCK, false);
+          }
+        }
+      }
+      world.setBlock(cx, 21, cz, BLOCKS.GOLD, false);
+      world.setBlock(cx, 22, cz, BLOCKS.GLOWSTONE, false);
+
+      // Royal Princess Throne Room
+      for (let dz = -3; dz <= 3; dz++) {
+        world.setBlock(cx, 7, cz + dz, BLOCKS.PURPLE_BLOCK, false);
+      }
+      world.setBlock(cx, 7, cz - 3, BLOCKS.GOLD, false);
+      world.setBlock(cx, 8, cz - 3, BLOCKS.GOLD, false);
+      world.setBlock(cx - 1, 7, cz - 3, BLOCKS.DIAMOND, false);
+      world.setBlock(cx + 1, 7, cz - 3, BLOCKS.DIAMOND, false);
+      world.setBlock(cx, 9, cz - 3, BLOCKS.GLOWSTONE, false);
+
+      // Wooden Entrance Bridge across Moat
+      for (let dz = r + 1; dz <= 18; dz++) {
+        world.setBlock(cx - 1, 5, cz + dz, BLOCKS.WOOD_PLANKS, false);
+        world.setBlock(cx, 5, cz + dz, BLOCKS.WOOD_PLANKS, false);
+        world.setBlock(cx + 1, 5, cz + dz, BLOCKS.WOOD_PLANKS, false);
+      }
+      world.setBlock(cx - 1, 7, cz + r, BLOCKS.QUARTZ, false);
+      world.setBlock(cx - 1, 8, cz + r, BLOCKS.QUARTZ, false);
+      world.setBlock(cx + 1, 7, cz + r, BLOCKS.QUARTZ, false);
+      world.setBlock(cx + 1, 8, cz + r, BLOCKS.QUARTZ, false);
+      world.setBlock(cx, 9, cz + r, BLOCKS.GLOWSTONE, false);
+
+      // Rose Gardens & Fountains
+      world.setBlock(cx - 5, 7, cz + 2, BLOCKS.WATER, false);
+      world.setBlock(cx + 5, 7, cz + 2, BLOCKS.WATER, false);
+      world.setBlock(cx - 6, 7, cz + 2, BLOCKS.QUARTZ, false);
+      world.setBlock(cx + 6, 7, cz + 2, BLOCKS.QUARTZ, false);
+
+      world.setBlock(cx - 5, 7, cz - 5, BLOCKS.LEAVES, false);
+      world.setBlock(cx - 5, 8, cz - 5, BLOCKS.PINK_CONCRETE, false);
+      world.setBlock(cx + 5, 7, cz - 5, BLOCKS.LEAVES, false);
+      world.setBlock(cx + 5, 8, cz - 5, BLOCKS.PINK_CONCRETE, false);
+
+      world.stampStructure(STAMPS.tree_oak, cx - 11, 6, cz - 11);
+      world.stampStructure(STAMPS.tree_oak, cx + 9, 6, cz - 11);
+
+      world.rebuildMesh();
+    }
+  },
+
+  medieval_castle: {
+    name: '🏰 Medieval Fortress Castle',
+    generate: (world) => {
+      world.clear();
+      const sx = world.sizeX, sz = world.sizeZ;
+      const cx = Math.floor(sx / 2), cz = Math.floor(sz / 2);
+
+      // Hill and Deep Moat
+      for (let x = 0; x < sx; x++) {
+        for (let z = 0; z < sz; z++) {
+          const dist = Math.hypot(x - cx, z - cz);
+          let h = 4;
+          if (dist > 20) h = 2;
+          else if (dist > 15) h = 3; // Moat
+          else if (dist < 12) h = 6; // Raised stronghold mound
+
+          for (let y = 0; y <= 5; y++) {
+            if (y <= h) {
+              world.setBlock(x, y, z, y === h ? BLOCKS.GRASS : (y > 2 ? BLOCKS.DIRT : BLOCKS.STONE), false);
+            } else if (dist > 15) {
+              world.setBlock(x, y, z, BLOCKS.WATER, false);
+            }
+          }
+        }
+      }
+
+      // Heavy Cobblestone Curtain Walls (16x16)
+      const r = 8;
+      for (let dx = -r; dx <= r; dx++) {
+        for (let dz = -r; dz <= r; dz++) {
+          const isWall = (Math.abs(dx) === r || Math.abs(dz) === r);
+          const isCorner = (Math.abs(dx) >= r - 1 && Math.abs(dz) >= r - 1);
+          const x = cx + dx;
+          const z = cz + dz;
+
+          if (!isWall) {
+            world.setBlock(x, 6, z, (Math.abs(dx) % 2 === 0 && Math.abs(dz) % 2 === 0) ? BLOCKS.STONE : BLOCKS.COBBLESTONE, false);
+          }
+
+          if (isWall && !isCorner) {
+            for (let y = 7; y <= 11; y++) {
+              world.setBlock(x, y, z, BLOCKS.COBBLESTONE, false);
+            }
+            if ((dx + dz) % 2 === 0) {
+              world.setBlock(x, 12, z, BLOCKS.STONE, false);
+            }
+          }
+        }
+      }
+
+      // 4 Square Corner Watchtowers
+      const towers = [
+        [cx - r, cz - r],
+        [cx + r, cz - r],
+        [cx - r, cz + r],
+        [cx + r, cz + r]
+      ];
+
+      for (const [tx, tz] of towers) {
+        for (let y = 6; y <= 14; y++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dz = -1; dz <= 1; dz++) {
+              const isCorner = Math.abs(dx) === 1 && Math.abs(dz) === 1;
+              world.setBlock(tx + dx, y, tz + dz, isCorner ? BLOCKS.STONE : BLOCKS.COBBLESTONE, false);
+            }
+          }
+        }
+        for (let dx = -2; dx <= 2; dx++) {
+          for (let dz = -2; dz <= 2; dz++) {
+            if (Math.abs(dx) === 2 || Math.abs(dz) === 2) {
+              world.setBlock(tx + dx, 15, tz + dz, BLOCKS.STONE, false);
+            }
+          }
+        }
+        world.setBlock(tx, 15, tz, BLOCKS.GLOWSTONE, false);
+      }
+
+      // High Central Keep (Great Hall)
+      for (let dx = -3; dx <= 3; dx++) {
+        for (let dz = -3; dz <= 3; dz++) {
+          for (let y = 7; y <= 16; y++) {
+            if (Math.abs(dx) === 3 || Math.abs(dz) === 3) {
+              const isWin = (y === 10 || y === 13) && (Math.abs(dx) === 0 || Math.abs(dz) === 0);
+              world.setBlock(cx + dx, y, cz + dz, isWin ? BLOCKS.GLASS : BLOCKS.STONE, false);
+            }
+          }
+        }
+      }
+
+      // Wooden Roof on Keep
+      for (let dy = 0; dy <= 3; dy++) {
+        const roofR = 3 - dy;
+        for (let dx = -roofR; dx <= roofR; dx++) {
+          for (let dz = -roofR; dz <= roofR; dz++) {
+            world.setBlock(cx + dx, 17 + dy, cz + dz, BLOCKS.WOOD_PLANKS, false);
+          }
+        }
+      }
+      world.setBlock(cx, 21, cz, BLOCKS.GOLD, false);
+
+      // Wooden Gatehouse Drawbridge
+      for (let dz = r + 1; dz <= 18; dz++) {
+        world.setBlock(cx - 1, 5, cz + dz, BLOCKS.WOOD_PLANKS, false);
+        world.setBlock(cx, 5, cz + dz, BLOCKS.WOOD_PLANKS, false);
+        world.setBlock(cx + 1, 5, cz + dz, BLOCKS.WOOD_PLANKS, false);
+      }
+      world.setBlock(cx - 1, 7, cz + r, BLOCKS.COBBLESTONE, false);
+      world.setBlock(cx - 1, 8, cz + r, BLOCKS.COBBLESTONE, false);
+      world.setBlock(cx + 1, 7, cz + r, BLOCKS.COBBLESTONE, false);
+      world.setBlock(cx + 1, 8, cz + r, BLOCKS.COBBLESTONE, false);
+      world.setBlock(cx, 9, cz + r, BLOCKS.GLOWSTONE, false);
+
+      // Courtyard Well
+      world.setBlock(cx - 4, 7, cz, BLOCKS.COBBLESTONE, false);
+      world.setBlock(cx - 4, 8, cz, BLOCKS.WATER, false);
+      world.setBlock(cx + 4, 7, cz, BLOCKS.GOLD, false);
+
+      world.rebuildMesh();
+    }
+  },
+
+  fantasy_castle: {
+    name: '🏔️ Fantasy Mountain Citadel',
+    generate: (world) => {
+      world.clear();
+      const sx = world.sizeX, sz = world.sizeZ;
+      const cx = Math.floor(sx / 2), cz = Math.floor(sz / 2);
+
+      // Stepped Mountain Peaks & Valley Lake
+      for (let x = 0; x < sx; x++) {
+        for (let z = 0; z < sz; z++) {
+          const leftPeak = Math.hypot(x - (cx - 10), z - cz);
+          const rightPeak = Math.hypot(x - (cx + 10), z - cz);
+          const minPeak = Math.min(leftPeak, rightPeak);
+          let h = Math.max(3, Math.round(14 - minPeak * 0.8));
+
+          // Valley gorge in the middle
+          if (Math.abs(x - cx) < 3 && z > cz - 8 && z < cz + 8) {
+            h = 3;
+          }
+
+          for (let y = 0; y <= h; y++) {
+            let b = BLOCKS.STONE;
+            if (y === h) {
+              b = h >= 12 ? BLOCKS.SNOW : (h >= 6 ? BLOCKS.GRASS : BLOCKS.SAND);
+            } else if (y >= h - 2) {
+              b = h >= 12 ? BLOCKS.STONE : BLOCKS.DIRT;
+            }
+            world.setBlock(x, y, z, b, false);
+          }
+
+          // Valley Lake Water
+          if (h <= 4) {
+            world.setBlock(x, 4, z, BLOCKS.WATER, false);
+          }
+        }
+      }
+
+      // Waterfall flowing from right peak into gorge
+      for (let y = 5; y <= 11; y++) {
+        world.setBlock(cx + 3, y, cz, BLOCKS.WATER, false);
+      }
+
+      // Left Mountain Citadel Tower
+      const ltx = cx - 10, ltz = cz;
+      for (let y = 12; y <= 20; y++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          for (let dz = -2; dz <= 2; dz++) {
+            if (Math.abs(dx) === 2 || Math.abs(dz) === 2) {
+              world.setBlock(ltx + dx, y, ltz + dz, BLOCKS.QUARTZ, false);
+            }
+          }
+        }
+      }
+      for (let dy = 0; dy <= 4; dy++) {
+        const r = 2 - Math.floor(dy / 1.5);
+        for (let dx = -r; dx <= r; dx++) {
+          for (let dz = -r; dz <= r; dz++) {
+            world.setBlock(ltx + dx, 21 + dy, ltz + dz, BLOCKS.PURPLE_BLOCK, false);
+          }
+        }
+      }
+      world.setBlock(ltx, 26, ltz, BLOCKS.DIAMOND, false);
+
+      // Right Mountain Citadel Tower
+      const rtx = cx + 10, rtz = cz;
+      for (let y = 12; y <= 18; y++) {
+        for (let dx = -2; dx <= 2; dx++) {
+          for (let dz = -2; dz <= 2; dz++) {
+            if (Math.abs(dx) === 2 || Math.abs(dz) === 2) {
+              world.setBlock(rtx + dx, y, rtz + dz, BLOCKS.QUARTZ, false);
+            }
+          }
+        }
+      }
+      for (let dy = 0; dy <= 3; dy++) {
+        const r = 2 - Math.floor(dy / 1.5);
+        for (let dx = -r; dx <= r; dx++) {
+          for (let dz = -r; dz <= r; dz++) {
+            world.setBlock(rtx + dx, 19 + dy, rtz + dz, BLOCKS.PURPLE_BLOCK, false);
+          }
+        }
+      }
+      world.setBlock(rtx, 23, rtz, BLOCKS.GOLD, false);
+
+      // Arched Stone Bridge across the Gorge
+      for (let bx = ltx + 2; bx <= rtx - 2; bx++) {
+        world.setBlock(bx, 13, cz - 1, BLOCKS.QUARTZ, false);
+        world.setBlock(bx, 13, cz, BLOCKS.WOOD_PLANKS, false);
+        world.setBlock(bx, 13, cz + 1, BLOCKS.QUARTZ, false);
+        world.setBlock(bx, 14, cz - 1, BLOCKS.STONE, false);
+        world.setBlock(bx, 14, cz + 1, BLOCKS.STONE, false);
+      }
+      for (let dy = 1; dy <= 4; dy++) {
+        world.setBlock(cx - 4, 13 - dy, cz, BLOCKS.STONE, false);
+        world.setBlock(cx + 4, 13 - dy, cz, BLOCKS.STONE, false);
+      }
+      world.setBlock(cx, 15, cz - 1, BLOCKS.GLOWSTONE, false);
+      world.setBlock(cx, 15, cz + 1, BLOCKS.GLOWSTONE, false);
+
+      world.rebuildMesh();
+    }
+  },
+
+  proj64: {
+    name: "🍄 Peach's Castle 64",
+    generate: (world) => {
+      world.clear();
+      const sx = world.sizeX, sz = world.sizeZ;
+      const cx = Math.floor(sx / 2), cz = Math.floor(sz / 2);
+
+      // Rolling Green Castle Grounds with Front Moat
+      for (let x = 0; x < sx; x++) {
+        for (let z = 0; z < sz; z++) {
+          let h = 4;
+          const isMoat = (z >= cz + 8 && z <= cz + 13);
+          if (isMoat) {
+            h = 2;
+          } else if (z < cz - 5) {
+            h = 5;
+          }
+
+          for (let y = 0; y <= 5; y++) {
+            if (y <= h) {
+              world.setBlock(x, y, z, y === h ? BLOCKS.GRASS : BLOCKS.DIRT, false);
+            } else if (isMoat && y <= 4) {
+              world.setBlock(x, y, z, BLOCKS.WATER, false);
+            }
+          }
+        }
+      }
+
+      // Wooden Entrance Bridge over front moat
+      for (let z = cz + 7; z <= cz + 14; z++) {
+        world.setBlock(cx - 1, 5, z, BLOCKS.WOOD_PLANKS, false);
+        world.setBlock(cx, 5, z, BLOCKS.WOOD_PLANKS, false);
+        world.setBlock(cx + 1, 5, z, BLOCKS.WOOD_PLANKS, false);
+        world.setBlock(cx - 2, 6, z, BLOCKS.WOOD_LOG, false);
+        world.setBlock(cx + 2, 6, z, BLOCKS.WOOD_LOG, false);
+      }
+
+      // Castle Main White Facade (Quartz)
+      for (let dx = -7; dx <= 7; dx++) {
+        for (let dz = -5; dz <= 5; dz++) {
+          const isOuterWall = (Math.abs(dx) === 7 || Math.abs(dz) === 5);
+          if (isOuterWall) {
+            for (let y = 5; y <= 11; y++) {
+              world.setBlock(cx + dx, y, cz + dz, BLOCKS.QUARTZ, false);
+            }
+          } else {
+            world.setBlock(cx + dx, 5, cz + dz, BLOCKS.WOOD_PLANKS, false);
+          }
+        }
+      }
+
+      // Twin Rounded Entrance Towers
+      const entranceTowers = [[cx - 6, cz + 5], [cx + 6, cz + 5]];
+      for (const [tx, tz] of entranceTowers) {
+        for (let y = 5; y <= 13; y++) {
+          for (let dx = -1; dx <= 1; dx++) {
+            for (let dz = -1; dz <= 1; dz++) {
+              world.setBlock(tx + dx, y, tz + dz, BLOCKS.QUARTZ, false);
+            }
+          }
+        }
+        for (let dy = 0; dy <= 3; dy++) {
+          const r = 2 - Math.floor(dy / 1.5);
+          for (let dx = -r; dx <= r; dx++) {
+            for (let dz = -r; dz <= r; dz++) {
+              world.setBlock(tx + dx, 14 + dy, tz + dz, BLOCKS.BRICK, false);
+            }
+          }
+        }
+        world.setBlock(tx, 18, tz, BLOCKS.GOLD, false);
+      }
+
+      // Central Grand Tower
+      for (let dx = -3; dx <= 3; dx++) {
+        for (let dz = -3; dz <= 3; dz++) {
+          for (let y = 11; y <= 17; y++) {
+            if (Math.abs(dx) === 3 || Math.abs(dz) === 3) {
+              world.setBlock(cx + dx, y, cz + dz, BLOCKS.QUARTZ, false);
+            }
+          }
+        }
+      }
+
+      // Princess Peach's Iconic Circular Stained Glass Window
+      world.setBlock(cx, 14, cz + 3, BLOCKS.PINK_CONCRETE, false);
+      world.setBlock(cx - 1, 14, cz + 3, BLOCKS.GOLD, false);
+      world.setBlock(cx + 1, 14, cz + 3, BLOCKS.GOLD, false);
+      world.setBlock(cx, 15, cz + 3, BLOCKS.GLOWSTONE, false);
+      world.setBlock(cx, 13, cz + 3, BLOCKS.GLASS, false);
+
+      // Main Red Peaked Roof
+      for (let dy = 0; dy <= 4; dy++) {
+        const r = 4 - dy;
+        for (let dx = -r; dx <= r; dx++) {
+          for (let dz = -r; dz <= r; dz++) {
+            world.setBlock(cx + dx, 18 + dy, cz + dz, BLOCKS.BRICK, false);
+          }
+        }
+      }
+      world.setBlock(cx, 23, cz, BLOCKS.GOLD, false);
+      world.setBlock(cx, 24, cz, BLOCKS.GOLD, false);
+      world.setBlock(cx + 1, 24, cz, BLOCKS.PINK_CONCRETE, false);
+
+      // Castle Oak Trees
+      world.stampStructure(STAMPS.tree_oak, cx - 14, 5, cz + 10);
+      world.stampStructure(STAMPS.tree_oak, cx + 12, 5, cz + 10);
+      world.stampStructure(STAMPS.tree_oak, cx - 13, 5, cz - 10);
+      world.stampStructure(STAMPS.tree_oak, cx + 13, 5, cz - 10);
+
+      world.rebuildMesh();
+    }
   }
 };
 

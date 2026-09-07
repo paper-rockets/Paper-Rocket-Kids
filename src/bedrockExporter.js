@@ -410,7 +410,7 @@ function generateUUID() {
 }
 
 // Export Bedrock .mcpack Skin Pack for 1-tap direct import into Minecraft Android
-export async function exportSkinMCPack(skinCanvas, skinName = 'Princess Sparkle') {
+export async function exportSkinMCPack(skinCanvas, skinName = 'Princess Sparkle', modelType = 'slim') {
   const zip = new JSZip();
 
   // Convert canvas to binary blob
@@ -442,7 +442,7 @@ export async function exportSkinMCPack(skinCanvas, skinName = 'Princess Sparkle'
     skins: [
       {
         localization_name: skinName.toLowerCase().replace(/\s+/g, '_'),
-        geometry: 'geometry.humanoid.custom',
+        geometry: modelType === 'slim' ? 'geometry.humanoid.customSlim' : 'geometry.humanoid.custom',
         texture: 'skin.png',
         type: 'free'
       }

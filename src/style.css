@@ -763,6 +763,37 @@ body, html {
   margin-top: 6px;
 }
 
+.bedrock-actions-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.bedrock-actions-row .btn {
+  flex: 1;
+  padding: 8px 6px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.btn-view-castle-3d {
+  background: #3b82f6;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.btn-view-castle-3d:hover {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
 /* 3D Skin Studio Modal Styling */
 .modal-skin-card {
   max-width: 820px;
@@ -1377,6 +1408,43 @@ body, html {
   background: #252a38;
   border-color: #6366f1;
   color: #ffffff;
+}
+
+.model-gender-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.model-gender-btn {
+  flex: 1;
+  padding: 8px 10px;
+  background: #181b23;
+  border: 1.5px solid #33394b;
+  border-radius: 8px;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+  touch-action: manipulation;
+}
+
+.model-gender-btn:hover {
+  background: #232734;
+  border-color: #a855f7;
+  color: #ffffff;
+}
+
+.model-gender-btn.active {
+  background: #2a1f3d;
+  border-color: #c084fc;
+  color: #ffffff;
+  box-shadow: 0 0 0 1px #c084fc, 0 2px 8px rgba(192, 132, 252, 0.25);
 }
 
 .skin-tone-row, .swatch-row {
