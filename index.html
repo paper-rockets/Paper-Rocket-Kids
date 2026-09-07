@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Magic Minecraft World Maker & Skin Studio</title>
     <link rel="stylesheet" href="./src/style.css" />
+    <!-- Progressive Web App Meta & Manifest -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#0e1015" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
     <script type="importmap">
       {
         "imports": {
@@ -19,6 +26,15 @@
   </head>
   <body>
     <div id="app">
+      <!-- PWA Update Notification Banner -->
+      <div id="pwa-update-banner" class="pwa-update-bar hidden">
+        <div class="pwa-update-info">
+          <span class="pwa-update-badge">NEW UPDATE</span>
+          <span>New skins, models or maps are ready!</span>
+        </div>
+        <button id="btn-pwa-refresh" class="btn btn-sm btn-magic">🔄 Update App Now</button>
+      </div>
+
       <!-- Top Navigation Switcher -->
       <header class="top-bar">
         <div class="app-switcher">
@@ -30,6 +46,9 @@
           </button>
           <button id="btn-switch-addons" class="app-switch-btn" title="Switch to Add-ons & Mods">
             🦄 Add-ons & Mods
+          </button>
+          <button id="btn-install-pwa" class="app-switch-btn pwa-install-btn hidden" title="Install directly onto this tablet">
+            📲 Install App
           </button>
         </div>
 
@@ -895,6 +914,16 @@
                 </div>
                 <h3>Fantasy Castle</h3>
                 <p>Epic mountain realm with towering peaks, grand bridges, and adventure lands.</p>
+                <button class="btn btn-accent btn-dl-bedrock-asset">🚀 1-Tap Open in Minecraft</button>
+              </div>
+
+              <div class="bedrock-card" data-dl-file="./worlds/proj64.mcworld" data-dl-name="PROJ 64 Peach's Castle.mcworld" data-dl-type="world">
+                <div class="asset-img-wrap">
+                  <img src="./worlds/proj64.jpg" alt="Peach's Castle PROJ 64" class="asset-card-img" />
+                  <span class="asset-badge">Full Bedrock World</span>
+                </div>
+                <h3>Peach's Castle (Super Mario 64)</h3>
+                <p>Play inside Peach's Castle with custom music, paintings, and royal courtyards!</p>
                 <button class="btn btn-accent btn-dl-bedrock-asset">🚀 1-Tap Open in Minecraft</button>
               </div>
 

@@ -1478,3 +1478,91 @@ function initSkinStudio() {
 }
 
 initSkinStudio();
+
+// =========================================================================
+// 📲 PROGRESSIVE WEB APP (PWA) CONTROLLER & AUTO-UPDATER
+// =========================================================================
+
+function initPWA() {
+  const btnInstallPWA = document.getElementById('btn-install-pwa');
+  const pwaUpdateBanner = document.getElementById('pwa-update-banner');
+  const btnPwaRefresh = document.getElementById('btn-pwa-refresh');
+
+  let deferredPrompt = null;
+
+  // 1. Listen for Android "Add to Home Screen" install prompt
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (btnInstallPWA) {
+      btnInstallPWA.classList.remove('hidden');
+    }
+  });
+
+  if (btnInstallPWA) {
+    btnInstallPWA.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      sounds.playPop();
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        btnInstallPWA.classList.add('hidden');
+      }
+      deferredPrompt = null;
+    });
+  }
+
+  // 2. Register Service Worker and manage updates
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', async () => {
+      try {
+        const reg = await navigator.serviceWorker.register('./sw.js');
+
+        // Check for updates periodically every 60 seconds and on tab focus
+        setInterval(() => reg.update(), 60000);
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') reg.update();
+        });
+
+        // If a new service worker is waiting, show the update banner
+        function promptUserToRefresh(worker) {
+          if (pwaUpdateBanner) {
+            pwaUpdateBanner.classList.remove('hidden');
+          }
+          if (btnPwaRefresh) {
+            btnPwaRefresh.addEventListener('click', () => {
+              worker.postMessage({ type: 'SKIP_WAITING' });
+            });
+          }
+        }
+
+        if (reg.waiting) {
+          promptUserToRefresh(reg.waiting);
+        }
+
+        reg.addEventListener('updatefound', () => {
+          const newWorker = reg.installing;
+          if (!newWorker) return;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              promptUserToRefresh(newWorker);
+            }
+          });
+        });
+
+        // When the new service worker activates, reload the page automatically
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (refreshing) return;
+          refreshing = true;
+          window.location.reload();
+        });
+      } catch (err) {
+        console.warn('PWA service worker registration failed:', err);
+      }
+    });
+  }
+}
+
+initPWA();
+
