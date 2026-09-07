@@ -1,5 +1,5 @@
 // Service Worker for Magic Minecraft Studio PWA
-const CACHE_VERSION = 'magic-mc-v1.2.0';
+const CACHE_VERSION = 'magic-mc-v1.3.0';
 const STATIC_CACHE = 'static-' + CACHE_VERSION;
 
 self.addEventListener('install', (event) => {
