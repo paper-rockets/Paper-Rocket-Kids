@@ -727,23 +727,6 @@
         <!-- 3D World Canvas Viewport -->
         <canvas id="webgl-canvas"></canvas>
 
-        <!-- 3D Castle Showcase Overlay (Active when viewing castles) -->
-        <div id="castle-showcase-overlay" class="castle-showcase-bar hidden">
-          <div class="showcase-info">
-            <button id="btn-showcase-back" class="btn-showcase-nav" title="Back to Castles">◀ Castles</button>
-            <div class="showcase-title-wrap">
-              <span id="showcase-castle-title" class="showcase-castle-title">🍄 Peach's Castle 64</span>
-              <span class="showcase-castle-subtitle">✨ 3D Model Showcase • Touch to rotate & zoom</span>
-            </div>
-          </div>
-          <div class="showcase-actions">
-            <button id="btn-showcase-spin" class="btn-showcase-action" title="Toggle Auto-Rotate">🔄 Spin View</button>
-            <button id="btn-showcase-sky" class="btn-showcase-action" title="Change Lighting">☀️ Day</button>
-            <button id="btn-showcase-edit" class="btn-showcase-action" title="Customize in Builder">✏️ Edit Blocks</button>
-            <button id="btn-showcase-mc" class="btn-showcase-action btn-showcase-highlight" title="Open in Minecraft">🚀 Minecraft</button>
-          </div>
-        </div>
-
       <!-- Left Toolbox (Tools & Brushes) -->
       <aside class="left-toolbar">
         <div class="tool-section-title">Tools</div>
@@ -925,10 +908,7 @@
                 </div>
                 <h3>Pink Castle</h3>
                 <p>Magical pink fairytale castle with grand towers, gardens, and royal decor.</p>
-                <div class="bedrock-actions-row">
-                  <button class="btn btn-view-castle-3d" data-map="pink_castle">🏰 3D Showcase</button>
-                  <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
-                </div>
+                <button class="btn btn-accent btn-dl-bedrock-asset" style="width: 100%; margin-top: 8px;">🚀 1-Tap Open in Minecraft</button>
               </div>
 
               <div class="bedrock-card" data-dl-file="./worlds/medieval_castle.mcworld" data-dl-name="Medieval Worldcraft Castle.mcworld" data-dl-type="world">
@@ -938,10 +918,7 @@
                 </div>
                 <h3>Medieval Castle</h3>
                 <p>Massive stone fortress with battle towers, moat, courtyard, and dungeons.</p>
-                <div class="bedrock-actions-row">
-                  <button class="btn btn-view-castle-3d" data-map="medieval_castle">🏰 3D Showcase</button>
-                  <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
-                </div>
+                <button class="btn btn-accent btn-dl-bedrock-asset" style="width: 100%; margin-top: 8px;">🚀 1-Tap Open in Minecraft</button>
               </div>
 
               <div class="bedrock-card" data-dl-file="./worlds/fantasy_castle.mcworld" data-dl-name="Fantasy Castle - v1.2 (Hardcore Mode).mcworld" data-dl-type="world">
@@ -951,10 +928,7 @@
                 </div>
                 <h3>Fantasy Castle</h3>
                 <p>Epic mountain realm with towering peaks, grand bridges, and adventure lands.</p>
-                <div class="bedrock-actions-row">
-                  <button class="btn btn-view-castle-3d" data-map="fantasy_castle">🏰 3D Showcase</button>
-                  <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
-                </div>
+                <button class="btn btn-accent btn-dl-bedrock-asset" style="width: 100%; margin-top: 8px;">🚀 1-Tap Open in Minecraft</button>
               </div>
 
               <div class="bedrock-card" data-dl-file="./worlds/proj64.mcworld" data-dl-name="PROJ 64 Peach's Castle.mcworld" data-dl-type="world">
@@ -964,10 +938,7 @@
                 </div>
                 <h3>Peach's Castle (Super Mario 64)</h3>
                 <p>Play inside Peach's Castle with custom music, paintings, and royal courtyards!</p>
-                <div class="bedrock-actions-row">
-                  <button class="btn btn-view-castle-3d" data-map="proj64">🏰 3D Showcase</button>
-                  <button class="btn btn-accent btn-dl-bedrock-asset">🚀 Minecraft</button>
-                </div>
+                <button class="btn btn-accent btn-dl-bedrock-asset" style="width: 100%; margin-top: 8px;">🚀 1-Tap Open in Minecraft</button>
               </div>
 
               <!-- Add-ons -->
@@ -1048,30 +1019,6 @@
               <span class="section-subtitle">Load inside the browser to sculpt, build, and customize</span>
             </div>
             <div class="map-cards">
-              <div class="map-card" data-map="pink_castle">
-                <div class="theme-icon">🌸</div>
-                <h3>Pink Fairytale Castle</h3>
-                <p>Fairytale palace with pink towers, quartz courtyards, rose gardens, and royal throne room.</p>
-                <button class="btn btn-magic">Load & Explore in 3D</button>
-              </div>
-              <div class="map-card" data-map="medieval_castle">
-                <div class="theme-icon">🏰</div>
-                <h3>Medieval Fortress Castle</h3>
-                <p>Massive stone fortress with 4 watchtowers, courtyard well, ramparts, and central keep.</p>
-                <button class="btn btn-primary">Load & Explore in 3D</button>
-              </div>
-              <div class="map-card" data-map="fantasy_castle">
-                <div class="theme-icon">🏔️</div>
-                <h3>Fantasy Mountain Citadel</h3>
-                <p>Soaring mountain citadel with arched stone bridge, flowing waterfall, and crystal spires.</p>
-                <button class="btn btn-primary">Load & Explore in 3D</button>
-              </div>
-              <div class="map-card" data-map="proj64">
-                <div class="theme-icon">🍄</div>
-                <h3>Peach's Castle (SM64)</h3>
-                <p>Super Mario 64 Peach's Castle with front bridge, stained glass window, and red towers.</p>
-                <button class="btn btn-magic">Load & Explore in 3D</button>
-              </div>
               <div class="map-card" data-map="fairy_castle">
                 <div class="theme-icon">👑</div>
                 <h3>Fairy Princess Palace</h3>
