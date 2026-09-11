@@ -468,9 +468,7 @@ export async function shareOrDownloadFile(fileBlob, filename, mimeType = 'applic
     const file = new File([fileBlob], filename, { type: mimeType });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({
-        files: [file],
-        title: filename,
-        text: 'Open in Minecraft'
+        files: [file]
       });
       return true;
     }
