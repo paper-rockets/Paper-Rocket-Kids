@@ -1620,11 +1620,21 @@ function initPWA() {
     });
   }
 
-  // 2. Register Service Worker and manage updates
+  // 2. Register Service Worker in production only; clear in development
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', async () => {
-      try {
-        const reg = await navigator.serviceWorker.register('./sw.js');
+    if (import.meta.env.DEV) {
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        for (const r of regs) r.unregister();
+      });
+      if ('caches' in window) {
+        caches.keys().then((keys) => {
+          keys.forEach((k) => caches.delete(k));
+        });
+      }
+    } else {
+      window.addEventListener('load', async () => {
+        try {
+          const reg = await navigator.serviceWorker.register('./sw.js');
 
         // Check for updates periodically every 60 seconds and on tab focus
         setInterval(() => reg.update(), 60000);
@@ -1669,6 +1679,7 @@ function initPWA() {
         console.warn('PWA service worker registration failed:', err);
       }
     });
+    }
   }
 }
 
