@@ -1,0 +1,1 @@
+{"targets":[{"arch":"arm64","platform":"darwin"},{"arch":"x64","platform":"darwin"},{"arch":"x64","platform":"linux"},{"arch":"x64","platform":"win32"}],"update_available":false,"version":"0.1.4"}
