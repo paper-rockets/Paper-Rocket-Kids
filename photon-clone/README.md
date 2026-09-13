@@ -42,6 +42,10 @@ videos) stop working. Running `serve.cjs` avoids that.
 - **The "Get the download link" button.** On the real site this sends your email to
   Tenzen's server, which emails you a download link. There is no server here, so the
   button will not do anything useful. Nothing is sent anywhere.
+- **The download page** (`photon/download/`) is saved and looks right, but its
+  "Download Photon Studio" button also needs Tenzen's server, so it cannot hand you
+  the actual program. The real download link Tenzen emails you is personal to you and
+  is deliberately not saved in this folder.
 - **The version number is frozen.** It says 0.1.4, which is what the real site reported
   on the day this copy was made. It will not update.
 - **Links to other pages** (Tenzen Studio home, Blog, Legal, Photon Privacy) still point
@@ -52,6 +56,7 @@ videos) stop working. Running `serve.cjs` avoids that.
 ## What is in here
 
     photon/index.html   the page itself
+    photon/download/    the "your download is ready" page
     _next/              the page's code, styles and fonts
     assets/             logos, background images, demo videos
     api/                one saved answer from the site's server (the version number)
@@ -60,6 +65,7 @@ videos) stop working. Running `serve.cjs` avoids that.
     index.html          sends you to /photon/ if you open the root
 
 Every downloaded file was checked byte-for-byte against the live site — all 43 match.
+The download page was added afterwards from the same site.
 
 ## A note on ownership
 
