@@ -2,12 +2,47 @@ import { defineConfig } from 'vite';
 import fs from 'fs';
 import path from 'path';
 
+// In-memory session store for "Thieve Session" feature
+let latestSessionJSON = null;
+
 export default defineConfig({
   base: './',
   plugins: [
     {
       name: 'file-upload-handler',
       configureServer(server) {
+        // Thieve Session: GET returns latest session, POST stores it
+        server.middlewares.use('/api/session', (req, res) => {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+          res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+          if (req.method === 'OPTIONS') {
+            res.writeHead(204);
+            res.end();
+            return;
+          }
+          if (req.method === 'POST') {
+            let body = '';
+            req.on('data', chunk => { body += chunk; });
+            req.on('end', () => {
+              latestSessionJSON = body;
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ success: true }));
+            });
+          } else if (req.method === 'GET') {
+            if (latestSessionJSON) {
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(latestSessionJSON);
+            } else {
+              res.writeHead(404, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ error: 'No session saved yet' }));
+            }
+          } else {
+            res.writeHead(405);
+            res.end('Method Not Allowed');
+          }
+        });
+
         server.middlewares.use('/api/upload', (req, res) => {
           if (req.method === 'POST') {
             const uploadDir = path.resolve(process.cwd(), 'uploads');

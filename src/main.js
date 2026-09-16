@@ -107,7 +107,10 @@ function autoSaveWorld() {
         sizeZ: world.sizeZ,
         blocks: Array.from(world.blocks)
       };
-      localStorage.setItem('minecraft_world_autosave', JSON.stringify(data));
+      const json = JSON.stringify(data);
+      localStorage.setItem('minecraft_world_autosave', json);
+      // Push session to server so phone can "thieve" it
+      fetch('/api/session', { method: 'POST', body: json }).catch(() => {});
     } catch (e) {
       // Silently ignore storage quota or private browsing errors
     }
@@ -586,6 +589,40 @@ if (inputPhoneUpload && uploadStatus) {
     } catch (err) {
       uploadStatus.style.color = '#f44336';
       uploadStatus.textContent = `❌ Error uploading: ${err.message}`;
+    }
+  });
+}
+
+// Thieve Session from PC Handler
+const btnThieveSession = document.getElementById('btn-thieve-session');
+const thieveStatus = document.getElementById('thieve-status');
+if (btnThieveSession && thieveStatus) {
+  btnThieveSession.addEventListener('click', async () => {
+    thieveStatus.style.display = 'block';
+    thieveStatus.style.color = '#ffeb3b';
+    thieveStatus.textContent = '⏳ Grabbing session from PC...';
+    try {
+      const response = await fetch('/api/session');
+      if (response.ok) {
+        const json = await response.text();
+        if (loadJSON(world, json)) {
+          autoSaveWorld();
+          thieveStatus.style.color = '#4caf50';
+          thieveStatus.textContent = '✅ Got it! Your PC\'s world is now loaded here.';
+          sounds.playMagicChime();
+          const modal = document.getElementById('modal-import');
+          if (modal) setTimeout(() => modal.classList.add('hidden'), 1800);
+        } else {
+          thieveStatus.style.color = '#f44336';
+          thieveStatus.textContent = '❌ Could not load the session. Try again.';
+        }
+      } else {
+        thieveStatus.style.color = '#f44336';
+        thieveStatus.textContent = '❌ No session found on PC yet. Make sure the app is open on your PC first!';
+      }
+    } catch (err) {
+      thieveStatus.style.color = '#f44336';
+      thieveStatus.textContent = `❌ Could not reach PC: ${err.message}`;
     }
   });
 }
